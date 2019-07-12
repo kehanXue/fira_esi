@@ -42,7 +42,7 @@ namespace vwpp
     {
     public:
 
-        Velocity2D trackingLine(double_t _cur_line_x, double_t _cur_yaw, Direction _direction,
+        Velocity2D trackingLine(double_t _cur_line_y, double_t _cur_yaw, Direction _direction,
                                 double_t _forward_vel = 0.10);
 
         VelocityZ adjustAltitude(double_t _target_altitude, double_t _cur_altitude);
