@@ -26,8 +26,9 @@ namespace vwpp
         TRACKINGLINE = 0,
         AUJUSTALTITUDE,
         HOVERING,
+        ROTATION,
         OPENCLAW,
-        CIRCULARMOTION
+        CIRCULARMOTION  //TODO
     };
 
     struct Velocity2D
@@ -44,6 +45,7 @@ namespace vwpp
     public:
 
         Action();
+
         virtual ~Action();
 
         Velocity2D trackingLine(double_t _cur_line_y, double_t _target_yaw, double_t _cur_yaw,
@@ -63,7 +65,6 @@ namespace vwpp
     private:
 
         tf::TransformListener odom_base_tf_listener;
-
 
 
     };

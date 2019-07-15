@@ -4,6 +4,7 @@
 
 #include "Action.h"
 #include "PIDController.h"
+#include "vision_test.h"
 
 
 vwpp::Action::Action()
@@ -11,10 +12,12 @@ vwpp::Action::Action()
 
 }
 
+
 vwpp::Action::~Action()
 {
 
 }
+
 
 vwpp::Velocity2D
 vwpp::Action::trackingLine(double_t _cur_line_y, double_t _target_yaw, double_t _cur_yaw,
@@ -157,10 +160,29 @@ int8_t vwpp::Action::openClaw()
 int8_t vwpp::Action::run(vwpp::ActionID _action_id)
 {
 
+    Velocity2D velocity_2d{};
+    VelocityZ velocity_z{};
+
     switch (_action_id)
     {
         case TRACKINGLINE:
-
+            velocity_2d = trackingLine(getLineCurX(), getTargetYaw(), getCurYaw(),
+                                       1.0);     // TODO Modify vision api, and get param from yaml.
+            break;
+        case AUJUSTALTITUDE:
+            velocity_z = adjustAltitude(getTargetAltitude(), getCurAltitude());
+            break;
+        case HOVERING:
+            velocity_2d = hovering(getCurQRx(), getCurQRy(), getTargetYaw(), getCurYaw());
+            break;
+        case ROTATION:
+            velocity_2d = rotating(getDirection(), getCurYaw());
+            break;
+        case OPENCLAW:
+            openClaw();
+            break;
+        case CIRCULARMOTION:
+            break;
     }
 
     return 0;

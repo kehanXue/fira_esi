@@ -134,7 +134,7 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-add_executable(fira_esi_node src/fira_esi_node.cpp src/PIDController.cpp src/PIDController.h src/fira_esi_node.cpp src/FlowController.cpp src/FlowController.h src/Task.cpp src/Task.h src/Action.cpp src/Action.h)
+add_executable(fira_esi_node src/fira_esi_node.cpp src/PIDController.cpp src/PIDController.h src/fira_esi_node.cpp src/FlowController.cpp src/FlowController.h src/Task.cpp src/Task.h src/Action.cpp src/Action.h src/vision_test.h)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the

@@ -8,6 +8,7 @@
 #include <cstdint>
 #include <vector>
 
+#include "fira_esi/vision/"
 #include "Action.h"
 
 namespace vwpp
@@ -23,17 +24,9 @@ namespace vwpp
         Landing
     };
 
-    class Task
+    class TaskBase
     {
     public:
-        int8_t run();
-        int8_t navigation();
-        int8_t avoidance();
-        int8_t hoverOnQR();
-        int8_t delivering();
-        int8_t scanTower();
-        int8_t scanBuilding();
-        int8_t landing();
 
         TaskID task_id;
 
