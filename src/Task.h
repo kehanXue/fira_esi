@@ -27,6 +27,13 @@ namespace vwpp
     {
     public:
         int8_t run();
+        int8_t navigation();
+        int8_t avoidance();
+        int8_t hoverOnQR();
+        int8_t delivering();
+        int8_t scanTower();
+        int8_t scanBuilding();
+        int8_t landing();
 
         TaskID task_id;
 

@@ -8,6 +8,7 @@
 #include <cstdint>
 #include <vector>
 #include <cmath>
+#include <tf/transform_listener.h>
 
 namespace vwpp
 {
@@ -42,16 +43,29 @@ namespace vwpp
     {
     public:
 
-        Velocity2D trackingLine(double_t _cur_line_y, double_t _cur_yaw, Direction _direction,
+        Action();
+        virtual ~Action();
+
+        Velocity2D trackingLine(double_t _cur_line_y, double_t _target_yaw, double_t _cur_yaw,
                                 double_t _forward_vel = 0.10);
 
         VelocityZ adjustAltitude(double_t _target_altitude, double_t _cur_altitude);
 
-        Velocity2D hovering(double_t _cur_x, double_t _cur_y, double_t _cur_yaw);
+        Velocity2D hovering(double_t _cur_x, double_t _cur_y, double_t _target_yaw, double_t _cur_yaw);
+
+        Velocity2D rotating(Direction _direction, double_t _cur_yaw);
 
         int8_t openClaw();
 
-        ActionID action_id;
+        int8_t run(ActionID _action_id);
+
+
+    private:
+
+        tf::TransformListener odom_base_tf_listener;
+
+
+
     };
 
 }
