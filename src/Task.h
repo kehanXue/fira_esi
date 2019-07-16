@@ -8,7 +8,7 @@
 #include <cstdint>
 #include <vector>
 
-#include "fira_esi/vision/"
+#include "fira_esi/vision/mycv.h"
 #include "Action.h"
 
 namespace vwpp
@@ -28,10 +28,48 @@ namespace vwpp
     {
     public:
 
+        TaskBase();
+
+        virtual ~TaskBase();
+
         TaskID task_id;
 
     private:
         std::vector<Action> vec_task_actions;
+
+        ros::NodeHandle nh;
+
+        MYCV down_camera;
+        MYCV forward_camera;
+    };
+
+    class TaskNavigation
+    {
+    public:
+        TaskNavigation();
+
+        virtual ~TaskNavigation();
+
+        TaskID getTaskID();
+
+
+    private:
+        TaskBase task_base;
+
+    };
+
+    class TaskAvoidance
+    {
+    public:
+        TaskAvoidance();
+
+        virtual ~TaskAvoidance();
+
+        TaskID getTaskID();
+
+    private:
+        TaskBase task_base;
+
     };
 }
 

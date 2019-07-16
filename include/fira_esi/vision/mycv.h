@@ -14,31 +14,45 @@
 
 enum CameraNumber
 {
-    No_Camera = -1,
-    Down_Camera = 0,
-    Forward_Camera = 1
+    NO_CAMERA = -1,
+    DOWN_CAMERA = 0,
+    FORWARD_CAMERA = 1
 };
 
 class MYCV
 {
 public:
     MYCV();
-    void init(int flag, ros::NodeHandle* pnh);
+
+    void init(int flag, ros::NodeHandle *pnh);
+
     void cvmain();
+
     void destory();
+
     ros::NodeHandle *nh;
 
 public:
     void open_camera(int number);
+
     void open_findline();
+
     void close_findline();
+
     void open_findgate();
+
     void close_findgate();
+
     void open_findQR();
+
     void close_findQR();
+
     void open_findblueH();
+
     void close_findblueH();
+
     void open_findredX();
+
     void close_findredX();
 
 public:
@@ -72,21 +86,34 @@ private:
 
 private:
     void findline(cv::Mat image);
+
     void findgate(cv::Mat image);
+
     void findQR(cv::Mat image);
+
     void findblueH(cv::Mat image);
+
     void findredX(cv::Mat image);
+
     cv::Point3d color_thing(cv::Mat image, cv::Scalar min_color, cv::Scalar max_color, std::string name);
+
     void Proc_image(cv::Mat &thresholdimage);
+
     void resetpoint(double point[], cv::Mat image);
+
     void check();
+
     void color_test();
 
 private:
     std::string int2str(int val);
+
     int getoneint(std::string name);
+
     void setoneint(int x, std::string name);
+
     cv::Scalar getScalar(std::string name);
+
     void setScalar(cv::Scalar color, std::string name);
 };
 

@@ -5,3 +5,23 @@
 #include "Task.h"
 
 
+vwpp::TaskBase::TaskBase()
+{
+
+}
+
+
+vwpp::TaskBase::~TaskBase()
+{
+
+}
+
+
+vwpp::TaskAvoiddance::TaskAvoiddance()
+{}
+
+
+vwpp::TaskAvoidance::~TaskAvoidance()
+{
+
+}
