@@ -20,6 +20,28 @@ public:
 
     virtual ~VisionInterface();
 
+    std::string getGroundQRinform();
+    std::string getTownQRinform();
+
+    double_t getLineOffset();
+    double_t getLineRotation();
+    double_t getQRxOffset();
+    double_t getQRyOffset();
+
+    bool getYellowGateState();
+    double_t getYellowGateX();
+    double_t getYellowGateY();
+    double_t getYellowGateDepth();
+
+    bool getRedGateState();
+    double_t getRedGateX();
+    double_t getRedGateY();
+    double_t getRedGateDepth();
+
+    bool getBlueHState();
+    bool getRedXState();
+
+
 private:
     VisionInterface();
 

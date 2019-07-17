@@ -38,9 +38,6 @@ namespace vwpp
         std::vector<Action> vec_task_actions;
 
         ros::NodeHandle nh;
-
-        MYCV down_camera;
-        MYCV forward_camera;
     };
 
     class TaskNavigation
