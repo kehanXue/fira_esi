@@ -20,6 +20,8 @@ public:
 
     virtual ~VisionInterface();
 
+    int8_t update();
+
     std::string getGroundQRinform();
     std::string getTownQRinform();
 

@@ -31,6 +31,23 @@ VisionInterface::~VisionInterface()
 }
 
 
+int8_t VisionInterface::update()
+{
+    try
+    {
+        down_camera.cvmain();
+        forward_camera.cvmain();
+
+        return 0;
+    }
+    catch (Exception& ex)   // TODO
+    {
+        return -1;
+    }
+
+}
+
+
 VisionInterface *VisionInterface::getInstance()
 {
     //
@@ -143,5 +160,7 @@ bool VisionInterface::getRedXState()
 {
     return forward_camera.detect_redX;
 }
+
+
 
 

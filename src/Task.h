@@ -55,9 +55,15 @@ namespace vwpp
 
     };
 
+
+
+
     class TaskAvoidance
     {
-    public:
+    public
+
+
+:
         TaskAvoidance();
 
         virtual ~TaskAvoidance();
