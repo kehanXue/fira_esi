@@ -18,7 +18,9 @@ vwpp::TaskBase::~TaskBase()
 
 
 vwpp::TaskAvoiddance::TaskAvoiddance()
-{}
+{
+
+}
 
 
 vwpp::TaskAvoidance::~TaskAvoidance()

@@ -1,3 +1,5 @@
+#include <utility>
+
 //
 // Created by kehan on 19-7-17.
 //
@@ -36,8 +38,39 @@ PX4Interface::PX4Interface() :
 }
 
 
+PX4Interface* PX4Interface::getInstance()
+{
+    if (instance == nullptr)
+    {
+        boost::unique_lock<boost::mutex> uq_lock_instance(mutex_instance);
+        if (instance == nullptr)
+        {
+            instance = new PX4Interface();
+        }
+    }
+
+    return instance;
+}
+
+
+// TODO Why?
+PX4Interface::PX4Interface(const PX4Interface &, ros::Rate _loop_rate) :
+        loop_rate(std::move(_loop_rate))
+{
+
+}
+
+
+PX4Interface &PX4Interface::operator=(const PX4Interface &)
+{
+
+}
+
+
 PX4Interface::~PX4Interface()
-= default;
+{
+    delete instance;
+}
 
 
 int8_t PX4Interface::update()
@@ -138,5 +171,7 @@ void PX4Interface::px4_pose_cb(const geometry_msgs::PoseStamped::ConstPtr &msg)
     this->px4_cur_pose = *msg;
 
 }
+
+
 
 

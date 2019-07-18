@@ -10,55 +10,69 @@
 
 #include "fira_esi/vision/mycv.h"
 
-
-// TODO Add thread or NOT
-class VisionInterface
+namespace vwpp
 {
-public:
+    // TODO Add thread or NOT
+    class VisionInterface
+    {
+    public:
 
-    static VisionInterface *getInstance();
+        static VisionInterface* getInstance();
 
-    virtual ~VisionInterface();
+        virtual ~VisionInterface();
 
-    int8_t update();
+        int8_t update();
 
-    std::string getGroundQRinform();
-    std::string getTownQRinform();
+        std::string getGroundQRinform();
 
-    double_t getLineOffset();
-    double_t getLineRotation();
-    double_t getQRxOffset();
-    double_t getQRyOffset();
+        std::string getTownQRinform();
 
-    bool getYellowGateState();
-    double_t getYellowGateX();
-    double_t getYellowGateY();
-    double_t getYellowGateDepth();
+        double_t getLineOffset();
 
-    bool getRedGateState();
-    double_t getRedGateX();
-    double_t getRedGateY();
-    double_t getRedGateDepth();
+        double_t getLineRotation();
 
-    bool getBlueHState();
-    bool getRedXState();
+        double_t getQRxOffset();
+
+        double_t getQRyOffset();
+
+        bool getYellowGateState();
+
+        double_t getYellowGateX();
+
+        double_t getYellowGateY();
+
+        double_t getYellowGateDepth();
+
+        bool getRedGateState();
+
+        double_t getRedGateX();
+
+        double_t getRedGateY();
+
+        double_t getRedGateDepth();
+
+        bool getBlueHState();
+
+        bool getRedXState();
 
 
-private:
-    VisionInterface();
+    private:
+        VisionInterface();
 
-    VisionInterface(const VisionInterface &);
+        VisionInterface(const VisionInterface &);
 
-    VisionInterface &operator=(const VisionInterface &);
+        VisionInterface &operator=(const VisionInterface &);
 
 
-    static VisionInterface *instance;
-    static boost::mutex mutex_instance;
+        static VisionInterface* instance;
+        static boost::mutex mutex_instance;
 
-    ros::NodeHandle nh;
-    MYCV down_camera;
-    MYCV forward_camera;
-};
+        ros::NodeHandle nh;
+        MYCV down_camera;
+        MYCV forward_camera;
+    };
+
+}
 
 
 

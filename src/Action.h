@@ -44,7 +44,8 @@ namespace vwpp
     {
     public:
 
-        Action();
+        static Action* getInstance();
+
 
         virtual ~Action();
 
@@ -63,6 +64,14 @@ namespace vwpp
 
 
     private:
+
+        Action();
+        Action(const Action &);
+        Action &operator=(const Action &);
+
+        static Action* instance;
+        static boost::mutex mutex_instance;
+
 
         tf::TransformListener odom_base_tf_listener;
 

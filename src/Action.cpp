@@ -4,7 +4,6 @@
 
 #include "Action.h"
 #include "PIDController.h"
-#include "vision_test.h"
 
 
 vwpp::Action::Action()
@@ -15,7 +14,33 @@ vwpp::Action::Action()
 
 vwpp::Action::~Action()
 {
+    delete instance;
+}
 
+vwpp::Action::Action(const vwpp::Action &)
+{
+
+}
+
+
+vwpp::Action &vwpp::Action::operator=(const vwpp::Action &)
+{
+
+}
+
+
+vwpp::Action* vwpp::Action::getInstance()
+{
+    if (instance == nullptr)
+    {
+        boost::unique_lock<boost::mutex> uq_lock_instance(mutex_instance);
+        if (instance == nullptr)
+        {
+            instance = new Action();
+        }
+    }
+
+    return instance;
 }
 
 
@@ -187,6 +212,10 @@ int8_t vwpp::Action::run(vwpp::ActionID _action_id)
 
     return 0;
 }
+
+
+
+
 
 
 

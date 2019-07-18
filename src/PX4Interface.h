@@ -14,26 +14,41 @@
 #include <geometry_msgs/PoseStamped.h>
 #include <tf/transform_datatypes.h>
 
+#include <boost/thread.hpp>
+
 class PX4Interface
 {
 public:
-    PX4Interface();
+
+    static PX4Interface* getInstance();
 
     virtual ~PX4Interface();
 
     int8_t update();
 
     int8_t switchOffboard();
+
     int8_t unlockVehicle();
 
     double_t getCurYaw();
+
     double_t getCurZ();
 
 
 private:
 
-    void px4_state_cb(const mavros_msgs::State::ConstPtr& msg);
-    void px4_pose_cb(const geometry_msgs::PoseStamped::ConstPtr& msg);
+    PX4Interface();
+
+    PX4Interface(const PX4Interface &, ros::Rate _loop_rate);
+
+    PX4Interface &operator=(const PX4Interface &);
+
+    static PX4Interface* instance;
+    static boost::mutex mutex_instance;
+
+    void px4_state_cb(const mavros_msgs::State::ConstPtr &msg);
+
+    void px4_pose_cb(const geometry_msgs::PoseStamped::ConstPtr &msg);
 
 
     ros::NodeHandle nh;
