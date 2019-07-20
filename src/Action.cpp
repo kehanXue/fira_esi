@@ -17,6 +17,7 @@ vwpp::Action::~Action()
     delete instance;
 }
 
+
 vwpp::Action::Action(const vwpp::Action &)
 {
 
@@ -182,36 +183,36 @@ int8_t vwpp::Action::openClaw()
 }
 
 
-int8_t vwpp::Action::run(vwpp::ActionID _action_id)
-{
-
-    Velocity2D velocity_2d{};
-    VelocityZ velocity_z{};
-
-    switch (_action_id)
-    {
-        case TRACKINGLINE:
-            velocity_2d = trackingLine(getLineCurX(), getTargetYaw(), getCurYaw(),
-                                       1.0);     // TODO Modify vision api, and get param from yaml.
-            break;
-        case AUJUSTALTITUDE:
-            velocity_z = adjustAltitude(getTargetAltitude(), getCurAltitude());
-            break;
-        case HOVERING:
-            velocity_2d = hovering(getCurQRx(), getCurQRy(), getTargetYaw(), getCurYaw());
-            break;
-        case ROTATION:
-            velocity_2d = rotating(getDirection(), getCurYaw());
-            break;
-        case OPENCLAW:
-            openClaw();
-            break;
-        case CIRCULARMOTION:
-            break;
-    }
-
-    return 0;
-}
+// int8_t vwpp::Action::run(vwpp::ActionID _action_id)
+// {
+//
+//    Velocity2D velocity_2d{};
+//    VelocityZ velocity_z{};
+//
+//    switch (_action_id)
+//    {
+//        case TRACKINGLINE:
+//            velocity_2d = trackingLine(getLineCurX(), getTargetYaw(), getCurYaw(),
+//                                       1.0);     // TODO Modify vision api, and get param from yaml.
+//            break;
+//        case ADJUSTALTITUDE:
+//            velocity_z = adjustAltitude(getTargetAltitude(), getCurAltitude());
+//            break;
+//        case HOVERING:
+//            velocity_2d = hovering(getCurQRx(), getCurQRy(), getTargetYaw(), getCurYaw());
+//            break;
+//        case ROTATION:
+//            velocity_2d = rotating(getDirection(), getCurYaw());
+//            break;
+//        case OPENCLAW:
+//            openClaw();
+//            break;
+//        case CIRCULARMOTION:
+//            break;
+//    }
+//
+//    return 0;
+// }
 
 
 

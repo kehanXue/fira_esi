@@ -12,6 +12,7 @@
 #include <mavros_msgs/SetMode.h>
 #include <mavros_msgs/CommandBool.h>
 #include <geometry_msgs/PoseStamped.h>
+#include <geometry_msgs/TwistStamped.h>
 #include <tf/transform_datatypes.h>
 
 #include <boost/thread.hpp>
@@ -33,6 +34,8 @@ public:
     double_t getCurYaw();
 
     double_t getCurZ();
+
+    int8_t publishLocalVel(const geometry_msgs::TwistStamped& _vel);
 
 
 private:
@@ -58,6 +61,9 @@ private:
     ros::ServiceClient px4_arming_client;
     ros::ServiceClient px4_set_mode_client;
     ros::Subscriber px4_pose_sub;
+    ros::Publisher px4_vel_pub;
+
+    boost::mutex mutex_vel_pub;
 
     mavros_msgs::State px4_cur_state;
     mavros_msgs::SetMode px4_offb_set_mode;

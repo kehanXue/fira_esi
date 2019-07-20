@@ -24,7 +24,7 @@ namespace vwpp
     enum ActionID
     {
         TRACKINGLINE = 0,
-        AUJUSTALTITUDE,
+        ADJUSTALTITUDE,
         HOVERING,
         ROTATION,
         OPENCLAW,
@@ -60,13 +60,15 @@ namespace vwpp
 
         int8_t openClaw();
 
-        int8_t run(ActionID _action_id);
+        // int8_t run(ActionID _action_id);
 
 
     private:
 
         Action();
+
         Action(const Action &);
+
         Action &operator=(const Action &);
 
         static Action* instance;

@@ -15,13 +15,16 @@ PX4Interface::PX4Interface() :
             ("/mavros/state", 1, &PX4Interface::px4_state_cb, this);
 
     px4_set_mode_client = nh.serviceClient<mavros_msgs::SetMode>
-            ("/mavors/set_mode");
+            ("/mavros/set_mode");
 
     px4_arming_client = nh.serviceClient<mavros_msgs::CommandBool>
             ("/mavros/cmd/arming");
 
     px4_pose_sub = nh.subscribe<geometry_msgs::PoseStamped>
             ("/mavros/local_position/pose", 1, &PX4Interface::px4_pose_cb, this);
+
+    px4_vel_pub = nh.advertise<geometry_msgs::TwistStamped>
+            ("/mavros/setpoint_velocity/cmd_vel_stamped", 1);
 
     // Wait for FCU connection
     while (ros::ok() && !px4_cur_state.connected)
@@ -170,6 +173,13 @@ void PX4Interface::px4_pose_cb(const geometry_msgs::PoseStamped::ConstPtr &msg)
 {
     this->px4_cur_pose = *msg;
 
+}
+
+
+int8_t PX4Interface::publishLocalVel(const geometry_msgs::TwistStamped& _vel)
+{
+    boost::unique_lock<boost::mutex> uq_lock_vel(mutex_vel_pub);
+    this->px4_vel_pub.publish(_vel);
 }
 
 
