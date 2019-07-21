@@ -31,6 +31,8 @@ namespace vwpp
 
         double_t getLineRotation();
 
+        bool getQRState();
+
         double_t getQRxOffset();
 
         double_t getQRyOffset();

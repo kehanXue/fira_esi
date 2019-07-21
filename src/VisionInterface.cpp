@@ -190,5 +190,12 @@ bool vwpp::VisionInterface::getRedXy()
 }
 
 
+bool vwpp::VisionInterface::getQRState()
+{
+    // TODO
+    return false;
+}
+
+
 
 

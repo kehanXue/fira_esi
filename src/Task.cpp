@@ -7,7 +7,9 @@
 
 // TODO
 vwpp::TaskBase::TaskBase() :
-        nh("~")
+        nh("~"),
+        task_id(NAVIGATION),
+        task_state(SUSPEND)
 {
 
 }
@@ -390,7 +392,7 @@ vwpp::TaskState vwpp::TaskDelivering::getTaskState()
 int8_t vwpp::TaskDelivering::run()
 {
 
-    double_t back_toward_yaw = 0;
+    static double_t back_toward_yaw = 0;
     VisionInterface::getInstance()->update();
     PX4Interface::getInstance()->update();
 
@@ -581,5 +583,69 @@ int8_t vwpp::TaskLanding::run()
 
     p_task_base->task_state = PROCESSING;
     return 0;
+}
+
+
+vwpp::TaskTakeoff::TaskTakeoff()
+{
+    p_task_base = new TaskBase(TAKEOFF);
+
+    p_task_base->task_state = START;
+
+    cur_action_id = ADJUSTALTITUDE;
+}
+
+
+vwpp::TaskTakeoff::~TaskTakeoff()
+{
+    delete p_task_base;
+
+}
+
+
+vwpp::TaskID vwpp::TaskTakeoff::getTaskID()
+{
+    return p_task_base->task_id;
+}
+
+
+vwpp::TaskState vwpp::TaskTakeoff::getTaskState()
+{
+    return p_task_base->task_state;
+}
+
+
+int8_t vwpp::TaskTakeoff::run()
+{
+    VisionInterface::getInstance()->update();
+    PX4Interface::getInstance()->update();
+
+    // TODO param
+    if (cur_action_id == ADJUSTALTITUDE)
+    {
+        double_t altitude_target = 0.;
+        if (fabs(PX4Interface::getInstance()->getCurZ() - altitude_target) <= 0.05)
+        {
+            p_task_base->task_state = FINISH;
+            return 1;
+        }
+
+        VelocityZ velocity_z = Action::getInstance()->adjustAltitude(altitude_target,
+                                                                     PX4Interface::getInstance()->getCurZ());
+        geometry_msgs::TwistStamped cmd_vel;
+        cmd_vel.header.stamp = ros::Time::now();
+        cmd_vel.header.frame_id = "camera_odom_frame";
+        cmd_vel.twist.linear.x = 0.;
+        cmd_vel.twist.linear.y = 0.;
+        cmd_vel.twist.linear.z = velocity_z;
+        cmd_vel.twist.angular.z = 0.;
+
+        PX4Interface::getInstance()->publishLocalVel(cmd_vel);
+
+    }
+
+    p_task_base->task_state = PROCESSING;
+    return 0;
+
 }
 

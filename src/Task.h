@@ -17,6 +17,7 @@ namespace vwpp
 {
     enum TaskID
     {
+        TAKEOFF = -4,
         NAVIGATION = -3,
         AVOIDANCE = -2,
         HOVERONQR = -1,
@@ -52,6 +53,28 @@ namespace vwpp
         ros::NodeHandle nh;
     };
 
+    class TaskTakeoff
+    {
+    public:
+
+        TaskTakeoff();
+
+        virtual ~TaskTakeoff();
+
+        TaskID getTaskID();
+
+        TaskState getTaskState();
+
+        int8_t run();
+
+    private:
+
+        TaskBase* p_task_base;
+
+        ActionID cur_action_id;
+
+    };
+
     class TaskNavigation
     {
     public:
@@ -78,7 +101,8 @@ namespace vwpp
     enum GateType
     {
         YELLOW = 0,
-        RED
+        RED,
+        NONE
     };
 
     class TaskAvoidance
