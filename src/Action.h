@@ -54,7 +54,8 @@ namespace vwpp
 
         VelocityZ adjustAltitude(double_t _target_altitude, double_t _cur_altitude);
 
-        Velocity2D hovering(double_t _cur_x, double_t _cur_y, double_t _target_yaw, double_t _cur_yaw);
+        // Velocity2D hovering(double_t _cur_x, double_t _cur_y, double_t _target_yaw, double_t _cur_yaw);
+        Velocity2D hovering(double_t _cur_x, double_t _cur_y);
 
         Velocity2D rotating(Direction _direction, double_t _cur_yaw);
 

@@ -99,7 +99,7 @@ vwpp::VelocityZ vwpp::Action::adjustAltitude(double_t _target_altitude, double_t
 }
 
 
-vwpp::Velocity2D vwpp::Action::hovering(double_t _cur_x, double_t _cur_y, double_t _target_yaw, double_t _cur_yaw)
+vwpp::Velocity2D vwpp::Action::hovering(double_t _cur_x, double_t _cur_y)
 {
     // TODO Get param from ros param server.
     static PIDController pid_controller_body_x(1.0, 0.0, 1.0);
@@ -111,8 +111,8 @@ vwpp::Velocity2D vwpp::Action::hovering(double_t _cur_x, double_t _cur_y, double
     pid_controller_body_y.setTarget(0);
     pid_controller_body_y.update(_cur_y);
 
-    pid_controller_body_yaw.setTarget(_target_yaw);
-    pid_controller_body_yaw.update(_cur_yaw);
+    // pid_controller_body_yaw.setTarget(_target_yaw);
+    // pid_controller_body_yaw.update(_cur_yaw);
 
     geometry_msgs::Vector3Stamped linear_body_vel{};
     linear_body_vel.header.stamp = ros::Time::now();
@@ -137,7 +137,8 @@ vwpp::Velocity2D vwpp::Action::hovering(double_t _cur_x, double_t _cur_y, double
     Velocity2D velocity_2d{};
     velocity_2d.x = linear_local_vel.vector.x;
     velocity_2d.y = linear_local_vel.vector.y;
-    velocity_2d.yaw = pid_controller_body_yaw.output();
+    // velocity_2d.yaw = pid_controller_body_yaw.output();
+    velocity_2d.yaw = 0;
 
     return velocity_2d;
 }

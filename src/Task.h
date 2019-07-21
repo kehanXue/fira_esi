@@ -17,13 +17,13 @@ namespace vwpp
 {
     enum TaskID
     {
-        NAVIGATION = 0,
-        AVOIDANCE,
-        HOVERONQR,
-        DELIVERING,
-        SCANTOWER,
-        SCANBUILDING,
-        LANDING
+        NAVIGATION = -3,
+        AVOIDANCE = -2,
+        HOVERONQR = -1,
+        DELIVERING = 0,
+        SCANTOWER = 1,
+        SCANBUILDING = 2,
+        LANDING = 3
     };
 
     enum TaskState
@@ -48,7 +48,6 @@ namespace vwpp
         TaskState task_state;
 
     private:
-        std::vector<ActionID> vec_task_actionIDs;
 
         ros::NodeHandle nh;
     };
@@ -108,19 +107,21 @@ namespace vwpp
         int64_t forward_counter;
     };
 
-    class TaskHovering
+    typedef TaskID CurrentQRTaskID;
+
+    class TaskHoverOnQR
     {
     public:
 
-        TaskHovering();
+        TaskHoverOnQR();
 
-        virtual ~TaskHovering();
+        virtual ~TaskHoverOnQR();
 
         TaskID getTaskID();
 
         TaskState getTaskState();
 
-        int8_t run();
+        CurrentQRTaskID run(TaskID _cur_task_id);
 
     private:
         TaskBase* p_task_base;

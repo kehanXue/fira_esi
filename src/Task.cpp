@@ -64,9 +64,9 @@ int8_t vwpp::TaskNavigation::run()
 
         // TODO
         Velocity2D velocity_2d = Action::getInstance()->trackingLine(VisionInterface::getInstance()->getLineOffset(),
-                                            PX4Interface::getInstance()->getCurYaw() +
-                                            VisionInterface::getInstance()->getLineRotation(),
-                                            PX4Interface::getInstance()->getCurYaw());
+                                                                     PX4Interface::getInstance()->getCurYaw() +
+                                                                     VisionInterface::getInstance()->getLineRotation(),
+                                                                     PX4Interface::getInstance()->getCurYaw());
 
 
         geometry_msgs::TwistStamped cmd_vel;
@@ -141,7 +141,7 @@ int8_t vwpp::TaskAvoidance::run(GateType _gate_type)
             }
 
             velocity_z = Action::getInstance()->adjustAltitude(this->altitude_target,
-                                                  PX4Interface::getInstance()->getCurZ());
+                                                               PX4Interface::getInstance()->getCurZ());
 
             // TODO param
             if (fabs(PX4Interface::getInstance()->getCurZ() - altitude_target) <= 0.10)
@@ -155,7 +155,7 @@ int8_t vwpp::TaskAvoidance::run(GateType _gate_type)
             this->altitude_target = 1.0;
 
             velocity_z = Action::getInstance()->adjustAltitude(this->altitude_target,
-                                                  PX4Interface::getInstance()->getCurZ());
+                                                               PX4Interface::getInstance()->getCurZ());
 
             // TODO param
             if (fabs(PX4Interface::getInstance()->getCurZ() - altitude_target) <= 0.10)
@@ -189,9 +189,9 @@ int8_t vwpp::TaskAvoidance::run(GateType _gate_type)
         }
 
         Velocity2D velocity_2d = Action::getInstance()->trackingLine(VisionInterface::getInstance()->getLineOffset(),
-                                            PX4Interface::getInstance()->getCurYaw() +
-                                            VisionInterface::getInstance()->getLineRotation(),
-                                            PX4Interface::getInstance()->getCurYaw());
+                                                                     PX4Interface::getInstance()->getCurYaw() +
+                                                                     VisionInterface::getInstance()->getLineRotation(),
+                                                                     PX4Interface::getInstance()->getCurYaw());
 
         geometry_msgs::TwistStamped cmd_vel;
         cmd_vel.header.stamp = ros::Time::now();
@@ -210,7 +210,7 @@ int8_t vwpp::TaskAvoidance::run(GateType _gate_type)
 }
 
 
-vwpp::TaskHovering::TaskHovering()
+vwpp::TaskHoverOnQR::TaskHoverOnQR()
 {
     p_task_base = new TaskBase(HOVERONQR);
 
@@ -219,32 +219,93 @@ vwpp::TaskHovering::TaskHovering()
 }
 
 
-vwpp::TaskHovering::~TaskHovering()
+vwpp::TaskHoverOnQR::~TaskHoverOnQR()
 {
     delete p_task_base;
 }
 
 
-vwpp::TaskID vwpp::TaskHovering::getTaskID()
+vwpp::TaskID vwpp::TaskHoverOnQR::getTaskID()
 {
     return p_task_base->task_id;
 }
 
 
-vwpp::TaskState vwpp::TaskHovering::getTaskState()
+vwpp::TaskState vwpp::TaskHoverOnQR::getTaskState()
 {
     return p_task_base->task_state;
 }
 
 
-int8_t vwpp::TaskHovering::run()
+vwpp::CurrentQRTaskID vwpp::TaskHoverOnQR::run(TaskID _cur_task_id)
 {
 
     VisionInterface::getInstance()->update();
     PX4Interface::getInstance()->update();
 
+    static int inter_adjust_altitude_time = 1;
+
+    if (cur_action_id == HOVERING)
+    {
+        Velocity2D velocity_2d = Action::getInstance()->hovering(VisionInterface::getInstance()->getQRxOffset(),
+                                                                 VisionInterface::getInstance()->getQRyOffset());
+
+        if (inter_adjust_altitude_time == 2)
+        {
+            p_task_base->task_state = FINISH;
+        }
+
+        geometry_msgs::TwistStamped cmd_vel;
+        cmd_vel.header.stamp = ros::Time::now();
+        cmd_vel.header.frame_id = "camera_odom_frame";
+        cmd_vel.twist.linear.x = velocity_2d.x;
+        cmd_vel.twist.linear.y = velocity_2d.y;
+        cmd_vel.twist.linear.z = 0.;
+        cmd_vel.twist.angular.z = velocity_2d.yaw;
+
+        PX4Interface::getInstance()->publishLocalVel(cmd_vel);
+    }
+    else if (cur_action_id == ROTATION)
+    {
+        std::string qr_inform = VisionInterface::getInstance()->getGroundQRinform();
+
+        // TODO
+        Direction target_direction = LOCAL_FORWARD;         // Init
+        switch (qr_inform.at(_cur_task_id))
+        {
+            case 'N':
+                target_direction = LOCAL_FORWARD;
+                break;
+            case 'W':
+                target_direction = LOCAL_LEFT;
+                break;
+            case 'S':
+                target_direction = LOCAL_BACK;
+                break;
+            case 'E':
+                target_direction = LOCAL_RIGHT;
+                break;
+        }
+
+        // TODO Add a & param
 
 
+        Velocity2D velocity_2d = Action::getInstance()->rotating(target_direction,
+                                                                 PX4Interface::getInstance()->getCurYaw());
+        geometry_msgs::TwistStamped cmd_vel;
+        cmd_vel.header.stamp = ros::Time::now();
+        cmd_vel.header.frame_id = "camera_odom_frame";
+        cmd_vel.twist.linear.x = velocity_2d.x;
+        cmd_vel.twist.linear.y = velocity_2d.y;
+        cmd_vel.twist.linear.z = 0.;
+        cmd_vel.twist.angular.z = velocity_2d.yaw;
+
+        PX4Interface::getInstance()->publishLocalVel(cmd_vel);
+    }
+
+
+
+    p_task_base->task_state = PROCESSING;
     return 0;
 }
 
