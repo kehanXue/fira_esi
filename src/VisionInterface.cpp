@@ -162,5 +162,33 @@ bool vwpp::VisionInterface::getRedXState()
 }
 
 
+bool vwpp::VisionInterface::getBlueHx()
+{
+    // TODO
+    return false;
+}
+
+
+bool vwpp::VisionInterface::getBlueHy()
+{
+    // TODO
+    return false;
+}
+
+
+bool vwpp::VisionInterface::getRedXx()
+{
+    // TODO
+    return false;
+}
+
+
+bool vwpp::VisionInterface::getRedXy()
+{
+    // TODO
+    return false;
+}
+
+
 
 

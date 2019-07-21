@@ -107,8 +107,6 @@ namespace vwpp
         int64_t forward_counter;
     };
 
-    typedef TaskID CurrentQRTaskID;
-
     class TaskHoverOnQR
     {
     public:
@@ -121,13 +119,59 @@ namespace vwpp
 
         TaskState getTaskState();
 
-        CurrentQRTaskID run(TaskID _cur_task_id);
+        char run(TaskID _cur_task_id);
 
     private:
         TaskBase* p_task_base;
 
+        // TODO Add to task_base
         ActionID cur_action_id;
     };
+
+    class TaskDelivering
+    {
+    public:
+
+        TaskDelivering();
+
+        virtual ~TaskDelivering();
+
+        TaskID getTaskID();
+
+        TaskState getTaskState();
+
+        int8_t run();
+
+    private:
+
+        TaskBase* p_task_base;
+
+        ActionID cur_action_id;
+    };
+
+
+    class TaskLanding
+    {
+    public:
+
+        TaskLanding();
+
+        virtual ~TaskLanding();
+
+        TaskID getTaskID();
+
+        TaskState getTaskState();
+
+        int8_t run();
+
+    private:
+
+        TaskBase* p_task_base;
+
+        ActionID cur_action_id;
+
+    };
+
 }
 
 

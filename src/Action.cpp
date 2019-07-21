@@ -178,10 +178,28 @@ vwpp::Velocity2D vwpp::Action::rotating(vwpp::Direction _direction, double_t _cu
 }
 
 
+vwpp::Velocity2D vwpp::Action::rotating(double_t _target_yaw, double_t _cur_yaw)
+{
+    static PIDController pid_controller_yaw(1.0, 0, 1.0);
+
+    pid_controller_yaw.setTarget(_target_yaw);
+    pid_controller_yaw.update(_cur_yaw);
+
+    Velocity2D linear_local_vel{};
+    linear_local_vel.x = 0;
+    linear_local_vel.y = 0;
+    linear_local_vel.yaw = pid_controller_yaw.output();
+
+    return linear_local_vel;
+}
+
+
 int8_t vwpp::Action::openClaw()
 {
     return 0;
 }
+
+
 
 
 // int8_t vwpp::Action::run(vwpp::ActionID _action_id)

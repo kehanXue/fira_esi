@@ -53,7 +53,16 @@ namespace vwpp
 
         bool getBlueHState();
 
+        bool getBlueHx();
+
+        bool getBlueHy();
+
         bool getRedXState();
+
+        bool getRedXx();
+
+        bool getRedXy();
+
 
 
     private:

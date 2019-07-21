@@ -91,6 +91,8 @@ vwpp::TaskAvoidance::TaskAvoidance()
 
     cur_action_id = ADJUSTALTITUDE;
 
+    p_task_base->task_state = START;
+
     altitude_target = 0.0;
 
     forward_counter = 0;
@@ -160,8 +162,8 @@ int8_t vwpp::TaskAvoidance::run(GateType _gate_type)
             // TODO param
             if (fabs(PX4Interface::getInstance()->getCurZ() - altitude_target) <= 0.10)
             {
-                inter_adjust_altitude_time = 1;
                 p_task_base->task_state = FINISH;
+                inter_adjust_altitude_time = 1;
                 return 1;
             }
 
@@ -216,6 +218,7 @@ vwpp::TaskHoverOnQR::TaskHoverOnQR()
 
     cur_action_id = HOVERING;
 
+    p_task_base->task_state = START;
 }
 
 
@@ -237,22 +240,26 @@ vwpp::TaskState vwpp::TaskHoverOnQR::getTaskState()
 }
 
 
-vwpp::CurrentQRTaskID vwpp::TaskHoverOnQR::run(TaskID _cur_task_id)
+char vwpp::TaskHoverOnQR::run(TaskID _cur_task_id)
 {
 
     VisionInterface::getInstance()->update();
     PX4Interface::getInstance()->update();
+    std::string qr_inform = VisionInterface::getInstance()->getGroundQRinform();
 
-    static int inter_adjust_altitude_time = 1;
+    static int inter_hovering_time = 1;
 
     if (cur_action_id == HOVERING)
     {
         Velocity2D velocity_2d = Action::getInstance()->hovering(VisionInterface::getInstance()->getQRxOffset(),
                                                                  VisionInterface::getInstance()->getQRyOffset());
 
-        if (inter_adjust_altitude_time == 2)
+        if (inter_hovering_time == 2)
         {
             p_task_base->task_state = FINISH;
+            inter_hovering_time = 1;
+
+            return qr_inform.at(qr_inform.size() - 1);
         }
 
         geometry_msgs::TwistStamped cmd_vel;
@@ -267,8 +274,6 @@ vwpp::CurrentQRTaskID vwpp::TaskHoverOnQR::run(TaskID _cur_task_id)
     }
     else if (cur_action_id == ROTATION)
     {
-        std::string qr_inform = VisionInterface::getInstance()->getGroundQRinform();
-
         // TODO
         Direction target_direction = LOCAL_FORWARD;         // Init
         switch (qr_inform.at(_cur_task_id))
@@ -287,11 +292,172 @@ vwpp::CurrentQRTaskID vwpp::TaskHoverOnQR::run(TaskID _cur_task_id)
                 break;
         }
 
+
         // TODO Add a & param
+        double_t yaw_target = 0;
+        switch (target_direction)
+        {
+            case LOCAL_FORWARD:
+                yaw_target = 0.;
+                break;
+            case LOCAL_LEFT:
+                yaw_target = 90.;
+                break;
+            case LOCAL_BACK:
+                yaw_target = 180.;
+                break;
+            case LOCAL_RIGHT:
+                yaw_target = 270.;
+                break;
+        }
+        // TODO
+        if (fabs(yaw_target - PX4Interface::getInstance()->getCurYaw()) <= 3.)
+        {
+            cur_action_id = HOVERING;
+            inter_hovering_time += 1;
+        }
+        else
+        {
+            Velocity2D velocity_2d = Action::getInstance()->rotating(target_direction,
+                                                                     PX4Interface::getInstance()->getCurYaw());
+            geometry_msgs::TwistStamped cmd_vel;
+            cmd_vel.header.stamp = ros::Time::now();
+            cmd_vel.header.frame_id = "camera_odom_frame";
+            cmd_vel.twist.linear.x = velocity_2d.x;
+            cmd_vel.twist.linear.y = velocity_2d.y;
+            cmd_vel.twist.linear.z = 0.;
+            cmd_vel.twist.angular.z = velocity_2d.yaw;
+
+            PX4Interface::getInstance()->publishLocalVel(cmd_vel);
+        }
+
+    }
 
 
-        Velocity2D velocity_2d = Action::getInstance()->rotating(target_direction,
+    p_task_base->task_state = PROCESSING;
+    return qr_inform.at(qr_inform.size() - 1);
+
+
+    // switch (qr_inform.at(qr_inform.size()-1))
+    // {
+    //     case '1':
+    //         current_qr_task_id = DELIVERING;
+    //         break;
+    //     case '2':
+    //         current_qr_task_id = SCANTOWER;
+    //         break;
+    //     case '3':
+    //         current_qr_task_id = SCANBUILDING;
+    //         break;
+    //     case '4':
+    //         current_qr_task_id = LANDING;
+    //         break;
+    // }
+
+}
+
+
+vwpp::TaskDelivering::TaskDelivering()
+{
+
+    p_task_base = new TaskBase(DELIVERING);
+
+    p_task_base->task_state = START;
+
+    cur_action_id = TRACKINGLINE;
+
+}
+
+
+vwpp::TaskDelivering::~TaskDelivering()
+{
+    delete p_task_base;
+}
+
+
+vwpp::TaskID vwpp::TaskDelivering::getTaskID()
+{
+    return p_task_base->task_id;
+}
+
+
+vwpp::TaskState vwpp::TaskDelivering::getTaskState()
+{
+    return p_task_base->task_state;
+}
+
+
+int8_t vwpp::TaskDelivering::run()
+{
+
+    double_t back_toward_yaw = 0;
+    VisionInterface::getInstance()->update();
+    PX4Interface::getInstance()->update();
+
+    if (cur_action_id == TRACKINGLINE)
+    {
+        if (VisionInterface::getInstance()->getRedXState())
+        {
+            cur_action_id = HOVERING;
+        }
+
+        Velocity2D velocity_2d = Action::getInstance()->trackingLine(VisionInterface::getInstance()->getLineOffset(),
+                                                                     PX4Interface::getInstance()->getCurYaw() +
+                                                                     VisionInterface::getInstance()->getLineRotation(),
+                                                                     PX4Interface::getInstance()->getCurYaw());
+
+        geometry_msgs::TwistStamped cmd_vel;
+        cmd_vel.header.stamp = ros::Time::now();
+        cmd_vel.header.frame_id = "camera_odom_frame";
+        cmd_vel.twist.linear.x = velocity_2d.x;
+        cmd_vel.twist.linear.y = velocity_2d.y;
+        cmd_vel.twist.linear.z = 0.;
+        cmd_vel.twist.angular.z = velocity_2d.yaw;
+
+        PX4Interface::getInstance()->publishLocalVel(cmd_vel);
+    }
+    else if (cur_action_id == HOVERING)
+    {
+        // TODO param
+        if (fabs(VisionInterface::getInstance()->getRedXx() - 0) <= 10 &&
+            fabs(VisionInterface::getInstance()->getRedXy() - 0) <= 10)
+        {
+            cur_action_id = OPENCLAW;
+        }
+
+        Velocity2D velocity_2d = Action::getInstance()->hovering(VisionInterface::getInstance()->getRedXx(),
+                                                                 VisionInterface::getInstance()->getRedXy());
+
+        geometry_msgs::TwistStamped cmd_vel;
+        cmd_vel.header.stamp = ros::Time::now();
+        cmd_vel.header.frame_id = "camera_odom_frame";
+        cmd_vel.twist.linear.x = velocity_2d.x;
+        cmd_vel.twist.linear.y = velocity_2d.y;
+        cmd_vel.twist.linear.z = 0.;
+        cmd_vel.twist.angular.z = velocity_2d.yaw;
+
+        PX4Interface::getInstance()->publishLocalVel(cmd_vel);
+    }
+    else if (cur_action_id == OPENCLAW)
+    {
+        // TODO
+        Action::getInstance()->openClaw();
+        cur_action_id = ROTATION;
+        // TODO
+        back_toward_yaw = (PX4Interface::getInstance()->getCurYaw() + 180) / 360.0;
+    }
+    else if (cur_action_id == ROTATION)
+    {
+        // TODO
+        if (fabs(PX4Interface::getInstance()->getCurYaw() - back_toward_yaw) <= 5)
+        {
+            p_task_base->task_state = FINISH;
+            return 1;
+        }
+
+        Velocity2D velocity_2d = Action::getInstance()->rotating(back_toward_yaw,
                                                                  PX4Interface::getInstance()->getCurYaw());
+
         geometry_msgs::TwistStamped cmd_vel;
         cmd_vel.header.stamp = ros::Time::now();
         cmd_vel.header.frame_id = "camera_odom_frame";
@@ -303,10 +469,117 @@ vwpp::CurrentQRTaskID vwpp::TaskHoverOnQR::run(TaskID _cur_task_id)
         PX4Interface::getInstance()->publishLocalVel(cmd_vel);
     }
 
-
-
     p_task_base->task_state = PROCESSING;
     return 0;
 }
 
+
+vwpp::TaskLanding::TaskLanding()
+{
+    p_task_base = new TaskBase(LANDING);
+
+    cur_action_id = TRACKINGLINE;
+
+    p_task_base->task_state = START;
+}
+
+
+vwpp::TaskLanding::~TaskLanding()
+{
+    delete p_task_base;
+}
+
+
+vwpp::TaskID vwpp::TaskLanding::getTaskID()
+{
+    return p_task_base->task_id;
+}
+
+
+vwpp::TaskState vwpp::TaskLanding::getTaskState()
+{
+    return p_task_base->task_state;
+}
+
+
+int8_t vwpp::TaskLanding::run()
+{
+    VisionInterface::getInstance()->update();
+    PX4Interface::getInstance()->update();
+
+    if (cur_action_id == TRACKINGLINE)
+    {
+        if (VisionInterface::getInstance()->getBlueHState())
+        {
+            cur_action_id = HOVERING;
+        }
+
+        Velocity2D velocity_2d = Action::getInstance()->trackingLine(VisionInterface::getInstance()->getLineOffset(),
+                                                                     PX4Interface::getInstance()->getCurYaw() +
+                                                                     VisionInterface::getInstance()->getLineRotation(),
+                                                                     PX4Interface::getInstance()->getCurYaw());
+
+        geometry_msgs::TwistStamped cmd_vel;
+        cmd_vel.header.stamp = ros::Time::now();
+        cmd_vel.header.frame_id = "camera_odom_frame";
+        cmd_vel.twist.linear.x = velocity_2d.x;
+        cmd_vel.twist.linear.y = velocity_2d.y;
+        cmd_vel.twist.linear.z = 0.;
+        cmd_vel.twist.angular.z = velocity_2d.yaw;
+
+        PX4Interface::getInstance()->publishLocalVel(cmd_vel);
+    }
+    else if (cur_action_id == HOVERING)
+    {
+        // TODO param
+        if (fabs(VisionInterface::getInstance()->getBlueHx() - 0) <= 10 &&
+            fabs(VisionInterface::getInstance()->getBlueHy() - 0) <= 10)
+        {
+            cur_action_id = ADJUSTALTITUDE;
+        }
+
+        Velocity2D velocity_2d = Action::getInstance()->hovering(VisionInterface::getInstance()->getBlueHx(),
+                                                                 VisionInterface::getInstance()->getBlueHy());
+
+        geometry_msgs::TwistStamped cmd_vel;
+        cmd_vel.header.stamp = ros::Time::now();
+        cmd_vel.header.frame_id = "camera_odom_frame";
+        cmd_vel.twist.linear.x = velocity_2d.x;
+        cmd_vel.twist.linear.y = velocity_2d.y;
+        cmd_vel.twist.linear.z = 0.;
+        cmd_vel.twist.angular.z = velocity_2d.yaw;
+
+        PX4Interface::getInstance()->publishLocalVel(cmd_vel);
+    }
+    else if (cur_action_id == ADJUSTALTITUDE)
+    {
+        // TODO param
+        double_t altitude_target = 0.;
+
+        // TODO param
+        if (fabs(PX4Interface::getInstance()->getCurZ() - altitude_target) <= 0.05)
+        {
+            p_task_base->task_state = FINISH;
+            return 1;
+        }
+
+
+        VelocityZ velocity_z = Action::getInstance()->adjustAltitude(altitude_target,
+                                                                     PX4Interface::getInstance()->getCurZ());
+
+        geometry_msgs::TwistStamped cmd_vel;
+        cmd_vel.header.stamp = ros::Time::now();
+        cmd_vel.header.frame_id = "camera_odom_frame";
+        cmd_vel.twist.linear.x = 0.;
+        cmd_vel.twist.linear.y = 0.;
+        cmd_vel.twist.linear.z = velocity_z;
+        cmd_vel.twist.angular.z = 0.;
+
+        PX4Interface::getInstance()->publishLocalVel(cmd_vel);
+
+    }
+
+    p_task_base->task_state = PROCESSING;
+    return 0;
+}
 
