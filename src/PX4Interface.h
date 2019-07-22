@@ -37,7 +37,9 @@ namespace vwpp
 
         double_t getCurZ();
 
-        int8_t publishLocalVel(const geometry_msgs::TwistStamped &_vel);
+        int8_t publishLocalVel(const geometry_msgs::Twist &_vel);
+
+        int8_t publishLocalPose(const geometry_msgs::PoseStamped &_pose);
 
 
     private:
@@ -64,8 +66,10 @@ namespace vwpp
         ros::ServiceClient px4_set_mode_client;
         ros::Subscriber px4_pose_sub;
         ros::Publisher px4_vel_pub;
+        ros::Publisher px4_pose_pub;
 
         boost::mutex mutex_vel_pub;
+        boost::mutex mutex_vel_pose;
 
         mavros_msgs::State px4_cur_state;
         mavros_msgs::SetMode px4_offb_set_mode;

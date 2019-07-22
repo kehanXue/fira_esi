@@ -8,6 +8,7 @@
 
 using namespace vwpp;
 
+
 PX4Interface::PX4Interface() :
         nh("~"),
         loop_rate(20.0)
@@ -24,8 +25,11 @@ PX4Interface::PX4Interface() :
     px4_pose_sub = nh.subscribe<geometry_msgs::PoseStamped>
             ("/mavros/local_position/pose", 1, &PX4Interface::px4_pose_cb, this);
 
-    px4_vel_pub = nh.advertise<geometry_msgs::TwistStamped>
-            ("/mavros/setpoint_velocity/cmd_vel_stamped", 1);
+    px4_vel_pub = nh.advertise<geometry_msgs::Twist>
+            ("/mavros/setpoint_velocity/cmd_vel_unstamped", 1);
+
+    px4_pose_pub = nh.advertise<geometry_msgs::PoseStamped>
+            ("/mavros/setpoint_position/local", 10);
 
     // Wait for FCU connection
     while (ros::ok() && !px4_cur_state.connected)
@@ -40,6 +44,11 @@ PX4Interface::PX4Interface() :
     // TODO Send a few setpoints before starting
     ROS_INFO("PX4Interface initialize successfully!");
 }
+
+
+PX4Interface* PX4Interface::instance = nullptr;
+
+boost::mutex PX4Interface::mutex_instance;
 
 
 PX4Interface* PX4Interface::getInstance()
@@ -97,7 +106,7 @@ int8_t PX4Interface::switchOffboard()
 {
     static ros::Time last_request = ros::Time::now();
 
-    while (true)
+    while (ros::ok())
     {
         if (px4_cur_state.mode != "OFFBOARD" &&
             (ros::Time::now() - last_request > ros::Duration(5.0)))
@@ -111,6 +120,14 @@ int8_t PX4Interface::switchOffboard()
             last_request = ros::Time::now();
         }
 
+        // !!!Must provide a pose msg! Or the plane couldn't takeoff!!!
+        geometry_msgs::PoseStamped temp_pose;
+        temp_pose.pose.position.x = 0;
+        temp_pose.pose.position.y = 0;
+        temp_pose.pose.position.z = 2;
+
+        vwpp::PX4Interface::getInstance()->publishLocalPose(temp_pose);
+        ros::spinOnce();
         loop_rate.sleep();
     }
 
@@ -122,7 +139,7 @@ int8_t PX4Interface::unlockVehicle()
 {
     static ros::Time last_request = ros::Time::now();
 
-    while (true)
+    while (ros::ok())
     {
         if (!px4_cur_state.armed &&
             (ros::Time::now() - last_request > ros::Duration(5.0)))
@@ -136,6 +153,13 @@ int8_t PX4Interface::unlockVehicle()
             last_request = ros::Time::now();
         }
 
+        // !!!Must provide a pose msg! Or the plane couldn't takeoff!!!
+        geometry_msgs::PoseStamped temp_pose;
+        temp_pose.pose.position.x = 0;
+        temp_pose.pose.position.y = 0;
+        temp_pose.pose.position.z = 2;
+        vwpp::PX4Interface::getInstance()->publishLocalPose(temp_pose);
+        ros::spinOnce();
         loop_rate.sleep();
     }
 
@@ -177,10 +201,17 @@ void PX4Interface::px4_pose_cb(const geometry_msgs::PoseStamped::ConstPtr &msg)
 }
 
 
-int8_t PX4Interface::publishLocalVel(const geometry_msgs::TwistStamped& _vel)
+int8_t PX4Interface::publishLocalVel(const geometry_msgs::Twist &_vel)
 {
     boost::unique_lock<boost::mutex> uq_lock_vel(mutex_vel_pub);
     this->px4_vel_pub.publish(_vel);
+}
+
+
+int8_t PX4Interface::publishLocalPose(const geometry_msgs::PoseStamped &_pose)
+{
+    boost::unique_lock<boost::mutex> uq_lock_pose(mutex_vel_pose);
+    this->px4_pose_pub.publish(_pose);
 }
 
 
