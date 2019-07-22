@@ -120,11 +120,11 @@ int8_t PX4Interface::switchOffboard()
             last_request = ros::Time::now();
         }
 
-        // !!!Must provide a pose msg! Or the plane couldn't takeoff!!!
+        // Must provide a pose msg! Or the plane couldn't takeoff!
         geometry_msgs::PoseStamped temp_pose;
         temp_pose.pose.position.x = 0;
         temp_pose.pose.position.y = 0;
-        temp_pose.pose.position.z = 2;
+        temp_pose.pose.position.z = 1;
 
         vwpp::PX4Interface::getInstance()->publishLocalPose(temp_pose);
         ros::spinOnce();
@@ -153,11 +153,11 @@ int8_t PX4Interface::unlockVehicle()
             last_request = ros::Time::now();
         }
 
-        // !!!Must provide a pose msg! Or the plane couldn't takeoff!!!
+        // Must provide a pose msg! Or the plane couldn't takeoff!
         geometry_msgs::PoseStamped temp_pose;
         temp_pose.pose.position.x = 0;
         temp_pose.pose.position.y = 0;
-        temp_pose.pose.position.z = 2;
+        temp_pose.pose.position.z = 1;
         vwpp::PX4Interface::getInstance()->publishLocalPose(temp_pose);
         ros::spinOnce();
         loop_rate.sleep();
@@ -179,6 +179,18 @@ double_t PX4Interface::getCurYaw()
     tf::Matrix3x3(cur_pose_quat).getRPY(roll, pitch, yaw);
 
     return yaw;
+}
+
+
+double_t PX4Interface::getCurX()
+{
+    return this->px4_cur_pose.pose.position.x;
+}
+
+
+double_t PX4Interface::getCurY()
+{
+    return this->px4_cur_pose.pose.position.y;
 }
 
 

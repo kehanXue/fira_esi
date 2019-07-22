@@ -88,14 +88,27 @@ vwpp::Action::trackingLine(double_t _cur_line_y, double_t _target_yaw, double_t 
 }
 
 
-vwpp::VelocityZ vwpp::Action::adjustAltitude(double_t _target_altitude, double_t _cur_altitude)
+vwpp::Linear3D vwpp::Action::adjustAltitude(double_t _target_altitude, double_t _cur_altitude, double_t _cur_x, double_t _cur_y)
 {
     // TODO Could use the tf_transform, but because the z axis is always coincident, so...
+    static PIDController pid_controller_local_x(1.0, 0.0, 1.0);
+    static PIDController pid_controller_local_y(1.0, 0.0, 1.0);
     static PIDController pid_controller_local_z(1.0, 0.0, 1.0);
+
+    pid_controller_local_x.setTarget(0.);
+    pid_controller_local_y.setTarget(0.);
     pid_controller_local_z.setTarget(_target_altitude);
+
+    pid_controller_local_x.update(_cur_x);
+    pid_controller_local_y.update(_cur_y);
     pid_controller_local_z.update(_cur_altitude);
 
-    return pid_controller_local_z.output();
+    Linear3D linear_3d{};
+    linear_3d.x = pid_controller_local_x.output();
+    linear_3d.y = pid_controller_local_y.output();
+    linear_3d.z = pid_controller_local_z.output();
+
+    return linear_3d;
 }
 
 
@@ -206,7 +219,7 @@ int8_t vwpp::Action::openClaw()
 // {
 //
 //    Velocity2D velocity_2d{};
-//    VelocityZ velocity_z{};
+//    Linear3D velocity_z{};
 //
 //    switch (_action_id)
 //    {

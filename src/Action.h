@@ -38,7 +38,12 @@ namespace vwpp
         double_t yaw;
     };
 
-    typedef double_t VelocityZ;
+    struct Linear3D
+    {
+        double_t x;
+        double_t y;
+        double_t z;
+    };
 
     class Action
     {
@@ -51,7 +56,7 @@ namespace vwpp
         Velocity2D trackingLine(double_t _cur_line_y, double_t _target_yaw, double_t _cur_yaw,
                                 double_t _forward_vel = 0.10);
 
-        VelocityZ adjustAltitude(double_t _target_altitude, double_t _cur_altitude);
+        Linear3D adjustAltitude(double_t _target_altitude, double_t _cur_altitude, double_t _cur_x, double_t _cur_y);
 
         // Velocity2D hovering(double_t _cur_x, double_t _cur_y, double_t _target_yaw, double_t _cur_yaw);
         Velocity2D hovering(double_t _cur_x, double_t _cur_y);

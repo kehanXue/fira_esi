@@ -71,13 +71,11 @@ int8_t vwpp::TaskNavigation::run()
                                                                      PX4Interface::getInstance()->getCurYaw());
 
 
-        geometry_msgs::TwistStamped cmd_vel;
-        cmd_vel.header.stamp = ros::Time::now();
-        cmd_vel.header.frame_id = "camera_odom_frame";
-        cmd_vel.twist.linear.x = velocity_2d.x;
-        cmd_vel.twist.linear.y = velocity_2d.y;
-        cmd_vel.twist.linear.z = 0.;
-        cmd_vel.twist.angular.z = velocity_2d.yaw;
+        geometry_msgs::Twist cmd_vel;
+        cmd_vel.linear.x = velocity_2d.x;
+        cmd_vel.linear.y = velocity_2d.y;
+        cmd_vel.linear.z = 0.;
+        cmd_vel.angular.z = velocity_2d.yaw;
 
         PX4Interface::getInstance()->publishLocalVel(cmd_vel);
     }
@@ -130,7 +128,7 @@ int8_t vwpp::TaskAvoidance::run(GateType _gate_type)
     if (cur_action_id == ADJUSTALTITUDE)
     {
 
-        VelocityZ velocity_z = 0;
+        Linear3D linear_3d{};
 
         if (inter_adjust_altitude_time == 1)
         {
@@ -144,8 +142,10 @@ int8_t vwpp::TaskAvoidance::run(GateType _gate_type)
                 this->altitude_target = 0.5;
             }
 
-            velocity_z = Action::getInstance()->adjustAltitude(this->altitude_target,
-                                                               PX4Interface::getInstance()->getCurZ());
+            linear_3d = Action::getInstance()->adjustAltitude(this->altitude_target,
+                                                              PX4Interface::getInstance()->getCurZ(),
+                                                              PX4Interface::getInstance()->getCurX(),
+                                                              PX4Interface::getInstance()->getCurY());
 
             // TODO param
             if (fabs(PX4Interface::getInstance()->getCurZ() - altitude_target) <= 0.10)
@@ -158,8 +158,11 @@ int8_t vwpp::TaskAvoidance::run(GateType _gate_type)
         {
             this->altitude_target = 1.0;
 
-            velocity_z = Action::getInstance()->adjustAltitude(this->altitude_target,
-                                                               PX4Interface::getInstance()->getCurZ());
+            linear_3d = Action::getInstance()->adjustAltitude(this->altitude_target,
+                                                              PX4Interface::getInstance()->getCurZ(),
+                                                              PX4Interface::getInstance()->getCurX(),
+                                                              PX4Interface::getInstance()->getCurY());
+
 
             // TODO param
             if (fabs(PX4Interface::getInstance()->getCurZ() - altitude_target) <= 0.10)
@@ -171,13 +174,11 @@ int8_t vwpp::TaskAvoidance::run(GateType _gate_type)
 
         }
 
-        geometry_msgs::TwistStamped cmd_vel;
-        cmd_vel.header.stamp = ros::Time::now();
-        cmd_vel.header.frame_id = "camera_odom_frame";
-        cmd_vel.twist.linear.x = 0.;
-        cmd_vel.twist.linear.y = 0.;
-        cmd_vel.twist.linear.z = velocity_z;
-        cmd_vel.twist.angular.z = 0.;
+        geometry_msgs::Twist cmd_vel;
+        cmd_vel.linear.x = linear_3d.x;
+        cmd_vel.linear.y = linear_3d.y;
+        cmd_vel.linear.z = linear_3d.z;
+        cmd_vel.angular.z = 0.;
 
         PX4Interface::getInstance()->publishLocalVel(cmd_vel);
 
@@ -197,13 +198,11 @@ int8_t vwpp::TaskAvoidance::run(GateType _gate_type)
                                                                      VisionInterface::getInstance()->getLineRotation(),
                                                                      PX4Interface::getInstance()->getCurYaw());
 
-        geometry_msgs::TwistStamped cmd_vel;
-        cmd_vel.header.stamp = ros::Time::now();
-        cmd_vel.header.frame_id = "camera_odom_frame";
-        cmd_vel.twist.linear.x = velocity_2d.x;
-        cmd_vel.twist.linear.y = velocity_2d.y;
-        cmd_vel.twist.linear.z = 0.;
-        cmd_vel.twist.angular.z = velocity_2d.yaw;
+        geometry_msgs::Twist cmd_vel;
+        cmd_vel.linear.x = velocity_2d.x;
+        cmd_vel.linear.y = velocity_2d.y;
+        cmd_vel.linear.z = 0.;
+        cmd_vel.angular.z = velocity_2d.yaw;
 
         PX4Interface::getInstance()->publishLocalVel(cmd_vel);
     }
@@ -264,13 +263,11 @@ char vwpp::TaskHoverOnQR::run(TaskID _cur_task_id)
             return qr_inform.at(qr_inform.size() - 1);
         }
 
-        geometry_msgs::TwistStamped cmd_vel;
-        cmd_vel.header.stamp = ros::Time::now();
-        cmd_vel.header.frame_id = "camera_odom_frame";
-        cmd_vel.twist.linear.x = velocity_2d.x;
-        cmd_vel.twist.linear.y = velocity_2d.y;
-        cmd_vel.twist.linear.z = 0.;
-        cmd_vel.twist.angular.z = velocity_2d.yaw;
+        geometry_msgs::Twist cmd_vel;
+        cmd_vel.linear.x = velocity_2d.x;
+        cmd_vel.linear.y = velocity_2d.y;
+        cmd_vel.linear.z = 0.;
+        cmd_vel.angular.z = velocity_2d.yaw;
 
         PX4Interface::getInstance()->publishLocalVel(cmd_vel);
     }
@@ -322,13 +319,11 @@ char vwpp::TaskHoverOnQR::run(TaskID _cur_task_id)
         {
             Velocity2D velocity_2d = Action::getInstance()->rotating(target_direction,
                                                                      PX4Interface::getInstance()->getCurYaw());
-            geometry_msgs::TwistStamped cmd_vel;
-            cmd_vel.header.stamp = ros::Time::now();
-            cmd_vel.header.frame_id = "camera_odom_frame";
-            cmd_vel.twist.linear.x = velocity_2d.x;
-            cmd_vel.twist.linear.y = velocity_2d.y;
-            cmd_vel.twist.linear.z = 0.;
-            cmd_vel.twist.angular.z = velocity_2d.yaw;
+            geometry_msgs::Twist cmd_vel;
+            cmd_vel.linear.x = velocity_2d.x;
+            cmd_vel.linear.y = velocity_2d.y;
+            cmd_vel.linear.z = 0.;
+            cmd_vel.angular.z = velocity_2d.yaw;
 
             PX4Interface::getInstance()->publishLocalVel(cmd_vel);
         }
@@ -408,13 +403,11 @@ int8_t vwpp::TaskDelivering::run()
                                                                      VisionInterface::getInstance()->getLineRotation(),
                                                                      PX4Interface::getInstance()->getCurYaw());
 
-        geometry_msgs::TwistStamped cmd_vel;
-        cmd_vel.header.stamp = ros::Time::now();
-        cmd_vel.header.frame_id = "camera_odom_frame";
-        cmd_vel.twist.linear.x = velocity_2d.x;
-        cmd_vel.twist.linear.y = velocity_2d.y;
-        cmd_vel.twist.linear.z = 0.;
-        cmd_vel.twist.angular.z = velocity_2d.yaw;
+        geometry_msgs::Twist cmd_vel;
+        cmd_vel.linear.x = velocity_2d.x;
+        cmd_vel.linear.y = velocity_2d.y;
+        cmd_vel.linear.z = 0.;
+        cmd_vel.angular.z = velocity_2d.yaw;
 
         PX4Interface::getInstance()->publishLocalVel(cmd_vel);
     }
@@ -430,13 +423,11 @@ int8_t vwpp::TaskDelivering::run()
         Velocity2D velocity_2d = Action::getInstance()->hovering(VisionInterface::getInstance()->getRedXx(),
                                                                  VisionInterface::getInstance()->getRedXy());
 
-        geometry_msgs::TwistStamped cmd_vel;
-        cmd_vel.header.stamp = ros::Time::now();
-        cmd_vel.header.frame_id = "camera_odom_frame";
-        cmd_vel.twist.linear.x = velocity_2d.x;
-        cmd_vel.twist.linear.y = velocity_2d.y;
-        cmd_vel.twist.linear.z = 0.;
-        cmd_vel.twist.angular.z = velocity_2d.yaw;
+        geometry_msgs::Twist cmd_vel;
+        cmd_vel.linear.x = velocity_2d.x;
+        cmd_vel.linear.y = velocity_2d.y;
+        cmd_vel.linear.z = 0.;
+        cmd_vel.angular.z = velocity_2d.yaw;
 
         PX4Interface::getInstance()->publishLocalVel(cmd_vel);
     }
@@ -460,13 +451,11 @@ int8_t vwpp::TaskDelivering::run()
         Velocity2D velocity_2d = Action::getInstance()->rotating(back_toward_yaw,
                                                                  PX4Interface::getInstance()->getCurYaw());
 
-        geometry_msgs::TwistStamped cmd_vel;
-        cmd_vel.header.stamp = ros::Time::now();
-        cmd_vel.header.frame_id = "camera_odom_frame";
-        cmd_vel.twist.linear.x = velocity_2d.x;
-        cmd_vel.twist.linear.y = velocity_2d.y;
-        cmd_vel.twist.linear.z = 0.;
-        cmd_vel.twist.angular.z = velocity_2d.yaw;
+        geometry_msgs::Twist cmd_vel;
+        cmd_vel.linear.x = velocity_2d.x;
+        cmd_vel.linear.y = velocity_2d.y;
+        cmd_vel.linear.z = 0.;
+        cmd_vel.angular.z = velocity_2d.yaw;
 
         PX4Interface::getInstance()->publishLocalVel(cmd_vel);
     }
@@ -521,13 +510,11 @@ int8_t vwpp::TaskLanding::run()
                                                                      VisionInterface::getInstance()->getLineRotation(),
                                                                      PX4Interface::getInstance()->getCurYaw());
 
-        geometry_msgs::TwistStamped cmd_vel;
-        cmd_vel.header.stamp = ros::Time::now();
-        cmd_vel.header.frame_id = "camera_odom_frame";
-        cmd_vel.twist.linear.x = velocity_2d.x;
-        cmd_vel.twist.linear.y = velocity_2d.y;
-        cmd_vel.twist.linear.z = 0.;
-        cmd_vel.twist.angular.z = velocity_2d.yaw;
+        geometry_msgs::Twist cmd_vel;
+        cmd_vel.linear.x = velocity_2d.x;
+        cmd_vel.linear.y = velocity_2d.y;
+        cmd_vel.linear.z = 0.;
+        cmd_vel.angular.z = velocity_2d.yaw;
 
         PX4Interface::getInstance()->publishLocalVel(cmd_vel);
     }
@@ -543,13 +530,11 @@ int8_t vwpp::TaskLanding::run()
         Velocity2D velocity_2d = Action::getInstance()->hovering(VisionInterface::getInstance()->getBlueHx(),
                                                                  VisionInterface::getInstance()->getBlueHy());
 
-        geometry_msgs::TwistStamped cmd_vel;
-        cmd_vel.header.stamp = ros::Time::now();
-        cmd_vel.header.frame_id = "camera_odom_frame";
-        cmd_vel.twist.linear.x = velocity_2d.x;
-        cmd_vel.twist.linear.y = velocity_2d.y;
-        cmd_vel.twist.linear.z = 0.;
-        cmd_vel.twist.angular.z = velocity_2d.yaw;
+        geometry_msgs::Twist cmd_vel;
+        cmd_vel.linear.x = velocity_2d.x;
+        cmd_vel.linear.y = velocity_2d.y;
+        cmd_vel.linear.z = 0.;
+        cmd_vel.angular.z = velocity_2d.yaw;
 
         PX4Interface::getInstance()->publishLocalVel(cmd_vel);
     }
@@ -566,16 +551,16 @@ int8_t vwpp::TaskLanding::run()
         }
 
 
-        VelocityZ velocity_z = Action::getInstance()->adjustAltitude(altitude_target,
-                                                                     PX4Interface::getInstance()->getCurZ());
+        Linear3D linear_3d = Action::getInstance()->adjustAltitude(altitude_target,
+                                                                   PX4Interface::getInstance()->getCurZ(),
+                                                                   PX4Interface::getInstance()->getCurX(),
+                                                                   PX4Interface::getInstance()->getCurY());
 
-        geometry_msgs::TwistStamped cmd_vel;
-        cmd_vel.header.stamp = ros::Time::now();
-        cmd_vel.header.frame_id = "camera_odom_frame";
-        cmd_vel.twist.linear.x = 0.;
-        cmd_vel.twist.linear.y = 0.;
-        cmd_vel.twist.linear.z = velocity_z;
-        cmd_vel.twist.angular.z = 0.;
+
+        geometry_msgs::Twist cmd_vel;
+        cmd_vel.linear.x = linear_3d.x;
+        cmd_vel.linear.y = linear_3d.y;
+        cmd_vel.linear.z = linear_3d.z;
 
         PX4Interface::getInstance()->publishLocalVel(cmd_vel);
 
@@ -630,15 +615,15 @@ int8_t vwpp::TaskTakeoff::run()
             return 1;
         }
 
-        VelocityZ velocity_z = Action::getInstance()->adjustAltitude(altitude_target,
-                                                                     PX4Interface::getInstance()->getCurZ());
-        geometry_msgs::TwistStamped cmd_vel;
-        cmd_vel.header.stamp = ros::Time::now();
-        cmd_vel.header.frame_id = "camera_odom_frame";
-        cmd_vel.twist.linear.x = 0.;
-        cmd_vel.twist.linear.y = 0.;
-        cmd_vel.twist.linear.z = velocity_z;
-        cmd_vel.twist.angular.z = 0.;
+        Linear3D linear_3d = Action::getInstance()->adjustAltitude(altitude_target,
+                                                                   PX4Interface::getInstance()->getCurZ(),
+                                                                   PX4Interface::getInstance()->getCurX(),
+                                                                   PX4Interface::getInstance()->getCurY());
+
+        geometry_msgs::Twist cmd_vel;
+        cmd_vel.linear.x = linear_3d.x;
+        cmd_vel.linear.y = linear_3d.y;
+        cmd_vel.linear.z = linear_3d.z;
 
         PX4Interface::getInstance()->publishLocalVel(cmd_vel);
 
