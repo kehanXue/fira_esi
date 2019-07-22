@@ -9,7 +9,7 @@
 vwpp::TaskBase::TaskBase() :
         nh("~"),
         task_id(NAVIGATION),
-        task_state(SUSPEND)
+        task_state(TASK_SUSPEND)
 {
 
 }
@@ -18,7 +18,7 @@ vwpp::TaskBase::TaskBase() :
 vwpp::TaskBase::TaskBase(vwpp::TaskID _task_id) :
         nh("~"),
         task_id(_task_id),
-        task_state(SUSPEND)
+        task_state(TASK_SUSPEND)
 {
 
 }
@@ -31,7 +31,7 @@ vwpp::TaskBase::~TaskBase()
 vwpp::TaskNavigation::TaskNavigation()
 {
     p_task_base = new TaskBase(NAVIGATION);
-    p_task_base->task_state = START;
+    p_task_base->task_state = TASK_START;
 
     cur_action_id = TRACKINGLINE;
 
@@ -82,7 +82,7 @@ int8_t vwpp::TaskNavigation::run()
         PX4Interface::getInstance()->publishLocalVel(cmd_vel);
     }
 
-    p_task_base->task_state = FINISH;
+    p_task_base->task_state = TASK_FINISH;
     return 0;
 }
 
@@ -93,7 +93,7 @@ vwpp::TaskAvoidance::TaskAvoidance()
 
     cur_action_id = ADJUSTALTITUDE;
 
-    p_task_base->task_state = START;
+    p_task_base->task_state = TASK_START;
 
     altitude_target = 0.0;
 
@@ -164,7 +164,7 @@ int8_t vwpp::TaskAvoidance::run(GateType _gate_type)
             // TODO param
             if (fabs(PX4Interface::getInstance()->getCurZ() - altitude_target) <= 0.10)
             {
-                p_task_base->task_state = FINISH;
+                p_task_base->task_state = TASK_FINISH;
                 inter_adjust_altitude_time = 1;
                 return 1;
             }
@@ -208,7 +208,7 @@ int8_t vwpp::TaskAvoidance::run(GateType _gate_type)
         PX4Interface::getInstance()->publishLocalVel(cmd_vel);
     }
 
-    p_task_base->task_state = PROCESSING;
+    p_task_base->task_state = TASK_PROCESSING;
     return 0;
 
 }
@@ -220,7 +220,7 @@ vwpp::TaskHoverOnQR::TaskHoverOnQR()
 
     cur_action_id = HOVERING;
 
-    p_task_base->task_state = START;
+    p_task_base->task_state = TASK_START;
 }
 
 
@@ -258,7 +258,7 @@ char vwpp::TaskHoverOnQR::run(TaskID _cur_task_id)
 
         if (inter_hovering_time == 2)
         {
-            p_task_base->task_state = FINISH;
+            p_task_base->task_state = TASK_FINISH;
             inter_hovering_time = 1;
 
             return qr_inform.at(qr_inform.size() - 1);
@@ -336,7 +336,7 @@ char vwpp::TaskHoverOnQR::run(TaskID _cur_task_id)
     }
 
 
-    p_task_base->task_state = PROCESSING;
+    p_task_base->task_state = TASK_PROCESSING;
     return qr_inform.at(qr_inform.size() - 1);
 
 
@@ -364,7 +364,7 @@ vwpp::TaskDelivering::TaskDelivering()
 
     p_task_base = new TaskBase(DELIVERING);
 
-    p_task_base->task_state = START;
+    p_task_base->task_state = TASK_START;
 
     cur_action_id = TRACKINGLINE;
 
@@ -453,7 +453,7 @@ int8_t vwpp::TaskDelivering::run()
         // TODO
         if (fabs(PX4Interface::getInstance()->getCurYaw() - back_toward_yaw) <= 5)
         {
-            p_task_base->task_state = FINISH;
+            p_task_base->task_state = TASK_FINISH;
             return 1;
         }
 
@@ -471,7 +471,7 @@ int8_t vwpp::TaskDelivering::run()
         PX4Interface::getInstance()->publishLocalVel(cmd_vel);
     }
 
-    p_task_base->task_state = PROCESSING;
+    p_task_base->task_state = TASK_PROCESSING;
     return 0;
 }
 
@@ -482,7 +482,7 @@ vwpp::TaskLanding::TaskLanding()
 
     cur_action_id = TRACKINGLINE;
 
-    p_task_base->task_state = START;
+    p_task_base->task_state = TASK_START;
 }
 
 
@@ -561,7 +561,7 @@ int8_t vwpp::TaskLanding::run()
         // TODO param
         if (fabs(PX4Interface::getInstance()->getCurZ() - altitude_target) <= 0.05)
         {
-            p_task_base->task_state = FINISH;
+            p_task_base->task_state = TASK_FINISH;
             return 1;
         }
 
@@ -581,7 +581,7 @@ int8_t vwpp::TaskLanding::run()
 
     }
 
-    p_task_base->task_state = PROCESSING;
+    p_task_base->task_state = TASK_PROCESSING;
     return 0;
 }
 
@@ -590,7 +590,7 @@ vwpp::TaskTakeoff::TaskTakeoff()
 {
     p_task_base = new TaskBase(TAKEOFF);
 
-    p_task_base->task_state = START;
+    p_task_base->task_state = TASK_START;
 
     cur_action_id = ADJUSTALTITUDE;
 }
@@ -626,7 +626,7 @@ int8_t vwpp::TaskTakeoff::run()
         double_t altitude_target = 0.;
         if (fabs(PX4Interface::getInstance()->getCurZ() - altitude_target) <= 0.05)
         {
-            p_task_base->task_state = FINISH;
+            p_task_base->task_state = TASK_FINISH;
             return 1;
         }
 
@@ -644,7 +644,7 @@ int8_t vwpp::TaskTakeoff::run()
 
     }
 
-    p_task_base->task_state = PROCESSING;
+    p_task_base->task_state = TASK_PROCESSING;
     return 0;
 
 }

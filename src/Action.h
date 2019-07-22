@@ -46,7 +46,6 @@ namespace vwpp
 
         static Action* getInstance();
 
-
         virtual ~Action();
 
         Velocity2D trackingLine(double_t _cur_line_y, double_t _target_yaw, double_t _cur_yaw,
@@ -58,6 +57,7 @@ namespace vwpp
         Velocity2D hovering(double_t _cur_x, double_t _cur_y);
 
         Velocity2D rotating(Direction _direction, double_t _cur_yaw);
+
         Velocity2D rotating(double_t _target_yaw, double_t _cur_yaw);
 
         int8_t openClaw();

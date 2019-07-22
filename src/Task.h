@@ -29,10 +29,10 @@ namespace vwpp
 
     enum TaskState
     {
-        SUSPEND,
-        START,
-        PROCESSING = 0,
-        FINISH,
+        TASK_SUSPEND,
+        TASK_START,
+        TASK_PROCESSING = 0,
+        TASK_FINISH
     };
 
     class TaskBase

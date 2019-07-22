@@ -9,6 +9,14 @@
 
 namespace vwpp
 {
+
+    enum FlowState
+    {
+        FLOW_START,
+        FLOW_PROCESSING,
+        FLOW_FINISH
+    };
+
     class FlowController
     {
     public:
@@ -19,10 +27,13 @@ namespace vwpp
 
         int8_t run();
 
+        FlowState getFlowState();
+
 
     private:
 
         TaskID cur_task_id;
+        FlowState cur_flow_state;
 
         TaskTakeoff* p_task_takeoff;
         TaskNavigation* p_task_navigation;
@@ -32,6 +43,7 @@ namespace vwpp
         TaskLanding* p_task_landing;
         
         GateType gate_type;
+        char task_type_id;
 
     };
 }

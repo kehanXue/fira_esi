@@ -6,6 +6,7 @@
 
 #include "PX4Interface.h"
 
+using namespace vwpp;
 
 PX4Interface::PX4Interface() :
         nh("~"),
