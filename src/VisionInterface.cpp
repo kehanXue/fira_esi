@@ -40,7 +40,7 @@ int8_t vwpp::VisionInterface::update()
 
         return 0;
     }
-    catch (Exception& ex)   // TODO
+    catch (Exception &ex)   // TODO
     {
         return -1;
     }
@@ -48,7 +48,7 @@ int8_t vwpp::VisionInterface::update()
 }
 
 
-vwpp::VisionInterface *vwpp::VisionInterface::getInstance()
+vwpp::VisionInterface* vwpp::VisionInterface::getInstance()
 {
     // https://www.cnblogs.com/cxjchen/p/3148582.html
     if (instance == nullptr)

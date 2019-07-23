@@ -16,19 +16,6 @@ int main(int argc, char** argv)
     ros::Rate loop_rate(20);
 
 
-    // Send a few setpoints before starting
-    geometry_msgs::PoseStamped temp_pose;
-    temp_pose.pose.position.x = 0;
-    temp_pose.pose.position.y = 0;
-    temp_pose.pose.position.z = 2;
-    for (int counter = 50; ros::ok() && counter > 0; --counter)
-    {
-        vwpp::PX4Interface::getInstance()->publishLocalPose(temp_pose);
-        ros::spinOnce();
-        loop_rate.sleep();
-    }
-
-
     vwpp::PX4Interface::getInstance()->switchOffboard();
     vwpp::PX4Interface::getInstance()->unlockVehicle();
 

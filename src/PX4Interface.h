@@ -36,7 +36,9 @@ namespace vwpp
         double_t getCurYaw();
 
         double_t getCurX();
+
         double_t getCurY();
+
         double_t getCurZ();
 
         int8_t publishLocalVel(const geometry_msgs::Twist &_vel);
