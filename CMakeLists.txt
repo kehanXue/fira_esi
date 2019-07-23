@@ -8,11 +8,11 @@ add_compile_options(-std=c++11)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  geometry_msgs
-  mavros
-  roscpp
-  std_msgs
-)
+        geometry_msgs
+        mavros
+        roscpp
+        std_msgs
+        )
 
 ## System dependencies are found with CMake's conventions
 find_package(Boost REQUIRED COMPONENTS system)
@@ -104,10 +104,10 @@ find_package(Boost REQUIRED COMPONENTS system)
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES fira_esi
-  CATKIN_DEPENDS geometry_msgs mavros roscpp std_msgs
-#  DEPENDS system_lib
+        #  INCLUDE_DIRS include
+        #  LIBRARIES fira_esi
+        CATKIN_DEPENDS geometry_msgs mavros roscpp std_msgs
+        #  DEPENDS system_lib
 )
 
 ###########
@@ -117,8 +117,8 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-  include
-  ${catkin_INCLUDE_DIRS}
+        include
+        ${catkin_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
@@ -134,7 +134,23 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-add_executable(fira_esi_node src/fira_esi_node.cpp src/PIDController.cpp src/PIDController.h src/fira_esi_node.cpp src/FlowController.cpp src/FlowController.h src/Task.cpp src/Task.h src/Action.cpp src/Action.h src/VisionInterface.cpp src/VisionInterface.h src/PX4Interface.cpp src/PX4Interface.h)
+add_executable(fira_esi_node
+        src/fira_esi_node.cpp
+        src/PIDController.cpp
+        src/PIDController.h
+        src/fira_esi_node.cpp
+        src/FlowController.cpp
+        src/FlowController.h
+        src/Task.cpp
+        src/Task.h
+        src/Action.cpp
+        src/Action.h
+        src/VisionInterface.cpp
+        src/VisionInterface.h
+        src/PX4Interface.cpp
+        src/PX4Interface.h
+        src/utils.h
+        src/utils.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -148,8 +164,8 @@ add_executable(fira_esi_node src/fira_esi_node.cpp src/PIDController.cpp src/PID
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(fira_esi_node
-  ${catkin_LIBRARIES}
-)
+        ${catkin_LIBRARIES}
+        )
 
 #############
 ## Install ##

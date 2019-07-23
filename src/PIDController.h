@@ -21,6 +21,8 @@ namespace vwpp
 
         int8_t setTarget(double_t _target);
 
+        double_t getTarget();
+
         int8_t update(double_t _cur);
 
         double_t output();

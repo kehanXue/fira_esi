@@ -35,6 +35,12 @@ int8_t vwpp::PIDController::setTarget(double_t _target)
 }
 
 
+double_t vwpp::PIDController::getTarget()
+{
+    return this->target;
+}
+
+
 int8_t vwpp::PIDController::update(double_t _cur)
 {
     err = target - _cur;
@@ -56,4 +62,6 @@ double_t vwpp::PIDController::output()
     }
     return ans;
 }
+
+
 
