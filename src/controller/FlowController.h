@@ -5,7 +5,7 @@
 #ifndef FIRA_ESI_FLOWCONTROLLER_H_
 #define FIRA_ESI_FLOWCONTROLLER_H_
 
-#include "Task.h"
+#include "controller/Task.h"
 
 namespace vwpp
 {

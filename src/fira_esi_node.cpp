@@ -4,7 +4,7 @@
 
 #include <ros/ros.h>
 
-#include "FlowController.h"
+#include "controller/FlowController.h"
 
 
 int main(int argc, char** argv)

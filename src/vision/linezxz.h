@@ -1,10 +1,7 @@
 #ifndef LINEZXZ_H
 #define LINEZXZ_H
 
-#include "alldefine.h"
-#include <vector>
-#include <iostream>
-#include <algorithm>
+#include "vision/alldefine.h"
 #include <opencv2/opencv.hpp>
 #include <cmath>
 
@@ -18,16 +15,15 @@ class Linezxz
     //fabs(k)>0.0001 is wanted!
 public:
 	Linezxz();
-	Linezxz(CvPoint x, CvPoint y);
-	~Linezxz();
+	Linezxz(cv::Point x, cv::Point y);
 
 public:
 	double		k,b;
-	CvPoint		A,B;
+	cv::Point	A,B;
 	int			endx;
-	void 		setLine(CvPoint x, CvPoint y);
+	void 		setLine(cv::Point x, cv::Point y);
 	void 		setLine(double kk, double bb);
-	double	 	getdistopoint(CvPoint p);
+	double	 	getdistopoint(cv::Point p);
 
 private:
 	void 		formatPoint();

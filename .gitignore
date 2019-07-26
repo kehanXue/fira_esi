@@ -91,3 +91,6 @@ gen/*
 *.out
 *.app
 
+# third_party
+third_party
+third_party/*

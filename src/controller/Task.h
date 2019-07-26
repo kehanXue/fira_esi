@@ -10,8 +10,8 @@
 
 #include "vision/mycv.h"
 #include "Action.h"
-#include "VisionInterface.h"
-#include "PX4Interface.h"
+#include "interface/VisionInterface.h"
+#include "interface/PX4Interface.h"
 
 namespace vwpp
 {

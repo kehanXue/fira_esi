@@ -3,7 +3,7 @@
 //
 
 #include "Task.h"
-#include "DynamicRecfgInterface.h"
+#include "interface/DynamicRecfgInterface.h"
 
 
 // TODO

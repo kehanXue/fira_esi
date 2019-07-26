@@ -10,7 +10,7 @@
 #include <cmath>
 #include <tf/transform_listener.h>
 
-#include "DynamicRecfgInterface.h"
+#include "interface/DynamicRecfgInterface.h"
 
 namespace vwpp
 {

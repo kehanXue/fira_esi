@@ -31,7 +31,9 @@ namespace vwpp
 
         double_t getLineRotation();
 
-        bool getQRState();
+        bool getTownQRState();
+
+        bool getGroundQRState();
 
         double_t getQRxOffset();
 
@@ -55,15 +57,15 @@ namespace vwpp
 
         bool getBlueHState();
 
-        bool getBlueHx();
+        double_t getBlueHx();
 
-        bool getBlueHy();
+        double_t getBlueHy();
 
         bool getRedXState();
 
-        bool getRedXx();
+        double_t getRedXx();
 
-        bool getRedXy();
+        double_t getRedXy();
 
 
 
@@ -79,8 +81,8 @@ namespace vwpp
         static boost::mutex mutex_instance;
 
         ros::NodeHandle nh;
-        MYCV down_camera;
-        MYCV forward_camera;
+        MYCV *down_camera;
+        MYCV *forward_camera;
     };
 
 }

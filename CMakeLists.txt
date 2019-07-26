@@ -13,11 +13,17 @@ find_package(catkin REQUIRED COMPONENTS
         roscpp
         std_msgs
         dynamic_reconfigure
-        )
+        cv_bridge
+        image_transport
+        message_generation
+        tf
+)
 
 ## System dependencies are found with CMake's conventions
 find_package(Boost REQUIRED COMPONENTS system)
-
+find_package(OpenCV REQUIRED)
+find_package(ZED 2 REQUIRED)
+find_package(CUDA ${ZED_CUDA_VERSION} EXACT REQUIRED)
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -91,7 +97,7 @@ find_package(Boost REQUIRED COMPONENTS system)
 
 ## Generate dynamic reconfigure parameters in the 'cfg' folder
 generate_dynamic_reconfigure_options(
-  cfg/fira_esi_dynamic_cfg.cfg
+        cfg/fira_esi_dynamic_cfg.cfg
 )
 
 ###################################
@@ -106,7 +112,7 @@ generate_dynamic_reconfigure_options(
 catkin_package(
         #  INCLUDE_DIRS include
         #  LIBRARIES fira_esi
-        CATKIN_DEPENDS geometry_msgs mavros roscpp std_msgs dynamic_reconfigure
+        CATKIN_DEPENDS geometry_msgs mavros roscpp std_msgs dynamic_reconfigure cv_bridge image_transport
         #  DEPENDS system_lib
 )
 
@@ -117,10 +123,21 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
+        ${catkin_INCLUDE_DIRS}
+        ${OpenCV_INCLUDE_DIRS}
+        ${ZED_INCLUDE_DIRS}
+        ${CUDA_INCLUDE_DIRS}
         include
         ../../devel/include
-        ${catkin_INCLUDE_DIRS}
+        src
 )
+
+link_directories(${OpenCV_LIBRARY_DIRS})
+link_directories(${ZED_LIBRARY_DIR})
+link_directories(${CUDA_LIBRARY_DIRS})
+
+SET(ZED_LIBS ${ZED_LIBRARIES} ${CUDA_CUDA_LIBRARY} ${CUDA_CUDART_LIBRARY} ${CUDA_NPP_LIBRARIES_ZED})
+
 
 ## Declare a C++ library
 # add_library(PIDController
@@ -137,23 +154,34 @@ include_directories(
 ## The recommended prefix ensures that target names across packages don't collide
 add_executable(fira_esi_node
         src/fira_esi_node.cpp
-        src/PIDController.cpp
-        src/PIDController.h
-        src/fira_esi_node.cpp
-        src/FlowController.cpp
-        src/FlowController.h
-        src/Task.cpp
-        src/Task.h
-        src/Action.cpp
-        src/Action.h
-        src/VisionInterface.cpp
-        src/VisionInterface.h
-        src/PX4Interface.cpp
-        src/PX4Interface.h
-        src/utils.h
-        src/utils.cpp
-        src/DynamicRecfgInterface.cpp
-        src/DynamicRecfgInterface.h)
+
+        src/interface/DynamicRecfgInterface.h
+        src/interface/DynamicRecfgInterface.cpp
+        src/interface/PX4Interface.h
+        src/interface/PX4Interface.cpp
+        src/interface/VisionInterface.h
+        src/interface/VisionInterface.cpp
+
+        src/controller/Action.h
+        src/controller/Action.cpp
+        src/controller/Task.h
+        src/controller/Task.cpp
+        src/controller/FlowController.h
+        src/controller/FlowController.cpp
+        src/controller/PIDController.h
+        src/controller/PIDController.cpp
+
+        src/vision/alldefine.h
+        src/vision/findlines.h
+        src/vision/findlines.cpp
+        src/vision/linezxz.h
+        src/vision/linezxz.cpp
+        src/vision/mycv.h
+        src/vision/mycv.cpp
+
+        src/utils/utils.h
+        src/utils/utils.cpp
+        )
 
 
 add_dependencies(fira_esi_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
@@ -170,7 +198,12 @@ add_dependencies(fira_esi_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPO
 ## Specify libraries to link a library or executable target against
 target_link_libraries(fira_esi_node
         ${catkin_LIBRARIES}
-        )
+        ${OpenCV_LIBRARIES}
+        yaml-cpp
+        ${ZBAR_LIBS}
+        zbar
+        ${ZED_LIBS}
+)
 
 #############
 ## Install ##

@@ -62,7 +62,7 @@ int8_t vwpp::FlowController::run()
 
 
         // Switch to HoverOnQR
-        if (VisionInterface::getInstance()->getQRState())
+        if (VisionInterface::getInstance()->getGroundQRState())
         {
             cur_task_id = HOVERONQR;
         }
