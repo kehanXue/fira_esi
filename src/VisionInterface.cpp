@@ -31,6 +31,12 @@ vwpp::VisionInterface::~VisionInterface()
 }
 
 
+vwpp::VisionInterface* vwpp::VisionInterface::instance = nullptr;
+
+
+boost::mutex vwpp::VisionInterface::mutex_instance;
+
+
 int8_t vwpp::VisionInterface::update()
 {
     try

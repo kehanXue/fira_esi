@@ -8,7 +8,7 @@
 #include <cstdint>
 #include <vector>
 
-#include "fira_esi/vision/mycv.h"
+#include "vision/mycv.h"
 #include "Action.h"
 #include "VisionInterface.h"
 #include "PX4Interface.h"

@@ -13,7 +13,7 @@ int main(int argc, char** argv)
     ros::init(argc, argv, "fira_esi_node");
     ros::NodeHandle nh("~");
 
-    ros::Rate loop_rate(20);
+    ros::Rate loop_rate(10);
 
 
     vwpp::PX4Interface::getInstance()->switchOffboard();

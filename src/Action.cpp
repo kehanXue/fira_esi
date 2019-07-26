@@ -30,6 +30,11 @@ vwpp::Action &vwpp::Action::operator=(const vwpp::Action &)
 }
 
 
+vwpp::Action* vwpp::Action::instance = nullptr;
+
+boost::mutex vwpp::Action::mutex_instance;
+
+
 vwpp::Action* vwpp::Action::getInstance()
 {
     if (instance == nullptr)
@@ -49,11 +54,18 @@ vwpp::Velocity2D
 vwpp::Action::trackingLine(double_t _cur_line_y, double_t _target_yaw, double_t _cur_yaw,
                            double_t _forward_vel)
 {
-    // TODO Get param from ros param server.
-    static PIDController pid_controller_body_y(1.0, 0.0, 1.0);
-    static PIDController pid_controller_body_yaw(1.0, 0.0, 1.0);
 
-    pid_controller_body_y.setTarget(0);
+    static PIDController pid_controller_body_y(vwpp::DynamicRecfgInterface::getInstance()->getPidVV2PYKp(),
+                                               vwpp::DynamicRecfgInterface::getInstance()->getPidVV2PYKi(),
+                                               vwpp::DynamicRecfgInterface::getInstance()->getPidVV2PYKd());
+
+    // TODO Change name 'body' to 'local'.
+    static PIDController pid_controller_body_yaw(vwpp::DynamicRecfgInterface::getInstance()->getPidVV2PYawKp(),
+                                                 vwpp::DynamicRecfgInterface::getInstance()->getPidVV2PYawKi(),
+                                                 vwpp::DynamicRecfgInterface::getInstance()->getPidVV2PYawKd());
+
+
+    pid_controller_body_y.setTarget(0.);
     pid_controller_body_y.update(_cur_line_y);
 
     pid_controller_body_yaw.setTarget(_target_yaw);
@@ -65,6 +77,7 @@ vwpp::Action::trackingLine(double_t _cur_line_y, double_t _target_yaw, double_t 
     linear_body_vel.vector.x = _forward_vel;
     // TODO The direction of y vel maybe opposite.
     linear_body_vel.vector.y = pid_controller_body_y.output();
+    // TODO Add velocity z.
     linear_body_vel.vector.z = 0;
 
     geometry_msgs::Vector3Stamped linear_local_vel{};
@@ -75,7 +88,7 @@ vwpp::Action::trackingLine(double_t _cur_line_y, double_t _target_yaw, double_t 
     catch (tf::TransformException &tf_ex)
     {
         ROS_ERROR("%s", tf_ex.what());
-        ros::Duration(1.0).sleep();
+        ros::Duration(vwpp::DynamicRecfgInterface::getInstance()->getTfBreakDuration()).sleep();
     }
 
 
@@ -92,9 +105,19 @@ vwpp::Linear3D
 vwpp::Action::adjustAltitude(double_t _target_altitude, double_t _cur_altitude, double_t _cur_x, double_t _cur_y)
 {
     // TODO Could use the tf_transform, but because the z axis is always coincident, so...
-    static PIDController pid_controller_local_x(1.0, 0.0, 1.0);
-    static PIDController pid_controller_local_y(1.0, 0.0, 1.0);
-    static PIDController pid_controller_local_z(1.0, 0.0, 1.0);
+    // TODO Use PX4 data to make the UAV stable. Maybe use vision.
+
+    static PIDController pid_controller_local_x(vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PXKp(),
+                                                vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PXKi(),
+                                                vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PXKd());
+
+    static PIDController pid_controller_local_y(vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PYKp(),
+                                                vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PYKi(),
+                                                vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PYKd());
+
+    static PIDController pid_controller_local_z(vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PZKp(),
+                                                vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PZKi(),
+                                                vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PZKd());
 
     pid_controller_local_x.setTarget(0.);
     pid_controller_local_y.setTarget(0.);
@@ -115,14 +138,24 @@ vwpp::Action::adjustAltitude(double_t _target_altitude, double_t _cur_altitude, 
 
 vwpp::Velocity2D vwpp::Action::hovering(double_t _cur_x, double_t _cur_y)
 {
-    // TODO Get param from ros param server.
-    static PIDController pid_controller_body_x(1.0, 0.0, 1.0);
-    static PIDController pid_controller_body_y(1.0, 0.0, 1.0);
-    static PIDController pid_controller_body_yaw(1.0, 0.0, 1.0);
+    static PIDController pid_controller_body_x(vwpp::DynamicRecfgInterface::getInstance()->getPidVV2PXKp(),
+                                               vwpp::DynamicRecfgInterface::getInstance()->getPidVV2PXKi(),
+                                               vwpp::DynamicRecfgInterface::getInstance()->getPidVV2PXKd());
 
-    pid_controller_body_x.setTarget(0);
+    static PIDController pid_controller_body_y(vwpp::DynamicRecfgInterface::getInstance()->getPidVV2PYKp(),
+                                               vwpp::DynamicRecfgInterface::getInstance()->getPidVV2PYKi(),
+                                               vwpp::DynamicRecfgInterface::getInstance()->getPidVV2PYKd());
+
+    static PIDController pid_controller_body_yaw(vwpp::DynamicRecfgInterface::getInstance()->getPidVV2PYawKp(),
+                                                 vwpp::DynamicRecfgInterface::getInstance()->getPidVV2PYawKi(),
+                                                 vwpp::DynamicRecfgInterface::getInstance()->getPidVV2PYawKd());
+
+
+
+    // Different task maybe different.
+    pid_controller_body_x.setTarget(0.);
     pid_controller_body_x.update(_cur_x);
-    pid_controller_body_y.setTarget(0);
+    pid_controller_body_y.setTarget(0.);
     pid_controller_body_y.update(_cur_y);
 
     // pid_controller_body_yaw.setTarget(_target_yaw);
@@ -145,14 +178,15 @@ vwpp::Velocity2D vwpp::Action::hovering(double_t _cur_x, double_t _cur_y)
     catch (tf::TransformException &tf_ex)
     {
         ROS_ERROR("%s", tf_ex.what());
-        ros::Duration(1.0).sleep();
+        ros::Duration(vwpp::DynamicRecfgInterface::getInstance()->getTfBreakDuration()).sleep();
     }
 
     Velocity2D velocity_2d{};
     velocity_2d.x = linear_local_vel.vector.x;
     velocity_2d.y = linear_local_vel.vector.y;
     // velocity_2d.yaw = pid_controller_body_yaw.output();
-    velocity_2d.yaw = 0;
+    // TODO
+    velocity_2d.yaw = 0.;
 
     return velocity_2d;
 }
@@ -162,7 +196,9 @@ vwpp::Velocity2D vwpp::Action::rotating(vwpp::Direction _direction, double_t _cu
 {
     double_t yaw_target = 0.;
     // TODO Need to be turning.
-    static PIDController pid_controller_yaw(1.0, 0, 1.0);
+    static PIDController pid_controller_yaw(vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PYawKp(),
+                                            vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PYawKi(),
+                                            vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PYawKd());
 
     switch (_direction)
     {
@@ -184,8 +220,8 @@ vwpp::Velocity2D vwpp::Action::rotating(vwpp::Direction _direction, double_t _cu
     pid_controller_yaw.update(_cur_yaw);
 
     Velocity2D linear_local_vel{};
-    linear_local_vel.x = 0;
-    linear_local_vel.y = 0;
+    linear_local_vel.x = 0.;
+    linear_local_vel.y = 0.;
     linear_local_vel.yaw = pid_controller_yaw.output();
 
     return linear_local_vel;
@@ -194,14 +230,17 @@ vwpp::Velocity2D vwpp::Action::rotating(vwpp::Direction _direction, double_t _cu
 
 vwpp::Velocity2D vwpp::Action::rotating(double_t _target_yaw, double_t _cur_yaw)
 {
-    static PIDController pid_controller_yaw(1.0, 0, 1.0);
+
+    static PIDController pid_controller_yaw(vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PYawKp(),
+                                            vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PYawKi(),
+                                            vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PYawKd());
 
     pid_controller_yaw.setTarget(_target_yaw);
     pid_controller_yaw.update(_cur_yaw);
 
     Velocity2D linear_local_vel{};
-    linear_local_vel.x = 0;
-    linear_local_vel.y = 0;
+    linear_local_vel.x = 0.;
+    linear_local_vel.y = 0.;
     linear_local_vel.yaw = pid_controller_yaw.output();
 
     return linear_local_vel;

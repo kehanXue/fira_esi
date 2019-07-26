@@ -8,7 +8,7 @@
 #include <boost/thread.hpp>
 #include <ros/ros.h>
 
-#include "fira_esi/vision/mycv.h"
+#include "vision/mycv.h"
 
 namespace vwpp
 {

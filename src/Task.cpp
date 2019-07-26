@@ -3,6 +3,7 @@
 //
 
 #include "Task.h"
+#include "DynamicRecfgInterface.h"
 
 
 // TODO
@@ -64,12 +65,11 @@ int8_t vwpp::TaskNavigation::run()
     if (cur_action_id == TRACKINGLINE)
     {
 
-        // TODO
-        Velocity2D velocity_2d = Action::getInstance()->trackingLine(VisionInterface::getInstance()->getLineOffset(),
-                                                                     PX4Interface::getInstance()->getCurYaw() +
-                                                                     VisionInterface::getInstance()->getLineRotation(),
-                                                                     PX4Interface::getInstance()->getCurYaw());
-
+        Velocity2D velocity_2d =
+                Action::getInstance()->trackingLine(VisionInterface::getInstance()->getLineOffset(),
+                                                    PX4Interface::getInstance()->getCurYaw() +
+                                                    VisionInterface::getInstance()->getLineRotation(),
+                                                    PX4Interface::getInstance()->getCurYaw());
 
         geometry_msgs::Twist cmd_vel;
         cmd_vel.linear.x = velocity_2d.x;
@@ -134,21 +134,24 @@ int8_t vwpp::TaskAvoidance::run(GateType _gate_type)
         {
             if (_gate_type == RED)
             {
-                // TODO Tuning param
-                this->altitude_target = 1.5;
+                this->altitude_target =
+                        vwpp::DynamicRecfgInterface::getInstance()->getAltitudeWhenRedGate();
             }
             else if (_gate_type == YELLOW)
             {
-                this->altitude_target = 0.5;
+                this->altitude_target =
+                        vwpp::DynamicRecfgInterface::getInstance()->getAltitudeWhenYellowGate();
             }
 
-            linear_3d = Action::getInstance()->adjustAltitude(this->altitude_target,
-                                                              PX4Interface::getInstance()->getCurZ(),
-                                                              PX4Interface::getInstance()->getCurX(),
-                                                              PX4Interface::getInstance()->getCurY());
+            // TODO X, Y has Bug!
+            linear_3d =
+                    Action::getInstance()->adjustAltitude(this->altitude_target,
+                                                          PX4Interface::getInstance()->getCurZ(),
+                                                          PX4Interface::getInstance()->getCurX(),
+                                                          PX4Interface::getInstance()->getCurY());
 
-            // TODO param
-            if (fabs(PX4Interface::getInstance()->getCurZ() - altitude_target) <= 0.10)
+            if (fabs(PX4Interface::getInstance()->getCurZ() - altitude_target) <=
+                vwpp::DynamicRecfgInterface::getInstance()->getAltitudeToleranceError())
             {
                 cur_action_id = TRACKINGLINE;
             }
@@ -156,7 +159,8 @@ int8_t vwpp::TaskAvoidance::run(GateType _gate_type)
         }
         else if (inter_adjust_altitude_time == 2)
         {
-            this->altitude_target = 1.0;
+            this->altitude_target =
+                    vwpp::DynamicRecfgInterface::getInstance()->getNormalFlightAltitude();
 
             linear_3d = Action::getInstance()->adjustAltitude(this->altitude_target,
                                                               PX4Interface::getInstance()->getCurZ(),
@@ -164,8 +168,8 @@ int8_t vwpp::TaskAvoidance::run(GateType _gate_type)
                                                               PX4Interface::getInstance()->getCurY());
 
 
-            // TODO param
-            if (fabs(PX4Interface::getInstance()->getCurZ() - altitude_target) <= 0.10)
+            if (fabs(PX4Interface::getInstance()->getCurZ() - altitude_target) <=
+                vwpp::DynamicRecfgInterface::getInstance()->getAltitudeToleranceError())
             {
                 p_task_base->task_state = TASK_FINISH;
                 inter_adjust_altitude_time = 1;
@@ -175,8 +179,10 @@ int8_t vwpp::TaskAvoidance::run(GateType _gate_type)
         }
 
         geometry_msgs::Twist cmd_vel;
-        cmd_vel.linear.x = linear_3d.x;
-        cmd_vel.linear.y = linear_3d.y;
+        // cmd_vel.linear.x = linear_3d.x;
+        // cmd_vel.linear.y = linear_3d.y;
+        cmd_vel.linear.x = 0.;
+        cmd_vel.linear.y = 0.;
         cmd_vel.linear.z = linear_3d.z;
         cmd_vel.angular.z = 0.;
 
@@ -186,8 +192,10 @@ int8_t vwpp::TaskAvoidance::run(GateType _gate_type)
     else if (cur_action_id == TRACKINGLINE)
     {
         forward_counter++;
-        // TODO param
-        if (forward_counter >= 10)
+
+        // 10: Controller Hz
+        if (forward_counter >=
+            10 * vwpp::DynamicRecfgInterface::getInstance()->getAvoidanceForwardTime())
         {
             cur_action_id = ADJUSTALTITUDE;
             inter_adjust_altitude_time += 1;
@@ -252,16 +260,28 @@ char vwpp::TaskHoverOnQR::run(TaskID _cur_task_id)
 
     if (cur_action_id == HOVERING)
     {
-        Velocity2D velocity_2d = Action::getInstance()->hovering(VisionInterface::getInstance()->getQRxOffset(),
-                                                                 VisionInterface::getInstance()->getQRyOffset());
-
-        if (inter_hovering_time == 2)
+        if (fabs(VisionInterface::getInstance()->getQRxOffset()) <
+            vwpp::DynamicRecfgInterface::getInstance()->getQrOffsetXTolerance() &&
+            fabs(VisionInterface::getInstance()->getQRyOffset()) <
+            vwpp::DynamicRecfgInterface::getInstance()->getQrOffsetYTolerance())
         {
-            p_task_base->task_state = TASK_FINISH;
-            inter_hovering_time = 1;
+            if (inter_hovering_time == 1)
+            {
+                cur_action_id = ROTATION;
+            }
+            if (inter_hovering_time == 2)
+            {
+                p_task_base->task_state = TASK_FINISH;
+                inter_hovering_time = 1;
 
-            return qr_inform.at(qr_inform.size() - 1);
+                return qr_inform.at(qr_inform.size() - 1);
+            }
         }
+
+        Velocity2D velocity_2d =
+                Action::getInstance()->hovering(VisionInterface::getInstance()->getQRxOffset(),
+                                                VisionInterface::getInstance()->getQRyOffset());
+
 
         geometry_msgs::Twist cmd_vel;
         cmd_vel.linear.x = velocity_2d.x;
@@ -270,6 +290,7 @@ char vwpp::TaskHoverOnQR::run(TaskID _cur_task_id)
         cmd_vel.angular.z = velocity_2d.yaw;
 
         PX4Interface::getInstance()->publishLocalVel(cmd_vel);
+
     }
     else if (cur_action_id == ROTATION)
     {
@@ -300,28 +321,33 @@ char vwpp::TaskHoverOnQR::run(TaskID _cur_task_id)
                 yaw_target = 0.;
                 break;
             case LOCAL_LEFT:
-                yaw_target = 90.;
+                yaw_target = M_PI / 2.;
                 break;
             case LOCAL_BACK:
-                yaw_target = 180.;
+                yaw_target = M_PI;
                 break;
             case LOCAL_RIGHT:
-                yaw_target = 270.;
+                yaw_target = M_PI * 1.5;
                 break;
         }
-        // TODO
-        if (fabs(yaw_target - PX4Interface::getInstance()->getCurYaw()) <= 3.)
+
+        if (fabs(yaw_target - PX4Interface::getInstance()->getCurYaw()) <=
+            vwpp::DynamicRecfgInterface::getInstance()->getRotateYawTolerance() * M_PI / 180.)
         {
             cur_action_id = HOVERING;
             inter_hovering_time += 1;
         }
+
         else
         {
+            // TODO
             Velocity2D velocity_2d = Action::getInstance()->rotating(target_direction,
                                                                      PX4Interface::getInstance()->getCurYaw());
+
             geometry_msgs::Twist cmd_vel;
             cmd_vel.linear.x = velocity_2d.x;
             cmd_vel.linear.y = velocity_2d.y;
+            // TODO Control z
             cmd_vel.linear.z = 0.;
             cmd_vel.angular.z = velocity_2d.yaw;
 
@@ -330,27 +356,8 @@ char vwpp::TaskHoverOnQR::run(TaskID _cur_task_id)
 
     }
 
-
     p_task_base->task_state = TASK_PROCESSING;
     return qr_inform.at(qr_inform.size() - 1);
-
-
-    // switch (qr_inform.at(qr_inform.size()-1))
-    // {
-    //     case '1':
-    //         current_qr_task_id = DELIVERING;
-    //         break;
-    //     case '2':
-    //         current_qr_task_id = SCANTOWER;
-    //         break;
-    //     case '3':
-    //         current_qr_task_id = SCANBUILDING;
-    //         break;
-    //     case '4':
-    //         current_qr_task_id = LANDING;
-    //         break;
-    // }
-
 }
 
 
@@ -414,8 +421,10 @@ int8_t vwpp::TaskDelivering::run()
     else if (cur_action_id == HOVERING)
     {
         // TODO param
-        if (fabs(VisionInterface::getInstance()->getRedXx() - 0) <= 10 &&
-            fabs(VisionInterface::getInstance()->getRedXy() - 0) <= 10)
+        if (fabs(VisionInterface::getInstance()->getRedXx() - 0.) <=
+            vwpp::DynamicRecfgInterface::getInstance()->getRedXOffsetXTolerance() &&
+            fabs(VisionInterface::getInstance()->getRedXy() - 0.) <=
+            vwpp::DynamicRecfgInterface::getInstance()->getRedXOffsetYTolerance())
         {
             cur_action_id = OPENCLAW;
         }
@@ -433,23 +442,26 @@ int8_t vwpp::TaskDelivering::run()
     }
     else if (cur_action_id == OPENCLAW)
     {
-        // TODO
         Action::getInstance()->openClaw();
+
         cur_action_id = ROTATION;
-        // TODO
+
+        // TODO Yaw Control.
         back_toward_yaw = (PX4Interface::getInstance()->getCurYaw() + 180) / 360.0;
     }
     else if (cur_action_id == ROTATION)
     {
-        // TODO
-        if (fabs(PX4Interface::getInstance()->getCurYaw() - back_toward_yaw) <= 5)
+
+        if (fabs(PX4Interface::getInstance()->getCurYaw() - back_toward_yaw) <=
+            vwpp::DynamicRecfgInterface::getInstance()->getRotateYawTolerance() * M_PI / 180.)
         {
             p_task_base->task_state = TASK_FINISH;
             return 1;
         }
 
-        Velocity2D velocity_2d = Action::getInstance()->rotating(back_toward_yaw,
-                                                                 PX4Interface::getInstance()->getCurYaw());
+        Velocity2D velocity_2d =
+                Action::getInstance()->rotating(back_toward_yaw,
+                                                PX4Interface::getInstance()->getCurYaw());
 
         geometry_msgs::Twist cmd_vel;
         cmd_vel.linear.x = velocity_2d.x;
@@ -505,14 +517,16 @@ int8_t vwpp::TaskLanding::run()
             cur_action_id = HOVERING;
         }
 
-        Velocity2D velocity_2d = Action::getInstance()->trackingLine(VisionInterface::getInstance()->getLineOffset(),
-                                                                     PX4Interface::getInstance()->getCurYaw() +
-                                                                     VisionInterface::getInstance()->getLineRotation(),
-                                                                     PX4Interface::getInstance()->getCurYaw());
+        Velocity2D velocity_2d =
+                Action::getInstance()->trackingLine(VisionInterface::getInstance()->getLineOffset(),
+                                                    PX4Interface::getInstance()->getCurYaw() +
+                                                    VisionInterface::getInstance()->getLineRotation(),
+                                                    PX4Interface::getInstance()->getCurYaw());
 
         geometry_msgs::Twist cmd_vel;
         cmd_vel.linear.x = velocity_2d.x;
         cmd_vel.linear.y = velocity_2d.y;
+        // TODO control z
         cmd_vel.linear.z = 0.;
         cmd_vel.angular.z = velocity_2d.yaw;
 
@@ -520,19 +534,22 @@ int8_t vwpp::TaskLanding::run()
     }
     else if (cur_action_id == HOVERING)
     {
-        // TODO param
-        if (fabs(VisionInterface::getInstance()->getBlueHx() - 0) <= 10 &&
-            fabs(VisionInterface::getInstance()->getBlueHy() - 0) <= 10)
+        if (fabs(VisionInterface::getInstance()->getBlueHx() - 0.) <=
+            vwpp::DynamicRecfgInterface::getInstance()->getBlueHOffsetXTolerance() &&
+            fabs(VisionInterface::getInstance()->getBlueHy() - 0.) <=
+            vwpp::DynamicRecfgInterface::getInstance()->getBlueHOffsetYTolerance())
         {
             cur_action_id = ADJUSTALTITUDE;
         }
 
-        Velocity2D velocity_2d = Action::getInstance()->hovering(VisionInterface::getInstance()->getBlueHx(),
-                                                                 VisionInterface::getInstance()->getBlueHy());
+        Velocity2D velocity_2d =
+                Action::getInstance()->hovering(VisionInterface::getInstance()->getBlueHx(),
+                                                VisionInterface::getInstance()->getBlueHy());
 
         geometry_msgs::Twist cmd_vel;
         cmd_vel.linear.x = velocity_2d.x;
         cmd_vel.linear.y = velocity_2d.y;
+        // TODO control z
         cmd_vel.linear.z = 0.;
         cmd_vel.angular.z = velocity_2d.yaw;
 
@@ -540,11 +557,12 @@ int8_t vwpp::TaskLanding::run()
     }
     else if (cur_action_id == ADJUSTALTITUDE)
     {
-        // TODO param
-        double_t altitude_target = 0.;
+        double_t altitude_target =
+                vwpp::DynamicRecfgInterface::getInstance()->getLandingAltitude();
 
-        // TODO param
-        if (fabs(PX4Interface::getInstance()->getCurZ() - altitude_target) <= 0.05)
+
+        if (fabs(PX4Interface::getInstance()->getCurZ() - altitude_target) <=
+            vwpp::DynamicRecfgInterface::getInstance()->getAltitudeToleranceError())
         {
             p_task_base->task_state = TASK_FINISH;
             return 1;
@@ -558,8 +576,11 @@ int8_t vwpp::TaskLanding::run()
 
 
         geometry_msgs::Twist cmd_vel;
-        cmd_vel.linear.x = linear_3d.x;
-        cmd_vel.linear.y = linear_3d.y;
+        // TODO
+        // cmd_vel.linear.x = linear_3d.x;
+        // cmd_vel.linear.y = linear_3d.y;
+        cmd_vel.linear.x = 0.;
+        cmd_vel.linear.y = 0.;
         cmd_vel.linear.z = linear_3d.z;
 
         PX4Interface::getInstance()->publishLocalVel(cmd_vel);
@@ -584,7 +605,6 @@ vwpp::TaskTakeoff::TaskTakeoff()
 vwpp::TaskTakeoff::~TaskTakeoff()
 {
     delete p_task_base;
-
 }
 
 
@@ -605,20 +625,25 @@ int8_t vwpp::TaskTakeoff::run()
     VisionInterface::getInstance()->update();
     PX4Interface::getInstance()->update();
 
-    // TODO param
     if (cur_action_id == ADJUSTALTITUDE)
     {
-        double_t altitude_target = 0.;
-        if (fabs(PX4Interface::getInstance()->getCurZ() - altitude_target) <= 0.05)
+        double_t altitude_target =
+                DynamicRecfgInterface::getInstance()->getNormalFlightAltitude();
+
+
+        if (fabs(PX4Interface::getInstance()->getCurZ() - altitude_target) <=
+            DynamicRecfgInterface::getInstance()->getAltitudeToleranceError())
         {
             p_task_base->task_state = TASK_FINISH;
             return 1;
         }
 
-        Linear3D linear_3d = Action::getInstance()->adjustAltitude(altitude_target,
-                                                                   PX4Interface::getInstance()->getCurZ(),
-                                                                   PX4Interface::getInstance()->getCurX(),
-                                                                   PX4Interface::getInstance()->getCurY());
+
+        Linear3D linear_3d =
+                Action::getInstance()->adjustAltitude(altitude_target,
+                                                      PX4Interface::getInstance()->getCurZ(),
+                                                      PX4Interface::getInstance()->getCurX(),
+                                                      PX4Interface::getInstance()->getCurY());
 
         geometry_msgs::Twist cmd_vel;
         cmd_vel.linear.x = linear_3d.x;

@@ -10,6 +10,8 @@
 #include <cmath>
 #include <tf/transform_listener.h>
 
+#include "DynamicRecfgInterface.h"
+
 namespace vwpp
 {
 
@@ -54,11 +56,13 @@ namespace vwpp
         virtual ~Action();
 
         Velocity2D trackingLine(double_t _cur_line_y, double_t _target_yaw, double_t _cur_yaw,
-                                double_t _forward_vel = 0.10);
+                                double_t _forward_vel = DynamicRecfgInterface::getInstance()->getForwardVel());
 
         Linear3D adjustAltitude(double_t _target_altitude, double_t _cur_altitude, double_t _cur_x, double_t _cur_y);
 
         // Velocity2D hovering(double_t _cur_x, double_t _cur_y, double_t _target_yaw, double_t _cur_yaw);
+
+        /* The _cur_x and _cur_y should be relative! Because the target is 0.! */
         Velocity2D hovering(double_t _cur_x, double_t _cur_y);
 
         Velocity2D rotating(Direction _direction, double_t _cur_yaw);

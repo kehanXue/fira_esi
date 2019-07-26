@@ -12,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
         mavros
         roscpp
         std_msgs
+        dynamic_reconfigure
         )
 
 ## System dependencies are found with CMake's conventions
@@ -89,10 +90,9 @@ find_package(Boost REQUIRED COMPONENTS system)
 ##     and list every .cfg file to be processed
 
 ## Generate dynamic reconfigure parameters in the 'cfg' folder
-# generate_dynamic_reconfigure_options(
-#   cfg/DynReconf1.cfg
-#   cfg/DynReconf2.cfg
-# )
+generate_dynamic_reconfigure_options(
+  cfg/fira_esi_dynamic_cfg.cfg
+)
 
 ###################################
 ## catkin specific configuration ##
@@ -106,7 +106,7 @@ find_package(Boost REQUIRED COMPONENTS system)
 catkin_package(
         #  INCLUDE_DIRS include
         #  LIBRARIES fira_esi
-        CATKIN_DEPENDS geometry_msgs mavros roscpp std_msgs
+        CATKIN_DEPENDS geometry_msgs mavros roscpp std_msgs dynamic_reconfigure
         #  DEPENDS system_lib
 )
 
@@ -118,18 +118,19 @@ catkin_package(
 ## Your package locations should be listed before other locations
 include_directories(
         include
+        ../../devel/include
         ${catkin_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
-# add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/fira_esi.cpp
+# add_library(PIDController
+#         src/PIDController.cpp
+#         src/PIDController.h
 # )
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
-# add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
@@ -150,8 +151,12 @@ add_executable(fira_esi_node
         src/PX4Interface.cpp
         src/PX4Interface.h
         src/utils.h
-        src/utils.cpp)
+        src/utils.cpp
+        src/DynamicRecfgInterface.cpp
+        src/DynamicRecfgInterface.h)
 
+
+add_dependencies(fira_esi_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use
