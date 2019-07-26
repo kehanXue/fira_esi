@@ -68,6 +68,8 @@ private:
     bool flag_findredX;
 
 private:
+    std::string param_topic;
+    std::string param_path;
     int camera_type;
     cv::VideoCapture vc;
     sl::Camera zed;

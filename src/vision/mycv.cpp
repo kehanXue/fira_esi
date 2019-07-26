@@ -1,10 +1,17 @@
 #include "vision/mycv.h"
 
-static std::string param_path = "../Desktop/FIRA/src/my_cv/param/vision.yaml";
-static std::string param_topic = "vision/";
 
 MYCV::MYCV(int flag, ros::NodeHandle *pnh)
 {
+    param_topic = ros::this_node::getName()+"/";
+#ifdef TEST
+    printf("%s\n", param_topic.c_str());
+#endif
+    pnh->getParam(param_topic+"yamlpath", param_path);
+#ifdef TEST
+    printf("%s\n", param_path.c_str());
+#endif
+
     camera_type = flag;
     nh = pnh;
 

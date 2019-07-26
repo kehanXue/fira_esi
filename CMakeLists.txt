@@ -181,7 +181,7 @@ add_executable(fira_esi_node
 
         src/utils/utils.h
         src/utils/utils.cpp
-        )
+)
 
 
 add_dependencies(fira_esi_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
