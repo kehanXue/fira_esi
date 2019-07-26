@@ -36,6 +36,8 @@ vwpp::FlowController::~FlowController()
 
 int8_t vwpp::FlowController::run()
 {
+    vwpp::DynamicRecfgInterface::getInstance()->update();
+
     if (cur_task_id == TAKEOFF)
     {
         p_task_takeoff->run();

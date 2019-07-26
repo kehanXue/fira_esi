@@ -69,7 +69,8 @@ vwpp::Action::trackingLine(double_t _cur_line_y, double_t _target_yaw, double_t 
     pid_controller_body_y.update(_cur_line_y);
 
     pid_controller_body_yaw.setTarget(_target_yaw);
-    pid_controller_body_yaw.update(_cur_yaw);
+    pid_controller_body_yaw.update(convertCurYaw2FabsYawThetaBetweenPI(pid_controller_body_yaw.getTarget(),
+                                                                       _cur_yaw));
 
     geometry_msgs::Vector3Stamped linear_body_vel{};
     linear_body_vel.header.stamp = ros::Time::now();
@@ -195,7 +196,6 @@ vwpp::Velocity2D vwpp::Action::hovering(double_t _cur_x, double_t _cur_y)
 vwpp::Velocity2D vwpp::Action::rotating(vwpp::Direction _direction, double_t _cur_yaw)
 {
     double_t yaw_target = 0.;
-    // TODO Need to be turning.
     static PIDController pid_controller_yaw(vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PYawKp(),
                                             vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PYawKi(),
                                             vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PYawKd());
@@ -206,18 +206,19 @@ vwpp::Velocity2D vwpp::Action::rotating(vwpp::Direction _direction, double_t _cu
             yaw_target = 0.;
             break;
         case LOCAL_LEFT:
-            yaw_target = 90.;
+            yaw_target = M_PI / 2;
             break;
         case LOCAL_BACK:
-            yaw_target = 180.;
+            yaw_target = M_PI;
             break;
         case LOCAL_RIGHT:
-            yaw_target = 270.;
+            yaw_target = M_PI * 1.5;
             break;
     }
 
     pid_controller_yaw.setTarget(yaw_target);
-    pid_controller_yaw.update(_cur_yaw);
+    pid_controller_yaw.update(convertCurYaw2FabsYawThetaBetweenPI(pid_controller_yaw.getTarget(),
+                                                                  _cur_yaw));
 
     Velocity2D linear_local_vel{};
     linear_local_vel.x = 0.;
@@ -236,7 +237,8 @@ vwpp::Velocity2D vwpp::Action::rotating(double_t _target_yaw, double_t _cur_yaw)
                                             vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PYawKd());
 
     pid_controller_yaw.setTarget(_target_yaw);
-    pid_controller_yaw.update(_cur_yaw);
+    pid_controller_yaw.update(convertCurYaw2FabsYawThetaBetweenPI(pid_controller_yaw.getTarget(),
+                                                                  _cur_yaw));
 
     Velocity2D linear_local_vel{};
     linear_local_vel.x = 0.;
@@ -251,48 +253,4 @@ int8_t vwpp::Action::openClaw()
 {
     return 0;
 }
-
-
-
-
-// int8_t vwpp::Action::run(vwpp::ActionID _action_id)
-// {
-//
-//    Velocity2D velocity_2d{};
-//    Linear3D velocity_z{};
-//
-//    switch (_action_id)
-//    {
-//        case TRACKINGLINE:
-//            velocity_2d = trackingLine(getLineCurX(), getTargetYaw(), getCurYaw(),
-//                                       1.0);     // TODO Modify vision api, and get param from yaml.
-//            break;
-//        case ADJUSTALTITUDE:
-//            velocity_z = adjustAltitude(getTargetAltitude(), getCurAltitude());
-//            break;
-//        case HOVERING:
-//            velocity_2d = hovering(getCurQRx(), getCurQRy(), getTargetYaw(), getCurYaw());
-//            break;
-//        case ROTATION:
-//            velocity_2d = rotating(getDirection(), getCurYaw());
-//            break;
-//        case OPENCLAW:
-//            openClaw();
-//            break;
-//        case CIRCULARMOTION:
-//            break;
-//    }
-//
-//    return 0;
-// }
-
-
-
-
-
-
-
-
-
-
 

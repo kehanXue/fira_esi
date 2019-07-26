@@ -11,6 +11,7 @@
 #include <tf/transform_listener.h>
 
 #include "interface/DynamicRecfgInterface.h"
+#include "utils/utils.h"
 
 namespace vwpp
 {
