@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<launch>
+    <node pkg="fira_esi"
+          name="fira_esi_node"
+          type="fira_esi_node"
+          output="screen"
+          required="true">
+        <rosparam command="load" file="$(find fira_esi)/param/vision.yaml"/>
+    </node>
+
+    <node pkg="dynamic_reconfigure"
+          name="dynparam"
+          type="dynparam"
+          args="load fira_esi_node $(find fira_esi)/param/controller.yaml">
+
+    </node>
+
+    <node pkg="rqt_reconfigure"
+          name="rqt_reconfigure"
+          type="rqt_reconfigure">
+    </node>
+
+</launch>

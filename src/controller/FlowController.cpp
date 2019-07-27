@@ -43,76 +43,77 @@ int8_t vwpp::FlowController::run()
         p_task_takeoff->run();
         if (p_task_takeoff->getTaskState() == TASK_FINISH)
         {
-            cur_task_id = NAVIGATION;
+            // cur_task_id = NAVIGATION;
+            // cur_task_id = LANDING;
         }
     }
-    else if (cur_task_id == NAVIGATION)
-    {
-        p_task_navigation->run();
+    // else if (cur_task_id == NAVIGATION)
+    // {
+    //     p_task_navigation->run();
 
-        // Switch to Avoidance
-        if (VisionInterface::getInstance()->getYellowGateState())
-        {
-            gate_type = YELLOW;
-            cur_task_id = AVOIDANCE;
-        }
-        else if (VisionInterface::getInstance()->getRedGateState())
-        {
-            gate_type = RED;
-            cur_task_id = AVOIDANCE;
-        }
-
-
-        // Switch to HoverOnQR
-        if (VisionInterface::getInstance()->getGroundQRState())
-        {
-            cur_task_id = HOVERONQR;
-        }
-
-    }
-    else if (cur_task_id == AVOIDANCE)
-    {
-        p_task_avoidance->run(gate_type);
-
-        // Switch to Navigation
-        if (p_task_avoidance->getTaskState() == TASK_FINISH)
-        {
-            cur_task_id = NAVIGATION;
-        }
-    }
-    else if (cur_task_id == HOVERONQR)
-    {
-        task_type_id = p_task_hover_on_qr->run(cur_task_id);
-
-        if (p_task_hover_on_qr->getTaskState() == TASK_FINISH)
-        {
-
-            switch (task_type_id)
-            {
-                case '0':
-                    // Switch to Navigation
-                    cur_task_id = NAVIGATION;
-                    break;
-                case '1':
-                    // Switch to Delivering
-                    cur_task_id = DELIVERING;
-                case '4':
-                    // Switch to Landing
-                    cur_task_id = LANDING;
-            }
+        // // Switch to Avoidance
+        // if (VisionInterface::getInstance()->getYellowGateState())
+        // {
+        //     gate_type = YELLOW;
+        //     cur_task_id = AVOIDANCE;
+        // }
+        // else if (VisionInterface::getInstance()->getRedGateState())
+        // {
+        //     gate_type = RED;
+        //     cur_task_id = AVOIDANCE;
+        // }
 
 
-        }
-    }
-    else if (cur_task_id == DELIVERING)
-    {
-        p_task_delivering->run();
+        // // Switch to HoverOnQR
+        // if (VisionInterface::getInstance()->getGroundQRState())
+        // {
+        //     cur_task_id = HOVERONQR;
+        // }
 
-        if (p_task_delivering->getTaskState() == TASK_FINISH)
-        {
-            cur_task_id = NAVIGATION;
-        }
-    }
+    // }
+    // else if (cur_task_id == AVOIDANCE)
+    // {
+    //     p_task_avoidance->run(gate_type);
+
+    //     // Switch to Navigation
+    //     if (p_task_avoidance->getTaskState() == TASK_FINISH)
+    //     {
+    //         cur_task_id = NAVIGATION;
+    //     }
+    // }
+    // else if (cur_task_id == HOVERONQR)
+    // {
+    //     task_type_id = p_task_hover_on_qr->run(cur_task_id);
+
+        // if (p_task_hover_on_qr->getTaskState() == TASK_FINISH)
+        // {
+
+            // switch (task_type_id)
+            // {
+            //     case '0':
+            //         // Switch to Navigation
+            //         cur_task_id = NAVIGATION;
+            //         break;
+            //     case '1':
+            //         // Switch to Delivering
+            //         cur_task_id = DELIVERING;
+            //     case '4':
+            //         // Switch to Landing
+            //         cur_task_id = LANDING;
+            // }
+
+
+    //     }
+    // }
+    // else if (cur_task_id == DELIVERING)
+    // {
+    //     p_task_delivering->run();
+
+    //     if (p_task_delivering->getTaskState() == TASK_FINISH)
+    //     {
+    //         cur_task_id = NAVIGATION;
+    //     }
+    // }
     else if (cur_task_id == LANDING)
     {
         p_task_landing->run();

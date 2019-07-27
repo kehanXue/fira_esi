@@ -481,7 +481,8 @@ vwpp::TaskLanding::TaskLanding()
 {
     p_task_base = new TaskBase(LANDING);
 
-    cur_action_id = TRACKINGLINE;
+    // cur_action_id = TRACKINGLINE;
+    cur_action_id = ADJUSTALTITUDE;
 
     p_task_base->task_state = TASK_START;
 }
@@ -507,7 +508,7 @@ vwpp::TaskState vwpp::TaskLanding::getTaskState()
 
 int8_t vwpp::TaskLanding::run()
 {
-    VisionInterface::getInstance()->update();
+    // VisionInterface::getInstance()->update();
     PX4Interface::getInstance()->update();
 
     if (cur_action_id == TRACKINGLINE)
@@ -622,7 +623,7 @@ vwpp::TaskState vwpp::TaskTakeoff::getTaskState()
 
 int8_t vwpp::TaskTakeoff::run()
 {
-    VisionInterface::getInstance()->update();
+    // VisionInterface::getInstance()->update();
     PX4Interface::getInstance()->update();
 
     if (cur_action_id == ADJUSTALTITUDE)

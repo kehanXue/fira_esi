@@ -70,6 +70,7 @@ namespace vwpp
 
 
     private:
+
         VisionInterface();
 
         VisionInterface(const VisionInterface &);
