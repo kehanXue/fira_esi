@@ -583,6 +583,7 @@ int8_t vwpp::TaskLanding::run()
         cmd_vel.linear.x = 0.;
         cmd_vel.linear.y = 0.;
         cmd_vel.linear.z = linear_3d.z;
+        cmd_vel.angular.z = 0.;
 
         PX4Interface::getInstance()->publishLocalVel(cmd_vel);
 
@@ -650,6 +651,7 @@ int8_t vwpp::TaskTakeoff::run()
         cmd_vel.linear.x = linear_3d.x;
         cmd_vel.linear.y = linear_3d.y;
         cmd_vel.linear.z = linear_3d.z;
+        cmd_vel.linear.z = 0.;
 
         PX4Interface::getInstance()->publishLocalVel(cmd_vel);
 

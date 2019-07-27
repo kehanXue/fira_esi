@@ -10,7 +10,7 @@ vwpp::DynamicRecfgInterface::DynamicRecfgInterface()
 
     nh = ros::NodeHandle("~");
 
-    // TODO
+    // this ptr.
     dyconfig_cb_type = boost::bind(&vwpp::DynamicRecfgInterface::reconfig_cb, this, _1, _2);
     dyconfig_server.setCallback(dyconfig_cb_type);
 }
@@ -73,51 +73,69 @@ int8_t vwpp::DynamicRecfgInterface::update()
 
 void vwpp::DynamicRecfgInterface::reconfig_cb(fira_esi::fira_esi_dynamic_cfgConfig &_config, uint32_t _level)
 {
-    this->altitude_tolerance_error = _config.altitude_tolerance_error;
     this->forward_vel = _config.forward_vel;
 
     this->normal_flight_altitude = _config.normal_flight_altitude;
     this->landing_altitude = _config.landing_altitude;
 
+
     this->pid_p_v2p_x_kp = _config.pid_p_v2p_x_kp;
     this->pid_p_v2p_x_ki = _config.pid_p_v2p_x_ki;
     this->pid_p_v2p_x_kd = _config.pid_p_v2p_x_kd;
+    this->pid_p_v2p_x_has_threshold = _config.pid_p_v2p_x_has_threshold;
+    this->pid_p_v2p_x_threshold = _config.pid_p_v2p_x_threshold;
 
     this->pid_p_v2p_y_kp = _config.pid_p_v2p_y_kp;
     this->pid_p_v2p_y_ki = _config.pid_p_v2p_y_ki;
     this->pid_p_v2p_y_kd = _config.pid_p_v2p_y_kd;
+    this->pid_p_v2p_y_has_threshold = _config.pid_p_v2p_y_has_threshold;
+    this->pid_p_v2p_y_threshold = _config.pid_p_v2p_y_threshold;
 
     this->pid_p_v2p_z_kp = _config.pid_p_v2p_z_kp;
     this->pid_p_v2p_z_ki = _config.pid_p_v2p_z_ki;
     this->pid_p_v2p_z_kd = _config.pid_p_v2p_z_kd;
+    this->pid_p_v2p_z_has_threshold = _config.pid_p_v2p_z_has_threshold;
+    this->pid_p_v2p_z_threshold = _config.pid_p_v2p_z_threshold;
+
+    this->pid_p_v2p_yaw_kp = _config.pid_p_v2p_yaw_kp;
+    this->pid_p_v2p_yaw_ki = _config.pid_p_v2p_yaw_ki;
+    this->pid_p_v2p_yaw_kd = _config.pid_p_v2p_yaw_kd;
+    this->pid_p_v2p_yaw_has_threshold = _config.pid_p_v2p_yaw_has_threshold;
+    this->pid_p_v2p_yaw_threshold = _config.pid_p_v2p_yaw_threshold;
 
 
     this->pid_v_v2p_x_kp = _config.pid_v_v2p_x_kp;
     this->pid_v_v2p_x_ki = _config.pid_v_v2p_x_ki;
     this->pid_v_v2p_x_kd = _config.pid_v_v2p_x_kd;
+    this->pid_v_v2p_x_has_threshold = _config.pid_v_v2p_x_has_threshold;
+    this->pid_v_v2p_x_threshold = _config.pid_v_v2p_x_threshold;
 
     this->pid_v_v2p_y_kp = _config.pid_v_v2p_y_kp;
     this->pid_v_v2p_y_ki = _config.pid_v_v2p_y_ki;
     this->pid_v_v2p_y_kd = _config.pid_v_v2p_y_kd;
+    this->pid_v_v2p_y_has_threshold = _config.pid_v_v2p_y_has_threshold;
+    this->pid_v_v2p_y_threshold = _config.pid_v_v2p_y_threshold;
 
     this->pid_v_v2p_z_kp = _config.pid_v_v2p_z_kp;
     this->pid_v_v2p_z_ki = _config.pid_v_v2p_z_ki;
     this->pid_v_v2p_z_kd = _config.pid_v_v2p_z_kd;
-
-    this->pid_p_v2p_yaw_kp = _config.pid_p_v2p_yaw_kp;
-    this->pid_p_v2p_yaw_ki = _config.pid_p_v2p_yaw_ki;
-    this->pid_p_v2p_yaw_kd = _config.pid_p_v2p_yaw_kd;
+    this->pid_v_v2p_z_has_threshold = _config.pid_v_v2p_z_has_threshold;
+    this->pid_v_v2p_z_threshold = _config.pid_v_v2p_z_threshold;
 
     this->pid_v_v2p_yaw_kp = _config.pid_v_v2p_yaw_kp;
     this->pid_v_v2p_yaw_ki = _config.pid_v_v2p_yaw_ki;
     this->pid_v_v2p_yaw_kd = _config.pid_v_v2p_yaw_kd;
+    this->pid_v_v2p_yaw_has_threshold = _config.pid_v_v2p_yaw_has_threshold;
+    this->pid_v_v2p_yaw_threshold = _config.pid_v_v2p_yaw_threshold;
 
-    this->tf_break_duration = _config.tf_break_duration;
 
     this->altitude_when_red_gate = _config.altitude_when_red_gate;
     this->altitude_when_yellow_gate = _config.altitude_when_yellow_gate;
-
     this->avoidance_forward_time = _config.avoidance_forward_time;
+
+    this->altitude_tolerance_error = _config.altitude_tolerance_error;
+    this->rotate_yaw_tolerance = _config.rotate_yaw_tolerance;
+
 
     this->blue_h_offset_x_tolerance = _config.blue_h_offset_x_tolerance;
     this->blue_h_offset_y_tolerance = _config.blue_h_offset_y_tolerance;
@@ -125,11 +143,10 @@ void vwpp::DynamicRecfgInterface::reconfig_cb(fira_esi::fira_esi_dynamic_cfgConf
     this->red_x_offset_x_tolerance = _config.red_x_offset_x_tolerance;
     this->red_x_offset_y_tolerance = _config.red_x_offset_y_tolerance;
 
-    this->rotate_yaw_tolerance = _config.rotate_yaw_tolerance;
-
     this->qr_offset_x_tolerance = _config.qr_offset_x_tolerance;
     this->qr_offset_y_tolerance = _config.qr_offset_y_tolerance;
 
+    this->tf_break_duration = _config.tf_break_duration;
 }
 
 
@@ -364,6 +381,102 @@ double_t vwpp::DynamicRecfgInterface::getQrOffsetXTolerance() const
 double_t vwpp::DynamicRecfgInterface::getQrOffsetYTolerance() const
 {
     return qr_offset_y_tolerance;
+}
+
+
+bool vwpp::DynamicRecfgInterface::isPidPV2PXHasThreshold() const
+{
+    return pid_p_v2p_x_has_threshold;
+}
+
+
+double_t vwpp::DynamicRecfgInterface::getPidPV2PXThreshold() const
+{
+    return pid_p_v2p_x_threshold;
+}
+
+
+bool vwpp::DynamicRecfgInterface::isPidPV2PYHasThreshold() const
+{
+    return pid_p_v2p_y_has_threshold;
+}
+
+
+double_t vwpp::DynamicRecfgInterface::getPidPV2PYThreshold() const
+{
+    return pid_p_v2p_y_threshold;
+}
+
+
+bool vwpp::DynamicRecfgInterface::isPidPV2PZHasThreshold() const
+{
+    return pid_p_v2p_z_has_threshold;
+}
+
+
+double_t vwpp::DynamicRecfgInterface::getPidPV2PZThreshold() const
+{
+    return pid_p_v2p_z_threshold;
+}
+
+
+bool vwpp::DynamicRecfgInterface::isPidVV2PXHasThreshold() const
+{
+    return pid_v_v2p_x_has_threshold;
+}
+
+
+double_t vwpp::DynamicRecfgInterface::getPidVV2PXThreshold() const
+{
+    return pid_v_v2p_x_threshold;
+}
+
+
+bool vwpp::DynamicRecfgInterface::isPidVV2PYHasThreshold() const
+{
+    return pid_v_v2p_y_has_threshold;
+}
+
+
+double_t vwpp::DynamicRecfgInterface::getPidVV2PYThreshold() const
+{
+    return pid_v_v2p_y_threshold;
+}
+
+
+bool vwpp::DynamicRecfgInterface::isPidVV2PZHasThreshold() const
+{
+    return pid_v_v2p_z_has_threshold;
+}
+
+
+double_t vwpp::DynamicRecfgInterface::getPidVV2PZThreshold() const
+{
+    return pid_v_v2p_z_threshold;
+}
+
+
+bool vwpp::DynamicRecfgInterface::isPidPV2PYawHasThreshold() const
+{
+    return pid_p_v2p_yaw_has_threshold;
+}
+
+
+double_t vwpp::DynamicRecfgInterface::getPidPV2PYawThreshold() const
+{
+    return pid_p_v2p_yaw_threshold;
+}
+
+
+bool vwpp::DynamicRecfgInterface::isPidVV2PYawHasThreshold() const
+{
+    return pid_v_v2p_yaw_has_threshold;
+}
+
+
+double_t vwpp::DynamicRecfgInterface::getPidVV2PYawThreshold() const
+{
+    return pid_v_v2p_yaw_threshold;
 }
 
 
