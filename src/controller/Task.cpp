@@ -624,8 +624,13 @@ vwpp::TaskState vwpp::TaskTakeoff::getTaskState()
 
 int8_t vwpp::TaskTakeoff::run()
 {
+    // ROS_INFO("Task: Takeoff!");
     // VisionInterface::getInstance()->update();
     PX4Interface::getInstance()->update();
+
+    static vwpp::JudgeAchieveCounter
+            judge_achieve_counter(vwpp::DynamicRecfgInterface::getInstance()->getJudgeAchieveCounterThreshold());
+
 
     if (cur_action_id == ADJUSTALTITUDE)
     {
@@ -636,8 +641,11 @@ int8_t vwpp::TaskTakeoff::run()
         if (fabs(PX4Interface::getInstance()->getCurZ() - altitude_target) <=
             DynamicRecfgInterface::getInstance()->getAltitudeToleranceError())
         {
-            p_task_base->task_state = TASK_FINISH;
-            return 1;
+            if (judge_achieve_counter.isAchieve())
+            {
+                p_task_base->task_state = TASK_FINISH;
+                return 1;
+            }
         }
 
 
@@ -651,7 +659,7 @@ int8_t vwpp::TaskTakeoff::run()
         cmd_vel.linear.x = linear_3d.x;
         cmd_vel.linear.y = linear_3d.y;
         cmd_vel.linear.z = linear_3d.z;
-        cmd_vel.linear.z = 0.;
+        cmd_vel.angular.z = 0.;
 
         PX4Interface::getInstance()->publishLocalVel(cmd_vel);
 

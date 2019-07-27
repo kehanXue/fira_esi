@@ -147,6 +147,8 @@ void vwpp::DynamicRecfgInterface::reconfig_cb(fira_esi::fira_esi_dynamic_cfgConf
     this->qr_offset_y_tolerance = _config.qr_offset_y_tolerance;
 
     this->tf_break_duration = _config.tf_break_duration;
+
+    this->judge_achieve_counter_threshold = _config.judge_achieve_counter_threshold;
 }
 
 
@@ -477,6 +479,12 @@ bool vwpp::DynamicRecfgInterface::isPidVV2PYawHasThreshold() const
 double_t vwpp::DynamicRecfgInterface::getPidVV2PYawThreshold() const
 {
     return pid_v_v2p_yaw_threshold;
+}
+
+
+int64_t vwpp::DynamicRecfgInterface::getJudgeAchieveCounterThreshold() const
+{
+    return judge_achieve_counter_threshold;
 }
 
 

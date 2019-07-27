@@ -139,6 +139,9 @@ namespace vwpp
         double_t qr_offset_x_tolerance{};
         double_t qr_offset_y_tolerance{};
 
+        /* Judge whether achieve counter, Unit beat */
+        int64_t judge_achieve_counter_threshold{};
+
     public:
         double_t getAltitudeToleranceError() const;
 
@@ -249,6 +252,8 @@ namespace vwpp
         double_t getQrOffsetXTolerance() const;
 
         double_t getQrOffsetYTolerance() const;
+
+        int64_t getJudgeAchieveCounterThreshold() const;
 
     };
 

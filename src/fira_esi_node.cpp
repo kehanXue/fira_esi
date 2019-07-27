@@ -9,22 +9,20 @@
 
 int main(int argc, char** argv)
 {
-    sleep(5);
+    // sleep(5);
     ros::init(argc, argv, "fira_esi_node");
     ros::NodeHandle nh("~");
 
     std::cout << "\033[32m" << ros::this_node::getName() << " start!"
               << "\033[0m" << std::endl;
 
-
     vwpp::DynamicRecfgInterface::getInstance()->update();
 
 
+    vwpp::FlowController flow_controller;
+
     vwpp::PX4Interface::getInstance()->switchOffboard();
     vwpp::PX4Interface::getInstance()->unlockVehicle();
-
-
-    vwpp::FlowController flow_controller;
 
 
     ros::Rate loop_rate(10);

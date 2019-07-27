@@ -44,7 +44,7 @@ int8_t vwpp::FlowController::run()
         if (p_task_takeoff->getTaskState() == TASK_FINISH)
         {
             // cur_task_id = NAVIGATION;
-            // cur_task_id = LANDING;
+            cur_task_id = LANDING;
         }
     }
     // else if (cur_task_id == NAVIGATION)
