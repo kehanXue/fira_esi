@@ -561,12 +561,17 @@ int8_t vwpp::TaskLanding::run()
         double_t altitude_target =
                 vwpp::DynamicRecfgInterface::getInstance()->getLandingAltitude();
 
+        static vwpp::JudgeAchieveCounter
+                judge_achieve_counter(vwpp::DynamicRecfgInterface::getInstance()->getJudgeAchieveCounterThreshold());
 
         if (fabs(PX4Interface::getInstance()->getCurZ() - altitude_target) <=
             vwpp::DynamicRecfgInterface::getInstance()->getAltitudeToleranceError())
         {
-            p_task_base->task_state = TASK_FINISH;
-            return 1;
+            if (judge_achieve_counter.isAchieve())
+            {
+                p_task_base->task_state = TASK_FINISH;
+                return 1;
+            }
         }
 
 

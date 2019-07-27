@@ -15,9 +15,9 @@
 
     </node>
 
-    <node pkg="rqt_reconfigure"
-          name="rqt_reconfigure"
-          type="rqt_reconfigure">
-    </node>
+<!--    <node pkg="rqt_reconfigure"-->
+<!--          name="rqt_reconfigure"-->
+<!--          type="rqt_reconfigure">-->
+<!--    </node>-->
 
 </launch>
