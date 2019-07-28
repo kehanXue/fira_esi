@@ -3,7 +3,6 @@
 //
 
 #include "Task.h"
-#include "interface/DynamicRecfgInterface.h"
 
 
 // TODO
@@ -33,6 +32,8 @@ vwpp::TaskNavigation::TaskNavigation()
 {
     p_task_base = new TaskBase(NAVIGATION);
     p_task_base->task_state = TASK_START;
+    p_action_tracking_line = new ActionTrackingLine(
+            vwpp::DynamicRecfgInterface::getInstance()->getNormalFlightAltitude());
 
     cur_action_id = TRACKINGLINE;
 
@@ -42,6 +43,7 @@ vwpp::TaskNavigation::TaskNavigation()
 vwpp::TaskNavigation::~TaskNavigation()
 {
     delete p_task_base;
+    delete p_action_tracking_line;
 }
 
 
@@ -65,17 +67,16 @@ int8_t vwpp::TaskNavigation::run()
     if (cur_action_id == TRACKINGLINE)
     {
 
-        Velocity2D velocity_2d =
-                Action::getInstance()->trackingLine(VisionInterface::getInstance()->getLineOffset(),
-                                                    PX4Interface::getInstance()->getCurYaw() +
-                                                    VisionInterface::getInstance()->getLineRotation(),
-                                                    PX4Interface::getInstance()->getCurYaw());
+        DroneVelocity drone_velocity =
+                p_action_tracking_line->calculateVelocity(
+                        vwpp::VisionInterface::getInstance()->getLineOffset(),
+                        vwpp::VisionInterface::getInstance()->getLineRotation());
 
         geometry_msgs::Twist cmd_vel;
-        cmd_vel.linear.x = velocity_2d.x;
-        cmd_vel.linear.y = velocity_2d.y;
-        cmd_vel.linear.z = 0.;
-        cmd_vel.angular.z = velocity_2d.yaw;
+        cmd_vel.linear.x = drone_velocity.x;
+        cmd_vel.linear.y = drone_velocity.y;
+        cmd_vel.linear.z = drone_velocity.z;
+        cmd_vel.angular.z = drone_velocity.yaw;
 
         PX4Interface::getInstance()->publishLocalVel(cmd_vel);
     }
@@ -123,15 +124,15 @@ int8_t vwpp::TaskAvoidance::run(GateType _gate_type)
     VisionInterface::getInstance()->update();
     PX4Interface::getInstance()->update();
 
+    geometry_msgs::Twist cmd_vel;
     static int inter_adjust_altitude_time = 1;
 
     if (cur_action_id == ADJUSTALTITUDE)
     {
 
-        Linear3D linear_3d{};
-
         if (inter_adjust_altitude_time == 1)
         {
+
             if (_gate_type == RED)
             {
                 this->altitude_target =
@@ -143,17 +144,27 @@ int8_t vwpp::TaskAvoidance::run(GateType _gate_type)
                         vwpp::DynamicRecfgInterface::getInstance()->getAltitudeWhenYellowGate();
             }
 
-            // TODO X, Y has Bug!
-            linear_3d =
-                    Action::getInstance()->adjustAltitude(this->altitude_target,
-                                                          PX4Interface::getInstance()->getCurZ(),
-                                                          PX4Interface::getInstance()->getCurX(),
-                                                          PX4Interface::getInstance()->getCurY());
+
+            // TODO ptr
+            static ActionAdjustAltitude action_adjust_altitude;
+            DroneVelocity drone_velocity = action_adjust_altitude.calculateVelocity(this->altitude_target,
+                                                                                    PX4Interface::getInstance()->getCurZ());
+
+            cmd_vel.linear.x = drone_velocity.x;
+            cmd_vel.linear.y = drone_velocity.y;
+            cmd_vel.linear.z = drone_velocity.z;
+            cmd_vel.angular.z = drone_velocity.yaw;
+
 
             if (fabs(PX4Interface::getInstance()->getCurZ() - altitude_target) <=
                 vwpp::DynamicRecfgInterface::getInstance()->getAltitudeToleranceError())
             {
-                cur_action_id = TRACKINGLINE;
+                static JudgeAchieveCounter judge_achieve_counter(
+                        DynamicRecfgInterface::getInstance()->getJudgeAchieveCounterThreshold());
+                if (judge_achieve_counter.isAchieve())
+                {
+                    cur_action_id = TRACKINGLINE;
+                }
             }
 
         }
@@ -162,31 +173,32 @@ int8_t vwpp::TaskAvoidance::run(GateType _gate_type)
             this->altitude_target =
                     vwpp::DynamicRecfgInterface::getInstance()->getNormalFlightAltitude();
 
-            linear_3d = Action::getInstance()->adjustAltitude(this->altitude_target,
-                                                              PX4Interface::getInstance()->getCurZ(),
-                                                              PX4Interface::getInstance()->getCurX(),
-                                                              PX4Interface::getInstance()->getCurY());
+
+            static ActionAdjustAltitude action_adjust_altitude;
+            DroneVelocity drone_velocity = action_adjust_altitude.calculateVelocity(this->altitude_target,
+                                                                                    PX4Interface::getInstance()->getCurZ());
+
+            cmd_vel.linear.x = drone_velocity.x;
+            cmd_vel.linear.y = drone_velocity.y;
+            cmd_vel.linear.z = drone_velocity.z;
+            cmd_vel.angular.z = drone_velocity.yaw;
 
 
             if (fabs(PX4Interface::getInstance()->getCurZ() - altitude_target) <=
                 vwpp::DynamicRecfgInterface::getInstance()->getAltitudeToleranceError())
             {
-                p_task_base->task_state = TASK_FINISH;
-                inter_adjust_altitude_time = 1;
-                return 1;
+                static JudgeAchieveCounter judge_achieve_counter(
+                        DynamicRecfgInterface::getInstance()->getJudgeAchieveCounterThreshold());
+                if (judge_achieve_counter.isAchieve())
+                {
+
+                    p_task_base->task_state = TASK_FINISH;
+                    inter_adjust_altitude_time = 1;
+                    return 1;
+                }
             }
 
         }
-
-        geometry_msgs::Twist cmd_vel;
-        // cmd_vel.linear.x = linear_3d.x;
-        // cmd_vel.linear.y = linear_3d.y;
-        cmd_vel.linear.x = 0.;
-        cmd_vel.linear.y = 0.;
-        cmd_vel.linear.z = linear_3d.z;
-        cmd_vel.angular.z = 0.;
-
-        PX4Interface::getInstance()->publishLocalVel(cmd_vel);
 
     }
     else if (cur_action_id == TRACKINGLINE)
@@ -201,20 +213,21 @@ int8_t vwpp::TaskAvoidance::run(GateType _gate_type)
             inter_adjust_altitude_time += 1;
         }
 
-        Velocity2D velocity_2d = Action::getInstance()->trackingLine(VisionInterface::getInstance()->getLineOffset(),
-                                                                     PX4Interface::getInstance()->getCurYaw() +
-                                                                     VisionInterface::getInstance()->getLineRotation(),
-                                                                     PX4Interface::getInstance()->getCurYaw());
+        static ActionTrackingLine action_tracking_line(this->altitude_target);
+        DroneVelocity drone_velocity =
+                action_tracking_line.calculateVelocity(
+                        vwpp::VisionInterface::getInstance()->getLineOffset(),
+                        vwpp::VisionInterface::getInstance()->getLineRotation());
 
-        geometry_msgs::Twist cmd_vel;
-        cmd_vel.linear.x = velocity_2d.x;
-        cmd_vel.linear.y = velocity_2d.y;
-        cmd_vel.linear.z = 0.;
-        cmd_vel.angular.z = velocity_2d.yaw;
 
-        PX4Interface::getInstance()->publishLocalVel(cmd_vel);
+        cmd_vel.linear.x = drone_velocity.x;
+        cmd_vel.linear.y = drone_velocity.y;
+        cmd_vel.linear.z = drone_velocity.z;
+        cmd_vel.angular.z = drone_velocity.yaw;
+
     }
 
+    PX4Interface::getInstance()->publishLocalVel(cmd_vel);
     p_task_base->task_state = TASK_PROCESSING;
     return 0;
 
@@ -267,27 +280,38 @@ char vwpp::TaskHoverOnQR::run(TaskID _cur_task_id)
         {
             if (inter_hovering_time == 1)
             {
-                cur_action_id = ROTATION;
+                static JudgeAchieveCounter judge_achieve_counter(
+                        DynamicRecfgInterface::getInstance()->getJudgeAchieveCounterThreshold());
+                if (judge_achieve_counter.isAchieve())
+                {
+                    cur_action_id = ROTATION;
+                }
             }
             if (inter_hovering_time == 2)
             {
-                p_task_base->task_state = TASK_FINISH;
-                inter_hovering_time = 1;
+                static JudgeAchieveCounter judge_achieve_counter(
+                        DynamicRecfgInterface::getInstance()->getJudgeAchieveCounterThreshold());
+                if (judge_achieve_counter.isAchieve())
+                {
+                    p_task_base->task_state = TASK_FINISH;
+                    inter_hovering_time = 1;
 
-                return qr_inform.at(qr_inform.size() - 1);
+                    return qr_inform.at(qr_inform.size() - 1);
+                }
             }
         }
 
-        Velocity2D velocity_2d =
-                Action::getInstance()->hovering(VisionInterface::getInstance()->getQRxOffset(),
-                                                VisionInterface::getInstance()->getQRyOffset());
+        static ActionHovering action_hovering(DynamicRecfgInterface::getInstance()->getNormalFlightAltitude());
 
+        DroneVelocity drone_velocity =
+                action_hovering.calculateVelocity(VisionInterface::getInstance()->getQRxOffset(),
+                                                  VisionInterface::getInstance()->getQRyOffset());
 
         geometry_msgs::Twist cmd_vel;
-        cmd_vel.linear.x = velocity_2d.x;
-        cmd_vel.linear.y = velocity_2d.y;
-        cmd_vel.linear.z = 0.;
-        cmd_vel.angular.z = velocity_2d.yaw;
+        cmd_vel.linear.x = drone_velocity.x;
+        cmd_vel.linear.y = drone_velocity.y;
+        cmd_vel.linear.z = drone_velocity.z;
+        cmd_vel.angular.z = drone_velocity.yaw;
 
         PX4Interface::getInstance()->publishLocalVel(cmd_vel);
 
@@ -334,22 +358,27 @@ char vwpp::TaskHoverOnQR::run(TaskID _cur_task_id)
         if (fabs(yaw_target - PX4Interface::getInstance()->getCurYaw()) <=
             vwpp::DynamicRecfgInterface::getInstance()->getRotateYawTolerance() * M_PI / 180.)
         {
-            cur_action_id = HOVERING;
-            inter_hovering_time += 1;
+            static JudgeAchieveCounter judge_achieve_counter(
+                    DynamicRecfgInterface::getInstance()->getJudgeAchieveCounterThreshold());
+            if (judge_achieve_counter.isAchieve())
+            {
+                cur_action_id = HOVERING;
+                inter_hovering_time += 1;
+            }
         }
 
         else
         {
-            // TODO
-            Velocity2D velocity_2d = Action::getInstance()->rotating(target_direction,
-                                                                     PX4Interface::getInstance()->getCurYaw());
+            static ActionRotating action_rotating(DynamicRecfgInterface::getInstance()->getNormalFlightAltitude());
+
+            DroneVelocity drone_velocity = action_rotating.calculateVelocity(yaw_target,
+                                                                             PX4Interface::getInstance()->getCurYaw());
 
             geometry_msgs::Twist cmd_vel;
-            cmd_vel.linear.x = velocity_2d.x;
-            cmd_vel.linear.y = velocity_2d.y;
-            // TODO Control z
-            cmd_vel.linear.z = 0.;
-            cmd_vel.angular.z = velocity_2d.yaw;
+            cmd_vel.linear.x = drone_velocity.x;
+            cmd_vel.linear.y = drone_velocity.y;
+            cmd_vel.linear.z = drone_velocity.z;
+            cmd_vel.angular.z = drone_velocity.yaw;
 
             PX4Interface::getInstance()->publishLocalVel(cmd_vel);
         }
@@ -402,19 +431,23 @@ int8_t vwpp::TaskDelivering::run()
     {
         if (VisionInterface::getInstance()->getRedXState())
         {
+            // TODO Who Judge?
             cur_action_id = HOVERING;
         }
 
-        Velocity2D velocity_2d = Action::getInstance()->trackingLine(VisionInterface::getInstance()->getLineOffset(),
-                                                                     PX4Interface::getInstance()->getCurYaw() +
-                                                                     VisionInterface::getInstance()->getLineRotation(),
-                                                                     PX4Interface::getInstance()->getCurYaw());
+        static ActionTrackingLine action_tracking_line(
+                DynamicRecfgInterface::getInstance()->getNormalFlightAltitude());
+
+        DroneVelocity drone_velocity =
+                action_tracking_line.calculateVelocity(
+                        vwpp::VisionInterface::getInstance()->getLineOffset(),
+                        vwpp::VisionInterface::getInstance()->getLineRotation());
 
         geometry_msgs::Twist cmd_vel;
-        cmd_vel.linear.x = velocity_2d.x;
-        cmd_vel.linear.y = velocity_2d.y;
-        cmd_vel.linear.z = 0.;
-        cmd_vel.angular.z = velocity_2d.yaw;
+        cmd_vel.linear.x = drone_velocity.x;
+        cmd_vel.linear.y = drone_velocity.y;
+        cmd_vel.linear.z = drone_velocity.z;
+        cmd_vel.angular.z = drone_velocity.yaw;
 
         PX4Interface::getInstance()->publishLocalVel(cmd_vel);
     }
@@ -426,48 +459,63 @@ int8_t vwpp::TaskDelivering::run()
             fabs(VisionInterface::getInstance()->getRedXy() - 0.) <=
             vwpp::DynamicRecfgInterface::getInstance()->getRedXOffsetYTolerance())
         {
-            cur_action_id = OPENCLAW;
+            static JudgeAchieveCounter judge_achieve_counter(
+                    DynamicRecfgInterface::getInstance()->getJudgeAchieveCounterThreshold());
+            if (judge_achieve_counter.isAchieve())
+            {
+                cur_action_id = OPENCLAW;
+            }
         }
 
-        Velocity2D velocity_2d = Action::getInstance()->hovering(VisionInterface::getInstance()->getRedXx(),
-                                                                 VisionInterface::getInstance()->getRedXy());
+        static ActionHovering action_hovering(DynamicRecfgInterface::getInstance()->getNormalFlightAltitude());
+        DroneVelocity drone_velocity =
+                action_hovering.calculateVelocity(VisionInterface::getInstance()->getRedXx(),
+                                                  VisionInterface::getInstance()->getRedXy());
 
         geometry_msgs::Twist cmd_vel;
-        cmd_vel.linear.x = velocity_2d.x;
-        cmd_vel.linear.y = velocity_2d.y;
-        cmd_vel.linear.z = 0.;
-        cmd_vel.angular.z = velocity_2d.yaw;
+        cmd_vel.linear.x = drone_velocity.x;
+        cmd_vel.linear.y = drone_velocity.y;
+        cmd_vel.linear.z = drone_velocity.z;
+        cmd_vel.angular.z = drone_velocity.yaw;
 
         PX4Interface::getInstance()->publishLocalVel(cmd_vel);
     }
     else if (cur_action_id == OPENCLAW)
     {
-        Action::getInstance()->openClaw();
+        // TODO
+        // Action::getInstance()->openClaw();
 
         cur_action_id = ROTATION;
 
         // TODO Yaw Control.
-        back_toward_yaw = (PX4Interface::getInstance()->getCurYaw() + 180) / 360.0;
+        back_toward_yaw = (PX4Interface::getInstance()->getCurYaw() + M_PI);
     }
     else if (cur_action_id == ROTATION)
     {
 
+        // TODO Maybe problems
         if (fabs(PX4Interface::getInstance()->getCurYaw() - back_toward_yaw) <=
             vwpp::DynamicRecfgInterface::getInstance()->getRotateYawTolerance() * M_PI / 180.)
         {
-            p_task_base->task_state = TASK_FINISH;
-            return 1;
+            static JudgeAchieveCounter judge_achieve_counter(
+                    DynamicRecfgInterface::getInstance()->getJudgeAchieveCounterThreshold());
+            if (judge_achieve_counter.isAchieve())
+            {
+                p_task_base->task_state = TASK_FINISH;
+                return 1;
+            }
         }
 
-        Velocity2D velocity_2d =
-                Action::getInstance()->rotating(back_toward_yaw,
-                                                PX4Interface::getInstance()->getCurYaw());
+        static ActionRotating action_rotating(DynamicRecfgInterface::getInstance()->getNormalFlightAltitude());
+        DroneVelocity drone_velocity =
+                action_rotating.calculateVelocity(back_toward_yaw,
+                                                  PX4Interface::getInstance()->getCurYaw());
 
         geometry_msgs::Twist cmd_vel;
-        cmd_vel.linear.x = velocity_2d.x;
-        cmd_vel.linear.y = velocity_2d.y;
-        cmd_vel.linear.z = 0.;
-        cmd_vel.angular.z = velocity_2d.yaw;
+        cmd_vel.linear.x = drone_velocity.x;
+        cmd_vel.linear.y = drone_velocity.y;
+        cmd_vel.linear.z = drone_velocity.z;
+        cmd_vel.angular.z = drone_velocity.yaw;
 
         PX4Interface::getInstance()->publishLocalVel(cmd_vel);
     }
@@ -518,18 +566,17 @@ int8_t vwpp::TaskLanding::run()
             cur_action_id = HOVERING;
         }
 
-        Velocity2D velocity_2d =
-                Action::getInstance()->trackingLine(VisionInterface::getInstance()->getLineOffset(),
-                                                    PX4Interface::getInstance()->getCurYaw() +
-                                                    VisionInterface::getInstance()->getLineRotation(),
-                                                    PX4Interface::getInstance()->getCurYaw());
+        static ActionTrackingLine action_tracking_line(DynamicRecfgInterface::getInstance()->getNormalFlightAltitude());
+
+        DroneVelocity drone_velocity =
+                action_tracking_line.calculateVelocity(VisionInterface::getInstance()->getLineOffset(),
+                                                       VisionInterface::getInstance()->getLineRotation());
 
         geometry_msgs::Twist cmd_vel;
-        cmd_vel.linear.x = velocity_2d.x;
-        cmd_vel.linear.y = velocity_2d.y;
-        // TODO control z
-        cmd_vel.linear.z = 0.;
-        cmd_vel.angular.z = velocity_2d.yaw;
+        cmd_vel.linear.x = drone_velocity.x;
+        cmd_vel.linear.y = drone_velocity.y;
+        cmd_vel.linear.z = drone_velocity.z;
+        cmd_vel.angular.z = drone_velocity.yaw;
 
         PX4Interface::getInstance()->publishLocalVel(cmd_vel);
     }
@@ -540,19 +587,25 @@ int8_t vwpp::TaskLanding::run()
             fabs(VisionInterface::getInstance()->getBlueHy() - 0.) <=
             vwpp::DynamicRecfgInterface::getInstance()->getBlueHOffsetYTolerance())
         {
-            cur_action_id = ADJUSTALTITUDE;
+
+            static JudgeAchieveCounter judge_achieve_counter(
+                    DynamicRecfgInterface::getInstance()->getJudgeAchieveCounterThreshold());
+            if (judge_achieve_counter.isAchieve())
+            {
+                cur_action_id = ADJUSTALTITUDE;
+            }
         }
 
-        Velocity2D velocity_2d =
-                Action::getInstance()->hovering(VisionInterface::getInstance()->getBlueHx(),
-                                                VisionInterface::getInstance()->getBlueHy());
+        static ActionHovering action_hovering(DynamicRecfgInterface::getInstance()->getNormalFlightAltitude());
+        DroneVelocity drone_velocity = action_hovering.calculateVelocity(VisionInterface::getInstance()->getBlueHx(),
+                                                                         VisionInterface::getInstance()->getBlueHy());
+
 
         geometry_msgs::Twist cmd_vel;
-        cmd_vel.linear.x = velocity_2d.x;
-        cmd_vel.linear.y = velocity_2d.y;
-        // TODO control z
-        cmd_vel.linear.z = 0.;
-        cmd_vel.angular.z = velocity_2d.yaw;
+        cmd_vel.linear.x = drone_velocity.x;
+        cmd_vel.linear.y = drone_velocity.y;
+        cmd_vel.linear.z = drone_velocity.z;
+        cmd_vel.angular.z = drone_velocity.yaw;
 
         PX4Interface::getInstance()->publishLocalVel(cmd_vel);
     }
@@ -561,12 +614,13 @@ int8_t vwpp::TaskLanding::run()
         double_t altitude_target =
                 vwpp::DynamicRecfgInterface::getInstance()->getLandingAltitude();
 
-        static vwpp::JudgeAchieveCounter
-                judge_achieve_counter(vwpp::DynamicRecfgInterface::getInstance()->getJudgeAchieveCounterThreshold());
 
         if (fabs(PX4Interface::getInstance()->getCurZ() - altitude_target) <=
             vwpp::DynamicRecfgInterface::getInstance()->getAltitudeToleranceError())
         {
+            static vwpp::JudgeAchieveCounter
+                    judge_achieve_counter(
+                    vwpp::DynamicRecfgInterface::getInstance()->getJudgeAchieveCounterThreshold());
             if (judge_achieve_counter.isAchieve())
             {
                 p_task_base->task_state = TASK_FINISH;
@@ -574,21 +628,15 @@ int8_t vwpp::TaskLanding::run()
             }
         }
 
-
-        Linear3D linear_3d = Action::getInstance()->adjustAltitude(altitude_target,
-                                                                   PX4Interface::getInstance()->getCurZ(),
-                                                                   PX4Interface::getInstance()->getCurX(),
-                                                                   PX4Interface::getInstance()->getCurY());
-
+        static ActionAdjustAltitude action_adjust_altitude;
+        DroneVelocity drone_velocity = action_adjust_altitude.calculateVelocity(altitude_target,
+                                                                                PX4Interface::getInstance()->getCurZ());
 
         geometry_msgs::Twist cmd_vel;
-        // TODO
-        // cmd_vel.linear.x = linear_3d.x;
-        // cmd_vel.linear.y = linear_3d.y;
-        cmd_vel.linear.x = 0.;
-        cmd_vel.linear.y = 0.;
-        cmd_vel.linear.z = linear_3d.z;
-        cmd_vel.angular.z = 0.;
+        cmd_vel.linear.x = drone_velocity.x;
+        cmd_vel.linear.y = drone_velocity.y;
+        cmd_vel.linear.z = drone_velocity.z;
+        cmd_vel.angular.z = drone_velocity.yaw;
 
         PX4Interface::getInstance()->publishLocalVel(cmd_vel);
 
@@ -633,19 +681,19 @@ int8_t vwpp::TaskTakeoff::run()
     // VisionInterface::getInstance()->update();
     PX4Interface::getInstance()->update();
 
-    static vwpp::JudgeAchieveCounter
-            judge_achieve_counter(vwpp::DynamicRecfgInterface::getInstance()->getJudgeAchieveCounterThreshold());
-
 
     if (cur_action_id == ADJUSTALTITUDE)
     {
         double_t altitude_target =
                 DynamicRecfgInterface::getInstance()->getNormalFlightAltitude();
 
-
         if (fabs(PX4Interface::getInstance()->getCurZ() - altitude_target) <=
             DynamicRecfgInterface::getInstance()->getAltitudeToleranceError())
         {
+            static vwpp::JudgeAchieveCounter
+                    judge_achieve_counter(
+                    vwpp::DynamicRecfgInterface::getInstance()->getJudgeAchieveCounterThreshold());
+
             if (judge_achieve_counter.isAchieve())
             {
                 p_task_base->task_state = TASK_FINISH;
@@ -653,21 +701,19 @@ int8_t vwpp::TaskTakeoff::run()
             }
         }
 
+        static ActionAdjustAltitude action_adjust_altitude;
+        DroneVelocity drone_velocity =
+                action_adjust_altitude.calculateVelocity(altitude_target,
+                                                         PX4Interface::getInstance()->getCurZ());
 
-        Linear3D linear_3d =
-                Action::getInstance()->adjustAltitude(altitude_target,
-                                                      PX4Interface::getInstance()->getCurZ(),
-                                                      PX4Interface::getInstance()->getCurX(),
-                                                      PX4Interface::getInstance()->getCurY());
 
         geometry_msgs::Twist cmd_vel;
-        cmd_vel.linear.x = linear_3d.x;
-        cmd_vel.linear.y = linear_3d.y;
-        cmd_vel.linear.z = linear_3d.z;
-        cmd_vel.angular.z = 0.;
+        cmd_vel.linear.x = drone_velocity.x;
+        cmd_vel.linear.y = drone_velocity.y;
+        cmd_vel.linear.z = drone_velocity.z;
+        cmd_vel.angular.z = drone_velocity.yaw;
 
         PX4Interface::getInstance()->publishLocalVel(cmd_vel);
-
     }
 
     p_task_base->task_state = TASK_PROCESSING;

@@ -9,13 +9,23 @@
 #include <vector>
 
 #include "vision/mycv.h"
-#include "Action.h"
+#include "controller/Action.h"
 #include "interface/VisionInterface.h"
 #include "interface/PX4Interface.h"
 #include "utils/JudgeAchieveCounter.h"
+#include "interface/DynamicRecfgInterface.h"
 
 namespace vwpp
 {
+
+    enum Direction
+    {
+        LOCAL_FORWARD = 0,
+        LOCAL_LEFT,
+        LOCAL_BACK,
+        LOCAL_RIGHT
+    };
+
     enum TaskID
     {
         TAKEOFF = -4,
@@ -95,6 +105,8 @@ namespace vwpp
         TaskBase* p_task_base;
 
         ActionID cur_action_id;
+
+        ActionTrackingLine* p_action_tracking_line;
 
     };
 
