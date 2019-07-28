@@ -19,7 +19,8 @@ dictitems:
       groups: !!python/object/new:dynamic_reconfigure.encoding.Config
         state: []
       id: 0
-      landing_altitude: -0.2
+      judge_achieve_counter_threshold: 15
+      landing_altitude: 0.0
       name: Default
       normal_flight_altitude: 1.0
       parameters: !!python/object/new:dynamic_reconfigure.encoding.Config
@@ -74,7 +75,8 @@ dictitems:
       tf_break_duration: 0.2
       type: ''
     state: []
-  landing_altitude: -0.2
+  judge_achieve_counter_threshold: 15
+  landing_altitude: 0.0
   normal_flight_altitude: 1.0
   pid_p_v2p_x_has_threshold: true
   pid_p_v2p_x_kd: 1.4

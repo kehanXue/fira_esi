@@ -1,92 +1,141 @@
 //
-// Created by kehan on 19-7-11.
+// Created by kehan on 19-7-27.
 //
 
 #ifndef FIRA_ESI_ACTION_H_
 #define FIRA_ESI_ACTION_H_
 
-#include <cstdint>
-#include <vector>
+
 #include <cmath>
 #include <tf/transform_listener.h>
-
 #include "interface/DynamicRecfgInterface.h"
+#include "interface/PX4Interface.h"
+#include "controller/PIDController.h"
 #include "utils/utils.h"
-#include "controller/Task.h"
 
-namespace vwpp
+
+enum ActionID
 {
+    TRACKINGLINE = 0,
+    ADJUSTALTITUDE,
+    HOVERING,
+    ROTATION,
+    OPENCLAW,
+    CIRCULARMOTION  //TODO
+};
+
+struct DroneVelocity
+{
+    double_t x;
+    double_t y;
+    double_t z;
+    double_t yaw;
+};
 
 
-    enum ActionID
-    {
-        TRACKINGLINE = 0,
-        ADJUSTALTITUDE,
-        HOVERING,
-        ROTATION,
-        OPENCLAW,
-        CIRCULARMOTION  //TODO
-    };
+class ActionBase
+{
+public:
+    ActionBase();
 
-    struct Velocity2D
-    {
-        double_t x;
-        double_t y;
-        double_t yaw;
-    };
+    virtual ~ActionBase();
 
-    struct Linear3D
-    {
-        double_t x;
-        double_t y;
-        double_t z;
-    };
+    ActionID action_id;
 
-    class Action
-    {
-    public:
+private:
 
-        static Action* getInstance();
+};
 
-        virtual ~Action();
+class ActionTrackingLine
+{
+public:
 
-        Velocity2D trackingLine(double_t _cur_line_y, double_t _target_yaw, double_t _cur_yaw,
-                                double_t _forward_vel = DynamicRecfgInterface::getInstance()->getForwardVel());
+    explicit ActionTrackingLine(double_t _target_altitude);
 
-        Linear3D adjustAltitude(double_t _target_altitude, double_t _cur_altitude, double_t _cur_x, double_t _cur_y);
+    virtual ~ActionTrackingLine();
 
-        // Velocity2D hovering(double_t _cur_x, double_t _cur_y, double_t _target_yaw, double_t _cur_yaw);
+    ActionID getActionID();
 
-        /* The _cur_x and _cur_y should be relative! Because the target is 0.! */
-        Velocity2D hovering(double_t _cur_x, double_t _cur_y);
+    DroneVelocity calculateVelocity(double_t _cur_line_v_y, double_t _cur_v_yaw,
+                                    double_t _forward_vel = vwpp::DynamicRecfgInterface::getInstance()->getForwardVel());
 
-        Velocity2D rotating(Direction _direction, double_t _cur_yaw);
+private:
 
-        Velocity2D rotating(double_t _target_yaw, double_t _cur_yaw);
+    double_t target_altitude;
 
-        int8_t openClaw();
+    // TODO ptr
+    tf::TransformListener odom_base_tf_listener;
 
-        // int8_t run(ActionID _action_id);
+    ActionID action_id;
+};
 
 
-    private:
+class ActionAdjustAltitude
+{
+public:
 
-        Action();
+    ActionAdjustAltitude();
 
-        Action(const Action &);
+    virtual ~ActionAdjustAltitude();
 
-        Action &operator=(const Action &);
+    ActionID getActionId() const;
 
-        static Action* instance;
-        static boost::mutex mutex_instance;
+    DroneVelocity calculateVelocity(double_t _target_altitude, double_t _cur_altitude);
+
+private:
+
+    double_t initial_p_x;
+    double_t initial_p_y;
+    double_t initial_p_yaw;
+
+    ActionID action_id;
+
+};
 
 
-        tf::TransformListener odom_base_tf_listener;
+class ActionHovering
+{
+public:
 
+    explicit ActionHovering(double_t _target_altitude);
 
-    };
+    virtual ~ActionHovering();
 
-}
+    ActionID getActionId() const;
+
+    DroneVelocity calculateVelocity(double_t _cur_v_x, double_t _cur_v_y);
+
+private:
+
+    double_t target_altitude;
+    double_t target_yaw;
+
+    tf::TransformListener odom_base_tf_listener;
+
+    ActionID action_id;
+};
+
+class ActionRotating
+{
+public:
+
+    explicit ActionRotating(double_t _target_altitude);
+
+    virtual ~ActionRotating();
+
+    ActionID getActionId() const;
+
+    DroneVelocity calculateVelocity(double_t _target_yaw, double_t _cur_yaw);
+
+private:
+
+    double_t target_altitude;
+
+    // TODO Add to Constructor?
+    double_t initial_p_x;
+    double_t initial_p_y;
+
+    ActionID action_id;
+};
 
 #endif //FIRA_ESI_ACTION_H_
-
