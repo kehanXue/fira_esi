@@ -91,7 +91,7 @@ add_executable(fira_esi_node
 
         src/utils/utils.h
         src/utils/utils.cpp
-        src/utils/JudgeAchieveCounter.cpp src/utils/JudgeAchieveCounter.h)
+        src/utils/JudgeAchieveCounter.cpp src/utils/JudgeAchieveCounter.h src/dev/Action.cpp src/dev/Action.h)
 
 
 ## Add cmake target dependencies of the executable

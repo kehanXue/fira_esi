@@ -12,17 +12,11 @@
 
 #include "interface/DynamicRecfgInterface.h"
 #include "utils/utils.h"
+#include "controller/Task.h"
 
 namespace vwpp
 {
 
-    enum Direction
-    {
-        LOCAL_FORWARD = 0,
-        LOCAL_LEFT,
-        LOCAL_BACK,
-        LOCAL_RIGHT
-    };
 
     enum ActionID
     {
