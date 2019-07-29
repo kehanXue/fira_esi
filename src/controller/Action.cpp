@@ -62,6 +62,7 @@ DroneVelocity ActionTrackingLine::calculateVelocity(double_t _cur_line_v_y, doub
 
     pid_controller_v_body_y.setTarget(0.);
     pid_controller_p_local_z.setTarget(this->target_altitude);
+    ROS_WARN("tracking line z target:%lf",this->target_altitude);
     pid_controller_v_body_yaw.setTarget(0.);
 
     pid_controller_v_body_y.update(_cur_line_v_y);
@@ -71,13 +72,16 @@ DroneVelocity ActionTrackingLine::calculateVelocity(double_t _cur_line_v_y, doub
 
 
     geometry_msgs::Vector3Stamped linear_body_vel{};
-    linear_body_vel.header.stamp = ros::Time::now();
+    // linear_body_vel.header.stamp = ros::Time::now();
+    linear_body_vel.header.stamp = ros::Time(0);
     // TODO param
     linear_body_vel.header.frame_id = "camera_link";
+    ROS_WARN("forward velocity: %lf", _forward_vel);
     linear_body_vel.vector.x = _forward_vel;
     linear_body_vel.vector.y = pid_controller_v_body_y.output();
     // TODO Test z
-    linear_body_vel.vector.z = pid_controller_p_local_z.output();
+    // linear_body_vel.vector.z = pid_controller_p_local_z.output();
+    linear_body_vel.vector.z = 0;
 
     geometry_msgs::Vector3Stamped linear_local_vel{};
     try
@@ -93,7 +97,7 @@ DroneVelocity ActionTrackingLine::calculateVelocity(double_t _cur_line_v_y, doub
     DroneVelocity drone_velocity{};
     drone_velocity.x = linear_local_vel.vector.x;
     drone_velocity.y = linear_local_vel.vector.y;
-    drone_velocity.z = linear_local_vel.vector.z;
+    drone_velocity.z = pid_controller_p_local_z.output();
     drone_velocity.yaw = pid_controller_v_body_yaw.output();
 
     return drone_velocity;
@@ -164,7 +168,8 @@ DroneVelocity ActionHovering::calculateVelocity(double_t _cur_v_x, double_t _cur
             convertCurYaw2FabsYawThetaBetweenPI(target_yaw, vwpp::PX4Interface::getInstance()->getCurZ()));
 
     geometry_msgs::Vector3Stamped linear_body_vel{};
-    linear_body_vel.header.stamp = ros::Time::now();
+    // linear_body_vel.header.stamp = ros::Time::now();
+    linear_body_vel.header.stamp = ros::Time(0);
     linear_body_vel.header.frame_id = "camera_link";
     linear_body_vel.vector.x = pid_controller_v_body_x.output();
     linear_body_vel.vector.y = pid_controller_v_body_y.output();

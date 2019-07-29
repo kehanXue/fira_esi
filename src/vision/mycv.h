@@ -7,7 +7,6 @@
 #include <ros/ros.h>
 #include <opencv2/opencv.hpp>
 #include <sl/Camera.hpp>
-
 #include <yaml-cpp/yaml.h>
 #include <zbar.h>
 
@@ -15,7 +14,6 @@
 #include <cmath>
 #include <cstdio>
 #include <fstream>
-#include <sstream>
 
 
 enum CameraNumber
@@ -66,6 +64,13 @@ private:
     bool flag_findQR;
     bool flag_findblueH;
     bool flag_findredX;
+
+private:
+    bool flag_first;
+    bool flag_first_findlline;
+    bool flag_first_findlgate;
+    bool flag_first_findblueH;
+    bool flag_first_findredX;
 
 private:
     std::string param_topic;

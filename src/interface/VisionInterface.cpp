@@ -28,8 +28,8 @@ vwpp::VisionInterface &vwpp::VisionInterface::operator=(const VisionInterface &)
 vwpp::VisionInterface::~VisionInterface()
 {
     delete instance;
-    delete forward_camera;
     delete down_camera;
+    delete forward_camera;
 }
 
 
@@ -39,6 +39,7 @@ int8_t vwpp::VisionInterface::update()
     {
         down_camera->cvmain();
         forward_camera->cvmain();
+        cv::waitKey(1);
 
         return 0;
     }
@@ -47,6 +48,8 @@ int8_t vwpp::VisionInterface::update()
 #ifdef TEST
         std::cout << ex.what() << std::endl;
 #endif
+        down_camera->destory();
+        forward_camera->destory();
         return -1;
     }
 

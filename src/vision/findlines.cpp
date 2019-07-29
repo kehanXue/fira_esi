@@ -2,56 +2,49 @@
 
 FindLines::FindLines()
 {
-	ans.clear();
+	flag_first 	= true;
+	vertical    = true;
+	transverse  = false;
 
-	nFrmNum	= 0;
-	heng    = false;
-	shu     = true;
+	dis         = 0.0;
+	rot         = 0.0;
+
+	aim.setLine(Maxk, -1.0*Maxk*Image_Width/2);
 }
 
-void FindLines::findmain(cv::Mat tpf, int &line_threshold, cv::Mat &outimage)
+void FindLines::findmain(cv::Mat image, int &line_threshold, cv::Mat &outimage)
 {
-	pFrame = tpf;
 	ans.clear();
-	pFrame = pFrame(cv::Rect(0, CutHeight, pFrame.cols, pFrame.rows - CutHeight));
-	nFrmNum++;
-	if(nFrmNum == 1)
-	{
-		pCutFrame = pFrame.clone();
-		cv::cvtColor(pCutFrame, pCutFrImg, CV_BGR2GRAY);
-		initaim();
-	}
-	else
-	{
-        pCutFrame = pFrame.clone();
-        cv::cvtColor(pCutFrame, pCutFrImg, CV_BGR2GRAY);
-        cv::GaussianBlur(pCutFrImg, pCutFrImg, cv::Size(3,3), 0);
-		cv::threshold(pCutFrImg, pCutFrImg, line_threshold, 255.0, CV_THRESH_BINARY);
+
+	cv::cvtColor(image, image, CV_BGR2GRAY);
+	cv::GaussianBlur(image, image, cv::Size(3,3), 0);
+	cv::threshold(image, image, 1.0*line_threshold, 255.0, CV_THRESH_BINARY);
 
 #ifdef TEST
-		static bool flag_first = true;
-		if(flag_first)
-		{
-			flag_first = false;
-			cv::namedWindow("line_threshold", 0);
-			cv::createTrackbar("x", "line_threshold", &line_threshold, 255);
-			cv::namedWindow("line_canny", 0);
-		}
-		cv::imshow("line_threshold", pCutFrImg);
-#endif
-		//进行形态学滤波，去掉噪音
-		//cvErode(pCutFrImg, pCutFrImg, 0, 3);
-		//cvDilate(pCutFrImg, pCutFrImg, 0, 3);
-
-		//canny变化
-		cv::Canny(pCutFrImg, pCutFrImg, 50, 100);
-#ifdef TEST
-		cv::imshow("line_canny", pCutFrImg);
-#endif
+#ifdef FIND_LINE
+	if(flag_first)
+	{
+		flag_first = false;
+		cv::namedWindow("line_threshold", 0);
+		cv::createTrackbar("x", "line_threshold", &line_threshold, 255);
+		cv::namedWindow("line_canny", 0);
 	}
-	cv::HoughLinesP(pCutFrImg, lines, 1, CV_PI / 180, 80, 15,80);//CV_PI / 180, 100, 15, 15
-	litknum=0;
-	if(shu)
+	cv::imshow("line_threshold", image);
+#endif
+#endif
+
+	cv::Canny(image, image, 50, 100);
+
+#ifdef TEST
+#ifdef FIND_LINE
+	//cv::imshow("line_canny", image);
+#endif
+#endif
+
+    std::vector<cv::Vec4f> lines;
+	cv::HoughLinesP(image, lines, 1, CV_PI/180, 80, 15,80);//CV_PI / 180, 100, 15, 15
+
+	if(vertical)
 	{
 	    for(int i = 0; i<lines.size(); i++)
 	    {
@@ -64,27 +57,27 @@ void FindLines::findmain(cv::Mat tpf, int &line_threshold, cv::Mat &outimage)
 
 		    if(lines.size()<4)
 		    {
-		    	if(fabs(k)>=1)
+		    	if(fabs(k) >= 1.0)
 			    {
-				    ans.emplace_back(Linezxz(line[0],line[1]));
-				    cv::line(outimage, line[0], line[1], CV_RGB(0, 0, 255), 6, CV_AA);
+				    ans.emplace_back(LineSort(line[0],line[1]));
+#ifdef TEST
+				    cv::line(outimage, line[0], line[1], cv::Scalar(255, 0, 0), 6);
+#endif
 			    }
 		    }
 		    else
 		    {
-			    if(fabs(k)>=1)
+			    if(fabs(k) >= 1.732)
 			    {
-				    ans.emplace_back(Linezxz(line[0],line[1]));
-				    cv::line(outimage, line[0], line[1], CV_RGB(0, 0, 255), 6, CV_AA);
-			    }
-			    else
-			    {
-				    litknum++;
+				    ans.emplace_back(LineSort(line[0],line[1]));
+#ifdef TEST
+				    cv::line(outimage, line[0], line[1], cv::Scalar(255, 0, 0), 6);
+#endif
 			    }
 		    }
 	    }
 	}
-	if(heng)
+	if(transverse)
 	{
 	    for(int i = 0; i<lines.size(); i++)
 	    {
@@ -93,49 +86,42 @@ void FindLines::findmain(cv::Mat tpf, int &line_threshold, cv::Mat &outimage)
             line[0].y = lines[i][1];
             line[1].x = lines[i][2];
             line[1].y = lines[i][3];
-		    double k = ((line[0].y - line[1].y)*1.0 / (line[0].x - line[1].x));
+		    double k = 1.0*(line[0].y - line[1].y) / (line[0].x - line[1].x);
 
 		    if(lines.size()<4)
 		    {
-		        if((fabs(k) < 0.5))
+		        if(fabs(k) <= 1.0)
 			    {
-				    ans.emplace_back(Linezxz(line[0],line[1]));
-					cv::line(outimage, line[0], line[1], CV_RGB(0, 0, 255), 6, CV_AA);
+				    ans.emplace_back(LineSort(line[0],line[1]));
+#ifdef TEST
+					cv::line(outimage, line[0], line[1], cv::Scalar(255, 0, 0), 6);
+#endif
 			    }
 		    }
 		    else
 		    {
-			    if((fabs(k) < 0.4))
+			    if(fabs(k) <= 0.577)
 			    {
-				    ans.emplace_back(Linezxz(line[0],line[1]));
-					cv::line(outimage, line[0], line[1], CV_RGB(0, 0, 255), 6, CV_AA);
-			    }
-			    else
-			    {
-				    litknum++;
+				    ans.emplace_back(LineSort(line[0],line[1]));
+#ifdef TEST
+					cv::line(outimage, line[0], line[1], cv::Scalar(255, 0, 0), 6);
+#endif
 			    }
 		    }
 	    }
 	}
 
-	cv::Point aaa,bbb,ccc,ddd;
-	aaa.x = 320;
-	aaa.y = 1;
-	bbb.x = 320;
-	bbb.y = 480-CutHeight;
-	ccc.x = 1;
-	ccc.y = 240;
-	ddd.x = 640;
-	ddd.y = (480-CutHeight) / 2;
+	static const cv::Point ver_A(Image_Width/2, 1), ver_B(Image_Width/2, Image_Height),
+	tra_A(1, Image_Height/2), tra_B(Image_Width, Image_Height/2);
 
 #ifdef TEST
-	if(shu)
-		cv::line(outimage, aaa, bbb, CV_RGB(0,0,0), 6, CV_AA);
-	if(heng)
-		cv::line(outimage, ccc, ddd, CV_RGB(0,0,0), 6, CV_AA);
+	if(vertical)
+		cv::line(outimage, ver_A, ver_B, cv::Scalar(0,0,0), 6);
+	if(transverse)
+		cv::line(outimage, tra_A, tra_B, cv::Scalar(0,0,0), 6);
 	for(unsigned int i=0; i<ans.size(); i++)
 	{
-		cv::line(outimage, ans[i].A, ans[i].B, CV_RGB(255, 0, 0), 6, CV_AA);
+		cv::line(outimage, ans[i].A, ans[i].B, cv::Scalar(0, 255, 0), 6);
 	}
 #endif
 
@@ -145,18 +131,13 @@ void FindLines::findmain(cv::Mat tpf, int &line_threshold, cv::Mat &outimage)
 	outputans();
 
 #ifdef TEST
-	cv::line(outimage, aim.A, aim.B, CV_RGB(0, 0, 255), 6, CV_AA);
+	cv::line(outimage, aim.A, aim.B, cv::Scalar(255, 0, 255), 6);
 #endif
 }
 
-void FindLines::initaim()
+LineSort FindLines::finde(cv::Mat &image)
 {
-	aim.setLine(Maxk, -Maxk*320.0);
-}
-
-Linezxz FindLines::finde(cv::Mat &image)
-{
-	unsigned long midnum = 0;
+	unsigned int midnum = 0;
 	cv::Point maina, mainb;
 	if(!ans.empty())
 	{
@@ -192,109 +173,130 @@ Linezxz FindLines::finde(cv::Mat &image)
 			maina=ans[0].A;
 			mainb=ans[0].B;
 		}
-
-#ifdef TEST
-		cv::line(image, maina, mainb, CV_RGB(0, 255, 0), 6, CV_AA);
-#endif
 	}
 	else
 	{
-		if(shu)
+		if(vertical)
 		{
-			maina.x	=	320;
+			maina.x	=	Image_Width/2;
 			maina.y	=	1;
-			mainb.x	=	320;
-			mainb.y	=	480-CutHeight;
+			mainb.x	=	Image_Width/2;
+			mainb.y	=	Image_Height;
 		}
-		if(heng)
+		if(transverse)
 		{
 			maina.x	=	1;
-			maina.y	=	240;
-			mainb.x	=	640 -CutHeight;
-			mainb.y	=	240;
+			maina.y	=	Image_Height/2;
+			mainb.x	=	Image_Width;
+			mainb.y	=	Image_Height/2;
 		}
 	}
-	return Linezxz(maina,mainb); 
+
+#ifdef TEST
+    cv::line(image, maina, mainb, cv::Scalar(0, 0, 255), 6);
+#endif
+
+	return LineSort(maina,mainb);
 }
 
 void FindLines::aimchange()
 {
-	static double		eAI[3]={0};
-	static double		eBI[3]={0};
 	cv::Point			newA, newB;
 	double				eA=0.0, eB=0.0;
 
-	if(shu)
+	if(vertical)
 	{
 	    eA		=	aime.A.x-aim.A.x;
 	    eB		=	aime.B.x-aim.B.x;
 	}
-    if(heng)
+    if(transverse)
     {
         eA		=	aime.A.y-aim.A.y;
         eB		=	aime.B.y-aim.B.y;
     }
 
-	if((fabs(eA)<1000.0||fabs(eB)<1000) && shu)
+	if((fabs(eA)<1000.0||fabs(eB)<1000) && vertical)
 	{
-		newA.x	=	aim.A.x+static_cast<int>(KPOfTranslation*eA);
+		newA.x	=	aim.A.x+static_cast<int>(KP_Of_Translation*eA);
+		if(newA.x > Image_Width/2)
+		{
+			newA.x--;
+		}
+		else if(newA.x < Image_Width/2)
+		{
+			newA.x++;
+		}
 		newA.y	=	1;
-		newB.x	=	aim.B.x+static_cast<int>(KPOfTranslation*eB);
-		newB.y	=	480-CutHeight;
-		aim		=	Linezxz(newA, newB);
+		newB.x	=	aim.B.x+static_cast<int>(KP_Of_Translation*eB);
+		if(newB.x > Image_Width/2)
+		{
+			newB.x--;
+		}
+		else if(newB.x < Image_Width/2)
+		{
+			newB.x++;
+		}
+		newB.y	=	Image_Height;
 	}
-	else if ((fabs(eA)<1000.0||fabs(eB)<1000) && heng)
+	else if ((fabs(eA)<1000.0||fabs(eB)<1000) && transverse)
 	{
-        newA.y	=	aim.A.y+static_cast<int>(KPOfTranslation*eA);
+        newA.y	=	aim.A.y+static_cast<int>(KP_Of_Translation*eA);
+		if(newA.y > Image_Height/2)
+		{
+			newA.y--;
+		}
+		else if(newA.y < Image_Height/2)
+		{
+			newA.y++;
+		}
         newA.x	=	1;
-        newB.y	=	aim.B.y+static_cast<int>(KPOfTranslation*eB);
-        newB.x	=	640-CutHeight;
-        aim		=	Linezxz(newA, newB);
+        newB.y	=	aim.B.y+static_cast<int>(KP_Of_Translation*eB);
+		if(newB.y > Image_Height/2)
+		{
+			newB.y--;
+		}
+		else if(newB.y < Image_Height/2)
+		{
+			newB.y++;
+		}
+        newB.x	=	Image_Width;
 	}
+	aim	= LineSort(newA, newB);
 }
 
 void FindLines::outputans()
 {
-	static const int cenx = 320;
-	static const int ceny = (320-CutHeight)/2;
-	static const int tianx = 320;
-	static const int tiany = 500 / 2;
+	static const cv::Point center(Image_Width/2, Image_Height/2);
 
-	cv::Point cen, tian;
-	cen.x =	cenx;
-	cen.y =	ceny;
-	tian.x = tianx;
-	tian.y = tiany;
-
-	if(shu)
+	if(vertical)
 	{
-		if(aim.A.x==aim.B.x && aim.A.x==cenx)
+		if(aim.A.x==aim.B.x && aim.A.x==center.x)
 			dis	= 0.0;
 		else
-			dis	= aim.getdistopoint(cen);
+			dis	= aim.getdistopoint(center);
 
-		if((aim.A.x+aim.B.x)/2>cenx)
+		if((aim.A.x+aim.B.x)/2>center.x)
 			dis	= -dis;
 
 		if(aim.A.x==aim.B.x)
 			rot	= 0.0;
 		else
-			rot	= atan( static_cast<double>(aim.A.x-aim.B.x)/(480.0-CutHeight) );
+			rot	= atan(1.0*(aim.A.x-aim.B.x)/Image_Height);
 	}
 
-	if(heng)
+	if(transverse)
 	{
-		if(aim.A.y == aim.B.y && aim.A.y == tiany)
+		if(aim.A.y == aim.B.y && aim.A.y == center.y)
 			dis	= 0.0;
 		else
-			dis	= aim.getdistopoint(tian);
+			dis	= aim.getdistopoint(center);
 
-		if((aim.A.y+aim.B.y)/2>tiany)
+		if((aim.A.y+aim.B.y)/2>center.y)
 			dis	= -dis;
 
 		if(aim.A.y==aim.B.y)
 			rot	= 0.0;
 		else
-			rot	= atan( static_cast<double>(aim.A.x-aim.B.x)/480.0 );
+			rot	= atan(1.0*(aim.A.x-aim.B.x)/Image_Height);
 	}
 }

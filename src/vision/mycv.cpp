@@ -7,6 +7,7 @@ MYCV::MYCV(int flag, ros::NodeHandle *pnh)
 #ifdef TEST
     printf("%s\n", param_topic.c_str());
 #endif
+
     pnh->getParam(param_topic+"yamlpath", param_path);
 #ifdef TEST
     printf("%s\n", param_path.c_str());
@@ -21,19 +22,24 @@ MYCV::MYCV(int flag, ros::NodeHandle *pnh)
     {
         camera_number = getoneint("down_camera");
         vc.open(camera_number);
-        flag_findline = true;
-        flag_findgate = false;
-        flag_findQR = true;
-        flag_findblueH = true;
-        flag_findredX = true;
+        //vc.set(CV_CAP_PROP_FRAME_WIDTH, 1280.0);
+        //vc.set(CV_CAP_PROP_FRAME_HEIGHT, 720.0);
+        //vc.set(CV_CAP_PROP_FRAME_WIDTH, 1920.0);
+        //vc.set(CV_CAP_PROP_FRAME_HEIGHT, 1080.0);
+        flag_findline       =   true;
+        flag_findgate       =   false;
+        flag_findQR         =   true;
+        flag_findblueH      =   true;
+        flag_findredX       =   true;
     }
     else if(flag == Forward_Camera)
     {
         sl::InitParameters zed_param;
-        zed_param.camera_resolution = sl::RESOLUTION_VGA;
-        zed_param.camera_fps = 30;
-        zed_param.depth_mode = sl::DEPTH_MODE_ULTRA;
-        zed_param.depth_minimum_distance = 300.0;
+        zed_param.camera_resolution         = sl::RESOLUTION_VGA;
+        zed_param.camera_fps                = 30;
+        zed_param.coordinate_units          = sl::UNIT_METER;
+        zed_param.depth_mode                = sl::DEPTH_MODE_ULTRA;
+        zed_param.depth_minimum_distance    = 0.3;
         if(sl::SUCCESS != zed.open(zed_param))
         {
 #ifdef TEST
@@ -44,41 +50,47 @@ MYCV::MYCV(int flag, ros::NodeHandle *pnh)
             vc.open(camera_number);
         }
 
-        flag_findline = false;
-        flag_findgate = true;
-        flag_findQR = true;
-        flag_findblueH = false;
-        flag_findredX = false;
+        flag_findline       =   false;
+        flag_findgate       =   true;
+        flag_findQR         =   true;
+        flag_findblueH      =   false;
+        flag_findredX       =   false;
     }
     else if(flag == No_Camera)
     {
-        flag_findline = false;
-        flag_findgate = false;
-        flag_findQR = false;
-        flag_findblueH = false;
-        flag_findredX = false;
+        flag_findline       =   false;
+        flag_findgate       =   false;
+        flag_findQR         =   false;
+        flag_findblueH      =   false;
+        flag_findredX       =   false;
     }
 
-    line_dis                = 0.0;
-    line_rot                = 0.0;
-    detect_QR               = false;
-    QR_inform               = "";
-    QR_location[0]          = 0.0;
-    QR_location[1]          = 0.0;
-    detect_yellow_gate      = false;
-    detect_red_gate         = false;
-    yellow_gate_location[0] = 0.0;
-    yellow_gate_location[1] = 0.0;
-    yellow_gate_location[2] = 0.0;
-    red_gate_location[0]    = 0.0;
-    red_gate_location[1]    = 0.0;
-    red_gate_location[2]    = 0.0;
-    detect_blueH            = false;
-    detect_redX             = false;
-    blueH_location[0]       = 0.0;
-    blueH_location[1]       = 0.0;
-    redX_location[0]        = 0.0;
-    redX_location[1]        = 0.0;
+    flag_first              =   true;
+    flag_first_findlline    =   true;
+    flag_first_findlgate    =   true;
+    flag_first_findblueH    =   true;
+    flag_first_findredX     =   true;
+
+    line_dis                =   0.0;
+    line_rot                =   0.0;
+    detect_QR               =   false;
+    QR_inform               =   "";
+    QR_location[0]          =   0.0;
+    QR_location[1]          =   0.0;
+    detect_yellow_gate      =   false;
+    detect_red_gate         =   false;
+    yellow_gate_location[0] =   0.0;
+    yellow_gate_location[1] =   0.0;
+    yellow_gate_location[2] =   0.0;
+    red_gate_location[0]    =   0.0;
+    red_gate_location[1]    =   0.0;
+    red_gate_location[2]    =   0.0;
+    detect_blueH            =   false;
+    detect_redX             =   false;
+    blueH_location[0]       =   0.0;
+    blueH_location[1]       =   0.0;
+    redX_location[0]        =   0.0;
+    redX_location[1]        =   0.0;
 }
 
 void MYCV::cvmain()
@@ -135,18 +147,9 @@ void MYCV::cvmain()
     }
 
 #ifdef TEST
-    static bool flag_first = true;
-    static bool flag_second = true;
-    if(flag_first || flag_second)
+    if(flag_first)
     {
-        if(flag_first)
-        {
-            flag_first = false;
-        }
-        else
-        {
-            flag_second = false;
-        }
+        flag_first = false;
         cv::namedWindow("VideoCapture image"+int2str(camera_type), 0);
     }
     cv::imshow("VideoCapture image"+int2str(camera_type), outimage);
@@ -155,10 +158,9 @@ void MYCV::cvmain()
 
 void MYCV::findline(cv::Mat image)
 {
-    static bool flag_first = true;
-    if(flag_first)
+    if(flag_first_findlline)
     {
-        flag_first = false;
+        flag_first_findlline = false;
         line_threshold = getoneint("line_threshold");
     }
 
@@ -176,10 +178,9 @@ void MYCV::findline(cv::Mat image)
 
 void MYCV::findgate(cv::Mat image)
 {
-    static bool flag_first = true;
-    if(flag_first)
+    if(flag_first_findlgate)
     {
-        flag_first = false;
+        flag_first_findlgate = false;
 
 #ifdef USE_HSV
         min_color[0] = getScalar("HSV_min_yellow");
@@ -196,12 +197,16 @@ void MYCV::findgate(cv::Mat image)
 #endif
 
 #ifdef TEST
+#ifdef FIND_GATE
         color_test();
+#endif
 #endif
     }
 
 #ifdef TEST
+#ifdef FIND_GATE
     check();
+#endif
 #endif
 
 #ifdef USE_HSV
@@ -268,13 +273,15 @@ void MYCV::findQR(cv::Mat image)
             QR_Y += symbol->get_location_y(i);
         }
 
-#ifdef TEST
-        cv::circle(outimage, cv::Point(QR_X/4,QR_Y/4), 5, cv::Scalar(0,255,0), 2);
-#endif
         QR_location[0] = QR_X/4.0;
         QR_location[1] = QR_Y/4.0;
-        resetpoint(QR_location, image);
 
+#ifdef TEST
+        cv::circle(outimage, cv::Point(QR_location[0], QR_location[1]), 5, cv::Scalar(0,255,0), 3);
+        cv::circle(outimage, cv::Point(QR_location[0], QR_location[1]), 20, cv::Scalar(0,255,0), 5);
+#endif
+
+        resetpoint(QR_location, image);
     }
 
     if(inform.empty())
@@ -291,10 +298,9 @@ void MYCV::findQR(cv::Mat image)
 
 void MYCV::findblueH(cv::Mat image)
 {
-    static bool flag_first = true;
-    if(flag_first)
+    if(flag_first_findblueH)
     {
-        flag_first = false;
+        flag_first_findblueH = false;
 
 #ifdef USE_HSV
         blueH_min_color = getScalar("HSV_min_blueH");
@@ -307,13 +313,17 @@ void MYCV::findblueH(cv::Mat image)
 #endif
 
 #ifdef TEST
+#ifdef FIND_BLUEH
         color_test2();
         cv::namedWindow("blueH", 0);
+#endif
 #endif
     }
 
 #ifdef TEST
+#ifdef FIND_BLUEH
     check2();
+#endif
 #endif
 
 #ifdef USE_HSV
@@ -337,7 +347,9 @@ void MYCV::findblueH(cv::Mat image)
             if(image.at<uchar>(i,j) == 255)
             {
 #ifdef TEST
+#ifdef FIND_BLUEH
                 outimage_blueH.at<uchar>(i,j) = 255;
+#endif
 #endif
 
                 sum_blue_rows += i;
@@ -348,14 +360,21 @@ void MYCV::findblueH(cv::Mat image)
     }
 
 #ifdef TEST
+#ifdef FIND_BLUEH
     cv::imshow("blueH", outimage_blueH);
 #endif
+#endif
 
-    if (number_blue>image.rows*image.cols/64)
+    if (number_blue>image.rows*image.cols/25)
     {
         detect_blueH = true;
         blueH_location[0] = 1.0* sum_blue_rows / number_blue;
         blueH_location[1] = 1.0* sum_blue_cols / number_blue;
+
+#ifdef TEST
+        cv::circle(outimage, cv::Point(blueH_location[0], blueH_location[1]), 5, cv::Scalar(255,0,0), 3);
+        cv::circle(outimage, cv::Point(blueH_location[0], blueH_location[1]), 20, cv::Scalar(255,0,0), 5);
+#endif
     }
     else
     {
@@ -365,10 +384,9 @@ void MYCV::findblueH(cv::Mat image)
 
 void MYCV::findredX(cv::Mat image)
 {
-    static bool flag_first = true;
-    if(flag_first)
+    if(flag_first_findredX)
     {
-        flag_first = false;
+        flag_first_findredX = false;
 
 #ifdef USE_HSV
         redX_min_color = getScalar("HSV_min_redX");
@@ -381,13 +399,17 @@ void MYCV::findredX(cv::Mat image)
 #endif
 
 #ifdef TEST
+#ifdef FIND_REDX
         color_test3();
         cv::namedWindow("redX", 0);
+#endif
 #endif
     }
 
 #ifdef TEST
+#ifdef FIND_REDX
     check3();
+#endif
 #endif
 
 #ifdef USE_HSV
@@ -412,7 +434,9 @@ void MYCV::findredX(cv::Mat image)
             if(image.at<uchar>(i,j) == 255)
             {
 #ifdef TEST
+#ifdef FIND_REDX
                 outimage_redX.at<uchar>(i,j) = 255;
+#endif
 #endif
 
                 sum_red_rows += i;
@@ -424,14 +448,21 @@ void MYCV::findredX(cv::Mat image)
     }
 
 #ifdef TEST
+#ifdef FIND_REDX
     cv::imshow("redX", outimage_redX);
 #endif
+#endif
 
-    if (number_red>image.rows*image.cols/64)
+    if (number_red>image.rows*image.cols/25)
     {
         detect_redX = true;
         redX_location[0] = 1.0* sum_red_rows / number_red;
         redX_location[1] = 1.0* sum_red_cols / number_red;
+
+#ifdef TEST
+        cv::circle(outimage, cv::Point(redX_location[0], redX_location[1]), 5, cv::Scalar(0,0,255), 3);
+        cv::circle(outimage, cv::Point(redX_location[0], redX_location[1]), 20, cv::Scalar(0,0,255), 5);
+#endif
     }
     else
     {
@@ -447,6 +478,7 @@ cv::Point3d MYCV::color_thing(cv::Mat image, cv::Scalar min_color, cv::Scalar ma
     Proc_image(thresholdimage);
 
 #ifdef TEST
+#ifdef FIND_GATE
     static bool flag_first = true;
     static bool flag_second = true;
     if(flag_first || flag_second)
@@ -462,6 +494,7 @@ cv::Point3d MYCV::color_thing(cv::Mat image, cv::Scalar min_color, cv::Scalar ma
         cv::namedWindow(name, 0);
     }
     cv::imshow(name, thresholdimage);
+#endif
 #endif
 
     std::vector<std::vector<cv::Point> > contours;
@@ -529,7 +562,7 @@ cv::Point3d MYCV::color_thing(cv::Mat image, cv::Scalar min_color, cv::Scalar ma
             else
             {
                 return cv::Point3d(rect_array[i].x+rect_array[i].width/2.0, rect_array[i].y+rect_array[i].height/2.0,
-                                   1000.0*image.cols/rect_array[i].width*0.75*sqrt(3.0));
+                                   image.cols/rect_array[i].width*0.75*sqrt(3.0));
             }
         }
     }
@@ -647,36 +680,37 @@ void MYCV::color_test()
     x[9] = static_cast<int>(max_color[1][0]);
     x[10] = static_cast<int>(max_color[1][1]);
     x[11] = static_cast<int>(max_color[1][2]);
-    cv::namedWindow("test");
+    cv::namedWindow("yellow", 0);
+    cv::namedWindow("red", 0);
 
 #ifdef USE_HSV
-    cv::createTrackbar("yellow H1", "test", &x[0], 180, nullptr);
-    cv::createTrackbar("yellow S1", "test", &x[1], 255, nullptr);
-    cv::createTrackbar("yellow V1", "test", &x[2], 255, nullptr);
-    cv::createTrackbar("yellow H2", "test", &x[3], 180, nullptr);
-    cv::createTrackbar("yellow S2", "test", &x[4], 255, nullptr);
-    cv::createTrackbar("yellow V2", "test", &x[5], 255, nullptr);
-    cv::createTrackbar("red H1", "test", &x[6], 180, nullptr);
-    cv::createTrackbar("red S1", "test", &x[7], 255, nullptr);
-    cv::createTrackbar("red V1", "test", &x[8], 255, nullptr);
-    cv::createTrackbar("red H2", "test", &x[9], 180, nullptr);
-    cv::createTrackbar("red S2", "test", &x[10], 255, nullptr);
-    cv::createTrackbar("red V2", "test", &x[11], 255, nullptr);
+    cv::createTrackbar("yellow H1", "yellow", &x[0], 180, nullptr);
+    cv::createTrackbar("yellow S1", "yellow", &x[1], 255, nullptr);
+    cv::createTrackbar("yellow V1", "yellow", &x[2], 255, nullptr);
+    cv::createTrackbar("yellow H2", "yellow", &x[3], 180, nullptr);
+    cv::createTrackbar("yellow S2", "yellow", &x[4], 255, nullptr);
+    cv::createTrackbar("yellow V2", "yellow", &x[5], 255, nullptr);
+    cv::createTrackbar("red H1", "red", &x[6], 180, nullptr);
+    cv::createTrackbar("red S1", "red", &x[7], 255, nullptr);
+    cv::createTrackbar("red V1", "red", &x[8], 255, nullptr);
+    cv::createTrackbar("red H2", "red", &x[9], 180, nullptr);
+    cv::createTrackbar("red S2", "red", &x[10], 255, nullptr);
+    cv::createTrackbar("red V2", "red", &x[11], 255, nullptr);
 #endif
 
 #ifdef USE_BGR
-    cv::createTrackbar("yellow B1", "test", &x[0], 255, nullptr);
-    cv::createTrackbar("yellow G1", "test", &x[1], 255, nullptr);
-    cv::createTrackbar("yellow R1", "test", &x[2], 255, nullptr);
-    cv::createTrackbar("yellow B2", "test", &x[3], 255, nullptr);
-    cv::createTrackbar("yellow G2", "test", &x[4], 255, nullptr);
-    cv::createTrackbar("yellow R2", "test", &x[5], 255, nullptr);
-    cv::createTrackbar("red B1", "test", &x[6], 255, nullptr);
-    cv::createTrackbar("red G1", "test", &x[7], 255, nullptr);
-    cv::createTrackbar("red R1", "test", &x[8], 255, nullptr);
-    cv::createTrackbar("red B2", "test", &x[9], 255, nullptr);
-    cv::createTrackbar("red G2", "test", &x[10], 255, nullptr);
-    cv::createTrackbar("red R2", "test", &x[11], 255, nullptr);
+    cv::createTrackbar("yellow B1", "yellow", &x[0], 255, nullptr);
+    cv::createTrackbar("yellow G1", "yellow", &x[1], 255, nullptr);
+    cv::createTrackbar("yellow R1", "yellow", &x[2], 255, nullptr);
+    cv::createTrackbar("yellow B2", "yellow", &x[3], 255, nullptr);
+    cv::createTrackbar("yellow G2", "yellow", &x[4], 255, nullptr);
+    cv::createTrackbar("yellow R2", "yellow", &x[5], 255, nullptr);
+    cv::createTrackbar("red B1", "red", &x[6], 255, nullptr);
+    cv::createTrackbar("red G1", "red", &x[7], 255, nullptr);
+    cv::createTrackbar("red R1", "red", &x[8], 255, nullptr);
+    cv::createTrackbar("red B2", "red", &x[9], 255, nullptr);
+    cv::createTrackbar("red G2", "red", &x[10], 255, nullptr);
+    cv::createTrackbar("red R2", "red", &x[11], 255, nullptr);
 #endif
 }
 
@@ -717,24 +751,24 @@ void MYCV::color_test2()
     x[15] = static_cast<int>(blueH_max_color[0]);
     x[16] = static_cast<int>(blueH_max_color[1]);
     x[17] = static_cast<int>(blueH_max_color[2]);
-    cv::namedWindow("test2");
+    cv::namedWindow("blueH", 0);
 
 #ifdef USE_HSV
-    cv::createTrackbar("blueH H1", "test", &x[12], 180, nullptr);
-    cv::createTrackbar("blueH S1", "test", &x[13], 255, nullptr);
-    cv::createTrackbar("blueH V1", "test", &x[14], 255, nullptr);
-    cv::createTrackbar("blueH H2", "test", &x[15], 180, nullptr);
-    cv::createTrackbar("blueH S2", "test", &x[16], 255, nullptr);
-    cv::createTrackbar("blueH V2", "test", &x[17], 255, nullptr);
+    cv::createTrackbar("blueH H1", "blueH", &x[12], 180, nullptr);
+    cv::createTrackbar("blueH S1", "blueH", &x[13], 255, nullptr);
+    cv::createTrackbar("blueH V1", "blueH", &x[14], 255, nullptr);
+    cv::createTrackbar("blueH H2", "blueH", &x[15], 180, nullptr);
+    cv::createTrackbar("blueH S2", "blueH", &x[16], 255, nullptr);
+    cv::createTrackbar("blueH V2", "blueH", &x[17], 255, nullptr);
 #endif
 
 #ifdef USE_BGR
-    cv::createTrackbar("blueH B1", "test2", &x[12], 255, nullptr);
-    cv::createTrackbar("blueH G1", "test2", &x[13], 255, nullptr);
-    cv::createTrackbar("blueH R1", "test2", &x[14], 255, nullptr);
-    cv::createTrackbar("blueH B2", "test2", &x[15], 255, nullptr);
-    cv::createTrackbar("blueH G2", "test2", &x[16], 255, nullptr);
-    cv::createTrackbar("blueH R2", "test2", &x[17], 255, nullptr);
+    cv::createTrackbar("blueH B1", "blueH", &x[12], 255, nullptr);
+    cv::createTrackbar("blueH G1", "blueH", &x[13], 255, nullptr);
+    cv::createTrackbar("blueH R1", "blueH", &x[14], 255, nullptr);
+    cv::createTrackbar("blueH B2", "blueH", &x[15], 255, nullptr);
+    cv::createTrackbar("blueH G2", "blueH", &x[16], 255, nullptr);
+    cv::createTrackbar("blueH R2", "blueH", &x[17], 255, nullptr);
 #endif
 }
 
@@ -775,24 +809,24 @@ void MYCV::color_test3()
     x[21] = static_cast<int>(redX_max_color[0]);
     x[22] = static_cast<int>(redX_max_color[1]);
     x[23] = static_cast<int>(redX_max_color[2]);
-    cv::namedWindow("test3");
+    cv::namedWindow("redX", 0);
 
 #ifdef USE_HSV
-    cv::createTrackbar("redX H1", "test", &x[18], 180, nullptr);
-    cv::createTrackbar("redX S1", "test", &x[19], 255, nullptr);
-    cv::createTrackbar("redX V1", "test", &x[20], 255, nullptr);
-    cv::createTrackbar("redX H2", "test", &x[21], 180, nullptr);
-    cv::createTrackbar("redX S2", "test", &x[22], 255, nullptr);
-    cv::createTrackbar("redX V2", "test", &x[23], 255, nullptr);
+    cv::createTrackbar("redX H1", "redX", &x[18], 180, nullptr);
+    cv::createTrackbar("redX S1", "redX", &x[19], 255, nullptr);
+    cv::createTrackbar("redX V1", "redX", &x[20], 255, nullptr);
+    cv::createTrackbar("redX H2", "redX", &x[21], 180, nullptr);
+    cv::createTrackbar("redX S2", "redX", &x[22], 255, nullptr);
+    cv::createTrackbar("redX V2", "redX", &x[23], 255, nullptr);
 #endif
 
 #ifdef USE_BGR
-    cv::createTrackbar("redX B1", "test3", &x[18], 255, nullptr);
-    cv::createTrackbar("redX G1", "test3", &x[19], 255, nullptr);
-    cv::createTrackbar("redX R1", "test3", &x[20], 255, nullptr);
-    cv::createTrackbar("redX B2", "test3", &x[21], 255, nullptr);
-    cv::createTrackbar("redX G2", "test3", &x[22], 255, nullptr);
-    cv::createTrackbar("redX R2", "test3", &x[23], 255, nullptr);
+    cv::createTrackbar("redX B1", "redX", &x[18], 255, nullptr);
+    cv::createTrackbar("redX G1", "redX", &x[19], 255, nullptr);
+    cv::createTrackbar("redX R1", "redX", &x[20], 255, nullptr);
+    cv::createTrackbar("redX B2", "redX", &x[21], 255, nullptr);
+    cv::createTrackbar("redX G2", "redX", &x[22], 255, nullptr);
+    cv::createTrackbar("redX R2", "redX", &x[23], 255, nullptr);
 #endif
 }
 
@@ -813,15 +847,13 @@ int MYCV::getoneint(std::string name)
 }
 
 void MYCV::setoneint(int x, std::string name)
-{
-    std::string path = param_path;
-    YAML::Node yamlConfig = YAML::LoadFile(path);
+{    YAML::Node yamlConfig = YAML::LoadFile(param_path);
     yamlConfig[name] = x;
     std::ofstream file;
-    file.open(path.c_str());
+    file.open(param_path.c_str());
     if(!file)
     {
-        ROS_INFO("ERROR TO OPEN FILE %s", path.c_str());
+        ROS_INFO("ERROR TO OPEN FILE %s", param_path.c_str());
     }
     file.flush();
     file << yamlConfig;
@@ -841,16 +873,15 @@ cv::Scalar MYCV::getScalar(std::string name)
 
 void MYCV::setScalar(cv::Scalar color, std::string name)
 {
-    std::string path = param_path;
-    YAML::Node yamlConfig = YAML::LoadFile(path);
+    YAML::Node yamlConfig = YAML::LoadFile(param_path);
     yamlConfig[name+"1"] = color[0];
     yamlConfig[name+"2"] = color[1];
     yamlConfig[name+"3"] = color[2];
     std::ofstream file;
-    file.open(path.c_str());
+    file.open(param_path.c_str());
     if(!file)
     {
-        ROS_INFO("ERROR TO OPEN FILE %s", path.c_str());
+        ROS_INFO("ERROR TO OPEN FILE %s", param_path.c_str());
     }
     file.flush();
     file << yamlConfig;
@@ -868,22 +899,28 @@ void MYCV::open_findline()
 {
     flag_findline = true;
 }
+
 void MYCV::close_findline()
 {
     flag_findline = false;
 }
+
 void MYCV::open_findgate()
 {
     flag_findgate = true;
 }
+
 void MYCV::close_findgate()
 {
     flag_findgate = false;
 }
+
 void MYCV::open_findQR()
 {
     flag_findQR = true;
 }
+
+
 void MYCV::close_findQR()
 {
     flag_findQR = false;

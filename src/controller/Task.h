@@ -106,8 +106,6 @@ namespace vwpp
 
         ActionID cur_action_id;
 
-        ActionTrackingLine* p_action_tracking_line;
-
     };
 
 

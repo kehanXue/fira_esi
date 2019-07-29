@@ -215,6 +215,8 @@ void PX4Interface::px4_pose_cb(const geometry_msgs::PoseStamped::ConstPtr &msg)
 int8_t PX4Interface::publishLocalVel(const geometry_msgs::Twist &_vel)
 {
     boost::unique_lock<boost::mutex> uq_lock_vel(mutex_vel_pub);
+
+    ROS_INFO("%lf,%lf,%lf,%lf", _vel.linear.x, _vel.linear.y, _vel.linear.z, _vel.angular.z);
     this->px4_vel_pub.publish(_vel);
 }
 

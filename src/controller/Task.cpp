@@ -32,8 +32,6 @@ vwpp::TaskNavigation::TaskNavigation()
 {
     p_task_base = new TaskBase(NAVIGATION);
     p_task_base->task_state = TASK_START;
-    p_action_tracking_line = new ActionTrackingLine(
-            vwpp::DynamicRecfgInterface::getInstance()->getNormalFlightAltitude());
 
     cur_action_id = TRACKINGLINE;
 
@@ -43,7 +41,6 @@ vwpp::TaskNavigation::TaskNavigation()
 vwpp::TaskNavigation::~TaskNavigation()
 {
     delete p_task_base;
-    delete p_action_tracking_line;
 }
 
 
@@ -61,14 +58,17 @@ vwpp::TaskState vwpp::TaskNavigation::getTaskState()
 
 int8_t vwpp::TaskNavigation::run()
 {
-    VisionInterface::getInstance()->update();
-    PX4Interface::getInstance()->update();
+    // VisionInterface::getInstance()->update();
+    // PX4Interface::getInstance()->update();
 
     if (cur_action_id == TRACKINGLINE)
     {
 
+        static ActionTrackingLine action_tracking_line(
+                vwpp::DynamicRecfgInterface::getInstance()->getNormalFlightAltitude());
+
         DroneVelocity drone_velocity =
-                p_action_tracking_line->calculateVelocity(
+                action_tracking_line.calculateVelocity(
                         vwpp::VisionInterface::getInstance()->getLineOffset(),
                         vwpp::VisionInterface::getInstance()->getLineRotation());
 
@@ -121,8 +121,8 @@ vwpp::TaskState vwpp::TaskAvoidance::getTaskState()
 int8_t vwpp::TaskAvoidance::run(GateType _gate_type)
 {
 
-    VisionInterface::getInstance()->update();
-    PX4Interface::getInstance()->update();
+    // VisionInterface::getInstance()->update();
+    // PX4Interface::getInstance()->update();
 
     geometry_msgs::Twist cmd_vel;
     static int inter_adjust_altitude_time = 1;
@@ -265,8 +265,8 @@ vwpp::TaskState vwpp::TaskHoverOnQR::getTaskState()
 char vwpp::TaskHoverOnQR::run(TaskID _cur_task_id)
 {
 
-    VisionInterface::getInstance()->update();
-    PX4Interface::getInstance()->update();
+    // VisionInterface::getInstance()->update();
+    // PX4Interface::getInstance()->update();
     std::string qr_inform = VisionInterface::getInstance()->getGroundQRinform();
 
     static int inter_hovering_time = 1;
@@ -424,8 +424,8 @@ int8_t vwpp::TaskDelivering::run()
 {
 
     static double_t back_toward_yaw = 0;
-    VisionInterface::getInstance()->update();
-    PX4Interface::getInstance()->update();
+    // VisionInterface::getInstance()->update();
+    // PX4Interface::getInstance()->update();
 
     if (cur_action_id == TRACKINGLINE)
     {
@@ -557,7 +557,7 @@ vwpp::TaskState vwpp::TaskLanding::getTaskState()
 int8_t vwpp::TaskLanding::run()
 {
     // VisionInterface::getInstance()->update();
-    PX4Interface::getInstance()->update();
+    // PX4Interface::getInstance()->update();
 
     if (cur_action_id == TRACKINGLINE)
     {
@@ -679,7 +679,7 @@ int8_t vwpp::TaskTakeoff::run()
 {
     // ROS_INFO("Task: Takeoff!");
     // VisionInterface::getInstance()->update();
-    PX4Interface::getInstance()->update();
+    // PX4Interface::getInstance()->update();
 
 
     if (cur_action_id == ADJUSTALTITUDE)

@@ -2,7 +2,7 @@
 #define FINDLINES_H
 
 #include "vision/alldefine.h"
-#include "vision/linezxz.h"
+#include "vision/linesort.h"
 #include <opencv2/opencv.hpp>
 #include <algorithm>
 
@@ -14,24 +14,18 @@ public:
 public:
     double					dis;
     double					rot;
-    void 	findmain(cv::Mat tpf, int &line_threshold, cv::Mat &outimage);
-    bool					heng;
-    bool					shu;
+    void 	                findmain(cv::Mat image, int &line_threshold, cv::Mat &outimage);
 
 private:
-    cv::Mat				    pFrame;
-    cv::Mat 				pCutFrame;
-    cv::Mat	    			pCutFrImg;
-    std::vector<Linezxz>	ans;
-    std::vector<cv::Vec4f>	lines;
-    Linezxz					aim;
-    Linezxz					aime;
-    int 					litknum;
-	int						nFrmNum;
-	void	initaim();
-	Linezxz finde(cv::Mat &image);
-	void	aimchange();
-	void	outputans();
+	bool 					flag_first;
+	bool					vertical;
+    bool					transverse;
+    std::vector<LineSort>	ans;
+    LineSort				aim;
+    LineSort				aime;
+    LineSort                finde(cv::Mat &image);
+	void	                aimchange();
+	void	                outputans();
 };
 
 #endif // FINDLINES_H

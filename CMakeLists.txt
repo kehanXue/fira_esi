@@ -84,10 +84,10 @@ add_executable(fira_esi_node
         src/vision/alldefine.h
         src/vision/findlines.h
         src/vision/findlines.cpp
-        src/vision/linezxz.h
-        src/vision/linezxz.cpp
         src/vision/mycv.h
         src/vision/mycv.cpp
+        src/vision/linesort.h
+        src/vision/linesort.cpp
 
         src/utils/utils.h
         src/utils/utils.cpp
