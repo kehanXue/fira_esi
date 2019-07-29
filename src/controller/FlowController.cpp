@@ -8,7 +8,8 @@
 vwpp::FlowController::FlowController() :
         cur_task_id(TAKEOFF),
         // cur_task_id(NAVIGATION),
-        gate_type(NONE)
+        gate_type(NONE),
+        last_qr_inform("")
 {
 
     cur_flow_state = FLOW_START;
@@ -70,54 +71,79 @@ int8_t vwpp::FlowController::run()
         // Switch to HoverOnQR
         if (VisionInterface::getInstance()->getGroundQRState())
         {
-            // cur_task_id = HOVERONQR;
+            cur_task_id = HOVERONQR;
             // cur_task_id = LANDING;
-            ROS_INFO("Task switch to LANDING!");
+            ROS_INFO("Task switch to HOVERONQR!");
         }
 
     }
-    // else if (cur_task_id == AVOIDANCE)
-    // {
-    //     p_task_avoidance->run(gate_type);
-    //
-    //     Switch to Navigation
+        // else if (cur_task_id == AVOIDANCE)
+        // {
+        //     p_task_avoidance->run(gate_type);
+        //
+        //     Switch to Navigation
         // if (p_task_avoidance->getTaskState() == TASK_FINISH)
         // {
         //     cur_task_id = NAVIGATION;
         // }
-    // }
-    // else if (cur_task_id == HOVERONQR)
-    // {
-    //     task_type_id = p_task_hover_on_qr->run(cur_task_id);
-    //
-    //     if (p_task_hover_on_qr->getTaskState() == TASK_FINISH)
-    //     {
-    //
-    //         switch (task_type_id)
-    //         {
-    //             case '0':
-    //                 Switch to Navigation
-                    // cur_task_id = NAVIGATION;
-                    // break;
-                // case '1':
-                //     Switch to Delivering
-                    // cur_task_id = DELIVERING;
-                // case '4':
-                //     Switch to Landing
-                    // cur_task_id = LANDING;
-            // }
-        //
         // }
-    // }
-    // else if (cur_task_id == DELIVERING)
-    // {
-    //     p_task_delivering->run();
-    //
-    //     if (p_task_delivering->getTaskState() == TASK_FINISH)
-    //     {
-    //         cur_task_id = NAVIGATION;
-    //     }
-    // }
+    else if (cur_task_id == HOVERONQR)
+    {
+        std::string cur_qr_inform = VisionInterface::getInstance()->getGroundQRinform();
+        if (cur_qr_inform.empty() && last_qr_inform.empty())
+        {
+            cur_task_id = NAVIGATION;
+            ROS_INFO("Task switch to NAVIGATION!");
+        }
+        else
+        {
+            if (cur_qr_inform.empty() && !last_qr_inform.empty())
+            {
+                cur_qr_inform = last_qr_inform;
+            }
+            task_type_id = p_task_hover_on_qr->run(cur_task_id, cur_qr_inform);
+            if (p_task_hover_on_qr->getTaskState() == TASK_FINISH)
+            {
+
+                static char target_task_type_id = '1';
+                if (task_type_id == '0')
+                {
+                    cur_task_id = NAVIGATION;
+                    last_qr_inform = "";
+                    ROS_INFO("Task switch to NAVIGATION!");
+                }
+                else if (task_type_id == target_task_type_id)
+                {
+                    if (target_task_type_id == '1')
+                    {
+                        cur_task_id = DELIVERING;
+                        last_qr_inform = "";
+                        ROS_INFO("Task switch to DELIVERING!");
+                        target_task_type_id = '4';
+                    }
+                    else if (target_task_type_id == '4')
+                    {
+                        cur_task_id = LANDING;
+                        last_qr_inform = "";
+                        ROS_INFO("Task switch to LANDING!");
+                    }
+                }
+
+            }
+
+        }
+        last_qr_inform = cur_qr_inform;
+
+    }
+        // else if (cur_task_id == DELIVERING)
+        // {
+        //     p_task_delivering->run();
+        //
+        //     if (p_task_delivering->getTaskState() == TASK_FINISH)
+        //     {
+        //         cur_task_id = NAVIGATION;
+        //     }
+        // }
     else if (cur_task_id == LANDING)
     {
         p_task_landing->run();

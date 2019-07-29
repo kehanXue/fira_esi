@@ -262,17 +262,22 @@ vwpp::TaskState vwpp::TaskHoverOnQR::getTaskState()
 }
 
 
-char vwpp::TaskHoverOnQR::run(TaskID _cur_task_id)
+char vwpp::TaskHoverOnQR::run(TaskID _cur_task_id, std::string _qr_inform)
 {
-
-    // VisionInterface::getInstance()->update();
-    // PX4Interface::getInstance()->update();
-    std::string qr_inform = VisionInterface::getInstance()->getGroundQRinform();
+    // static std::string last_qr_inform;
+    // std::string _qr_inform = VisionInterface::getInstance()->getGroundQRinform();
+    ROS_INFO("QR inform: %s", _qr_inform.c_str());
+    // if (_qr_inform.empty())
+    // {
+    //     _qr_inform = last_qr_inform;
+    // }
+    // last_qr_inform = _qr_inform;
 
     static int inter_hovering_time = 1;
 
     if (cur_action_id == HOVERING)
     {
+        ROS_INFO("Current task HoverOnQR action: HOVERING");
         if (fabs(VisionInterface::getInstance()->getQRxOffset()) <
             vwpp::DynamicRecfgInterface::getInstance()->getQrOffsetXTolerance() &&
             fabs(VisionInterface::getInstance()->getQRyOffset()) <
@@ -285,6 +290,7 @@ char vwpp::TaskHoverOnQR::run(TaskID _cur_task_id)
                 if (judge_achieve_counter.isAchieve())
                 {
                     cur_action_id = ROTATION;
+                    ROS_INFO("Task HoverOnQR switch action to ROTATION!");
                 }
             }
             if (inter_hovering_time == 2)
@@ -296,7 +302,7 @@ char vwpp::TaskHoverOnQR::run(TaskID _cur_task_id)
                     p_task_base->task_state = TASK_FINISH;
                     inter_hovering_time = 1;
 
-                    return qr_inform.at(qr_inform.size() - 1);
+                    return _qr_inform.at(_qr_inform.size() - 1);
                 }
             }
         }
@@ -306,6 +312,10 @@ char vwpp::TaskHoverOnQR::run(TaskID _cur_task_id)
         DroneVelocity drone_velocity =
                 action_hovering.calculateVelocity(VisionInterface::getInstance()->getQRxOffset(),
                                                   VisionInterface::getInstance()->getQRyOffset());
+
+        ROS_ERROR("QR x_offset:%lf, QR y_offset:%lf",
+                  VisionInterface::getInstance()->getQRxOffset(),
+                  VisionInterface::getInstance()->getQRyOffset());
 
         geometry_msgs::Twist cmd_vel;
         cmd_vel.linear.x = drone_velocity.x;
@@ -318,9 +328,10 @@ char vwpp::TaskHoverOnQR::run(TaskID _cur_task_id)
     }
     else if (cur_action_id == ROTATION)
     {
+        ROS_INFO("Current task HoverOnQR action: ROTATION");
         // TODO
         Direction target_direction = LOCAL_FORWARD;         // Init
-        switch (qr_inform.at(_cur_task_id))
+        switch (_qr_inform.at(_cur_task_id))
         {
             case 'N':
                 target_direction = LOCAL_FORWARD;
@@ -355,6 +366,7 @@ char vwpp::TaskHoverOnQR::run(TaskID _cur_task_id)
                 break;
         }
 
+        ROS_ERROR("On QR rotating to %lf", yaw_target);
         if (fabs(yaw_target - PX4Interface::getInstance()->getCurYaw()) <=
             vwpp::DynamicRecfgInterface::getInstance()->getRotateYawTolerance() * M_PI / 180.)
         {
@@ -386,7 +398,7 @@ char vwpp::TaskHoverOnQR::run(TaskID _cur_task_id)
     }
 
     p_task_base->task_state = TASK_PROCESSING;
-    return qr_inform.at(qr_inform.size() - 1);
+    return _qr_inform.at(_qr_inform.size() - 1);
 }
 
 

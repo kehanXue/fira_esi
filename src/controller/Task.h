@@ -154,7 +154,7 @@ namespace vwpp
 
         TaskState getTaskState();
 
-        char run(TaskID _cur_task_id);
+        char run(TaskID _cur_task_id, std::string _qr_inform);
 
     private:
         TaskBase* p_task_base;

@@ -20,5 +20,13 @@ vwpp::JudgeAchieveCounter::~JudgeAchieveCounter()
 bool vwpp::JudgeAchieveCounter::isAchieve()
 {
     counter++;
-    return counter >= target;
+    if (counter >= target)
+    {
+        counter = 0;
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }

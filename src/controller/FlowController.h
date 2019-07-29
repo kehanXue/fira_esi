@@ -34,6 +34,7 @@ namespace vwpp
 
         TaskID cur_task_id;
         FlowState cur_flow_state;
+        std::string last_qr_inform;
 
         TaskTakeoff* p_task_takeoff;
         TaskNavigation* p_task_navigation;

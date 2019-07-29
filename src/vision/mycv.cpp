@@ -603,8 +603,8 @@ void MYCV::Proc_image(cv::Mat &thresholdimage)
 void MYCV::resetpoint(double point[], cv::Mat image)
 {
     cv::Point2d mid(point[0], point[1]);
-    mid.x = mid.x - image.cols/2.0;
-    mid.y = -(mid.y - image.rows/2.0);
+    mid.x = (point[1] - image.rows/2.0);
+    mid.y = (point[0] - image.cols/2.0);
     point[0] = mid.x;
     point[1] = mid.y;
 }
