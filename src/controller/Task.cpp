@@ -28,13 +28,12 @@ vwpp::TaskBase::~TaskBase()
 = default;
 
 
-vwpp::TaskNavigation::TaskNavigation()
+vwpp::TaskNavigation::TaskNavigation() :
+        runtime(0),
+        cur_action_id(TRACKINGLINE)
 {
     p_task_base = new TaskBase(NAVIGATION);
     p_task_base->task_state = TASK_START;
-
-    cur_action_id = TRACKINGLINE;
-
 }
 
 
@@ -58,8 +57,16 @@ vwpp::TaskState vwpp::TaskNavigation::getTaskState()
 
 int8_t vwpp::TaskNavigation::run()
 {
-    // VisionInterface::getInstance()->update();
-    // PX4Interface::getInstance()->update();
+    runtime++;
+    if (runtime >=
+        DynamicRecfgInterface::getInstance()->getNavigationPerSustainTime())
+    {
+        p_task_base->task_state = TASK_FINISH;
+    }
+    else
+    {
+        p_task_base->task_state = TASK_PROCESSING;
+    }
 
     if (cur_action_id == TRACKINGLINE)
     {
@@ -81,7 +88,14 @@ int8_t vwpp::TaskNavigation::run()
         PX4Interface::getInstance()->publishLocalVel(cmd_vel);
     }
 
-    p_task_base->task_state = TASK_FINISH;
+    return 0;
+}
+
+
+int8_t vwpp::TaskNavigation::restart()
+{
+    runtime = 0;
+
     return 0;
 }
 
@@ -157,7 +171,7 @@ int8_t vwpp::TaskAvoidance::run(GateType _gate_type)
 
 
             if (fabs(PX4Interface::getInstance()->getCurZ() - altitude_target) <=
-                vwpp::DynamicRecfgInterface::getInstance()->getAltitudeToleranceError())
+                vwpp::DynamicRecfgInterface::getInstance()->getAltitudeTolerance())
             {
                 static JudgeAchieveCounter judge_achieve_counter(
                         DynamicRecfgInterface::getInstance()->getJudgeAchieveCounterThreshold());
@@ -185,7 +199,7 @@ int8_t vwpp::TaskAvoidance::run(GateType _gate_type)
 
 
             if (fabs(PX4Interface::getInstance()->getCurZ() - altitude_target) <=
-                vwpp::DynamicRecfgInterface::getInstance()->getAltitudeToleranceError())
+                vwpp::DynamicRecfgInterface::getInstance()->getAltitudeTolerance())
             {
                 static JudgeAchieveCounter judge_achieve_counter(
                         DynamicRecfgInterface::getInstance()->getJudgeAchieveCounterThreshold());
@@ -645,7 +659,7 @@ int8_t vwpp::TaskLanding::run()
 
 
         if (fabs(PX4Interface::getInstance()->getCurZ() - altitude_target) <=
-            vwpp::DynamicRecfgInterface::getInstance()->getAltitudeToleranceError())
+            vwpp::DynamicRecfgInterface::getInstance()->getAltitudeTolerance())
         {
             static vwpp::JudgeAchieveCounter
                     judge_achieve_counter(
@@ -717,7 +731,7 @@ int8_t vwpp::TaskTakeoff::run()
                 DynamicRecfgInterface::getInstance()->getNormalFlightAltitude();
 
         if (fabs(PX4Interface::getInstance()->getCurZ() - altitude_target) <=
-            DynamicRecfgInterface::getInstance()->getAltitudeToleranceError())
+            DynamicRecfgInterface::getInstance()->getAltitudeTolerance())
         {
             static vwpp::JudgeAchieveCounter
                     judge_achieve_counter(

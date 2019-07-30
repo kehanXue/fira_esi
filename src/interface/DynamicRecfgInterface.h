@@ -45,7 +45,7 @@ namespace vwpp
 
 
         /* Determine if the altitude has been reached during the flight */
-        double_t altitude_tolerance_error{};
+        double_t altitude_tolerance{};
 
         /* UAV move forward's velocity */
         double_t forward_vel{};
@@ -139,11 +139,18 @@ namespace vwpp
         double_t qr_offset_x_tolerance{};
         double_t qr_offset_y_tolerance{};
 
+        /* NAVIGATION Task per sustain time */
+        double_t navigation_per_sustain_time;
+    public:
+        double_t getNavigationPerSustainTime() const;
+
+    private:
+
         /* Judge whether achieve counter, Unit beat */
         int64_t judge_achieve_counter_threshold{};
 
     public:
-        double_t getAltitudeToleranceError() const;
+        double_t getAltitudeTolerance() const;
 
         double_t getForwardVel() const;
 

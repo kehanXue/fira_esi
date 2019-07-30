@@ -289,7 +289,7 @@ void MYCV::findQR(cv::Mat image)
         detect_QR = false;
         QR_inform = "";
     }
-    else if(abs(QR_location[0])<100 && abs(QR_location[1])<100)
+    else if(fabs(QR_location[0])<170 && fabs(QR_location[1])<170)
     {
         detect_QR = true;
         QR_inform = inform[0];

@@ -98,6 +98,8 @@ namespace vwpp
 
         TaskState getTaskState();
 
+        int8_t restart();
+
         int8_t run();
 
     private:
@@ -105,6 +107,8 @@ namespace vwpp
         TaskBase* p_task_base;
 
         ActionID cur_action_id;
+
+        int64_t runtime;
 
     };
 

@@ -133,7 +133,7 @@ void vwpp::DynamicRecfgInterface::reconfig_cb(fira_esi::fira_esi_dynamic_cfgConf
     this->altitude_when_yellow_gate = _config.altitude_when_yellow_gate;
     this->avoidance_forward_time = _config.avoidance_forward_time;
 
-    this->altitude_tolerance_error = _config.altitude_tolerance_error;
+    this->altitude_tolerance = _config.altitude_tolerance;
     this->rotate_yaw_tolerance = _config.rotate_yaw_tolerance;
 
 
@@ -148,13 +148,14 @@ void vwpp::DynamicRecfgInterface::reconfig_cb(fira_esi::fira_esi_dynamic_cfgConf
 
     this->tf_break_duration = _config.tf_break_duration;
 
+    this->navigation_per_sustain_time = _config.navigation_per_sustain_time;
     this->judge_achieve_counter_threshold = _config.judge_achieve_counter_threshold;
 }
 
 
-double_t vwpp::DynamicRecfgInterface::getAltitudeToleranceError() const
+double_t vwpp::DynamicRecfgInterface::getAltitudeTolerance() const
 {
-    return altitude_tolerance_error;
+    return altitude_tolerance;
 }
 
 
@@ -485,6 +486,12 @@ double_t vwpp::DynamicRecfgInterface::getPidVV2PYawThreshold() const
 int64_t vwpp::DynamicRecfgInterface::getJudgeAchieveCounterThreshold() const
 {
     return judge_achieve_counter_threshold;
+}
+
+
+double_t vwpp::DynamicRecfgInterface::getNavigationPerSustainTime() const
+{
+    return navigation_per_sustain_time;
 }
 
 
