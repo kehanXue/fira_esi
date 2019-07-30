@@ -127,6 +127,8 @@ public:
 
     DroneVelocity calculateVelocity(double_t _target_yaw, double_t _cur_yaw);
 
+    int8_t setHoverOnXY(double_t _hover_x, double_t _hover_y);
+
 private:
 
     double_t target_altitude;

@@ -248,7 +248,8 @@ int8_t vwpp::TaskAvoidance::run(GateType _gate_type)
 }
 
 
-vwpp::TaskHoverOnQR::TaskHoverOnQR()
+vwpp::TaskHoverOnQR::TaskHoverOnQR() :
+        action_rotating(DynamicRecfgInterface::getInstance()->getNormalFlightAltitude())
 {
     p_task_base = new TaskBase(HOVERONQR);
 
@@ -410,17 +411,16 @@ char vwpp::TaskHoverOnQR::run(TaskID _cur_task_id, std::string _qr_inform)
                 return _qr_inform.at(_qr_inform.size() - 1);
             }
         }
-
-        static ActionRotating action_rotating(DynamicRecfgInterface::getInstance()->getNormalFlightAltitude());
+        // action_rotating(DynamicRecfgInterface::getInstance()->getNormalFlightAltitude());
 
         DroneVelocity drone_velocity = action_rotating.calculateVelocity(yaw_target,
                                                                          PX4Interface::getInstance()->getCurYaw());
 
         geometry_msgs::Twist cmd_vel;
-        // cmd_vel.linear.x = drone_velocity.x;
-        // cmd_vel.linear.y = drone_velocity.y;
-        cmd_vel.linear.x = 0;
-        cmd_vel.linear.y = 0;
+        cmd_vel.linear.x = drone_velocity.x;
+        cmd_vel.linear.y = drone_velocity.y;
+        // cmd_vel.linear.x = 0;
+        // cmd_vel.linear.y = 0;
         cmd_vel.linear.z = drone_velocity.z;
         cmd_vel.angular.z = drone_velocity.yaw;
 
@@ -430,6 +430,13 @@ char vwpp::TaskHoverOnQR::run(TaskID _cur_task_id, std::string _qr_inform)
 
     p_task_base->task_state = TASK_PROCESSING;
     return _qr_inform.at(_qr_inform.size() - 1);
+}
+
+
+int8_t vwpp::TaskHoverOnQR::resetHoverOnXY(double_t _hover_x, double_t _hover_y)
+{
+    action_rotating.setHoverOnXY(_hover_x, _hover_y);
+    return 0;
 }
 
 
@@ -467,14 +474,11 @@ int8_t vwpp::TaskDelivering::run()
 {
 
     static double_t back_toward_yaw = 0;
-    // VisionInterface::getInstance()->update();
-    // PX4Interface::getInstance()->update();
 
     if (cur_action_id == TRACKINGLINE)
     {
         if (VisionInterface::getInstance()->getRedXState())
         {
-            // TODO Who Judge?
             cur_action_id = HOVERING;
         }
 

@@ -160,11 +160,15 @@ namespace vwpp
 
         char run(TaskID _cur_task_id, std::string _qr_inform);
 
+        int8_t resetHoverOnXY(double_t _hover_x, double_t _hover_y);
+
     private:
         TaskBase* p_task_base;
 
         // TODO Add to task_base
         ActionID cur_action_id;
+
+        ActionRotating action_rotating;
     };
 
     class TaskDelivering

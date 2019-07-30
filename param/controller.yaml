@@ -1,6 +1,6 @@
 !!python/object/new:dynamic_reconfigure.encoding.Config
 dictitems:
-  altitude_tolerance_error: 0.12
+  altitude_tolerance: 0.06
   altitude_when_red_gate: 1.6
   altitude_when_yellow_gate: 0.5
   avoidance_forward_time: 9.0
@@ -9,7 +9,7 @@ dictitems:
   forward_vel: 0.2
   groups: !!python/object/new:dynamic_reconfigure.encoding.Config
     dictitems:
-      altitude_tolerance_error: 0.12
+      altitude_tolerance: 0.06
       altitude_when_red_gate: 1.6
       altitude_when_yellow_gate: 0.5
       avoidance_forward_time: 9.0
@@ -19,9 +19,10 @@ dictitems:
       groups: !!python/object/new:dynamic_reconfigure.encoding.Config
         state: []
       id: 0
-      judge_achieve_counter_threshold: 30
+      judge_achieve_counter_threshold: 21
       landing_altitude: 0.0
       name: Default
+      navigation_per_sustain_time: 25
       normal_flight_altitude: 0.51
       parameters: !!python/object/new:dynamic_reconfigure.encoding.Config
         state: []
@@ -49,13 +50,13 @@ dictitems:
       pid_v_v2p_x_has_threshold: true
       pid_v_v2p_x_kd: 0.0
       pid_v_v2p_x_ki: 0.0
-      pid_v_v2p_x_kp: 0.005
-      pid_v_v2p_x_threshold: 0.1
+      pid_v_v2p_x_kp: 0.006
+      pid_v_v2p_x_threshold: 0.13
       pid_v_v2p_y_has_threshold: true
       pid_v_v2p_y_kd: 0.0
       pid_v_v2p_y_ki: 0.0
-      pid_v_v2p_y_kp: 0.005
-      pid_v_v2p_y_threshold: 0.1
+      pid_v_v2p_y_kp: 0.006
+      pid_v_v2p_y_threshold: 0.13
       pid_v_v2p_yaw_has_threshold: true
       pid_v_v2p_yaw_kd: 0.0
       pid_v_v2p_yaw_ki: 0.0
@@ -70,13 +71,14 @@ dictitems:
       qr_offset_y_tolerance: 20.0
       red_x_offset_x_tolerance: 9.0
       red_x_offset_y_tolerance: 9.0
-      rotate_yaw_tolerance: 9.6
+      rotate_yaw_tolerance: 15.299999999999999
       state: true
       tf_break_duration: 0.2
       type: ''
     state: []
-  judge_achieve_counter_threshold: 30
+  judge_achieve_counter_threshold: 21
   landing_altitude: 0.0
+  navigation_per_sustain_time: 25
   normal_flight_altitude: 0.51
   pid_p_v2p_x_has_threshold: true
   pid_p_v2p_x_kd: 0.0
@@ -101,13 +103,13 @@ dictitems:
   pid_v_v2p_x_has_threshold: true
   pid_v_v2p_x_kd: 0.0
   pid_v_v2p_x_ki: 0.0
-  pid_v_v2p_x_kp: 0.005
-  pid_v_v2p_x_threshold: 0.1
+  pid_v_v2p_x_kp: 0.006
+  pid_v_v2p_x_threshold: 0.13
   pid_v_v2p_y_has_threshold: true
   pid_v_v2p_y_kd: 0.0
   pid_v_v2p_y_ki: 0.0
-  pid_v_v2p_y_kp: 0.005
-  pid_v_v2p_y_threshold: 0.1
+  pid_v_v2p_y_kp: 0.006
+  pid_v_v2p_y_threshold: 0.13
   pid_v_v2p_yaw_has_threshold: true
   pid_v_v2p_yaw_kd: 0.0
   pid_v_v2p_yaw_ki: 0.0
@@ -122,6 +124,6 @@ dictitems:
   qr_offset_y_tolerance: 20.0
   red_x_offset_x_tolerance: 9.0
   red_x_offset_y_tolerance: 9.0
-  rotate_yaw_tolerance: 9.6
+  rotate_yaw_tolerance: 15.299999999999999
   tf_break_duration: 0.2
 state: []

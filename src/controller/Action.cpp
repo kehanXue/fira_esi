@@ -268,6 +268,13 @@ DroneVelocity ActionRotating::calculateVelocity(double_t _target_yaw, double_t _
 }
 
 
+int8_t ActionRotating::setHoverOnXY(double_t _hover_x, double_t _hover_y)
+{
+    initial_p_x = _hover_x;
+    initial_p_y = _hover_y;
+}
+
+
 ActionAdjustAltitude::ActionAdjustAltitude() :
         action_id(ADJUSTALTITUDE)
 {

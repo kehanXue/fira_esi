@@ -75,21 +75,22 @@ int8_t vwpp::FlowController::run()
             {
                 p_task_navigation->restart();
                 cur_task_id = HOVERONQR;
+                p_task_hover_on_qr->resetHoverOnXY(PX4Interface::getInstance()->getCurX(), PX4Interface::getInstance()->getCurY());
                 // cur_task_id = LANDING;
                 ROS_INFO("Task switch to HOVERONQR!");
             }
         }
     }
-    // else if (cur_task_id == AVOIDANCE)
-    // {
-    //     p_task_avoidance->run(gate_type);
-    //
-    //     Switch to Navigation
-    // if (p_task_avoidance->getTaskState() == TASK_FINISH)
-    // {
-    //     cur_task_id = NAVIGATION;
-    // }
-    // }
+        // else if (cur_task_id == AVOIDANCE)
+        // {
+        //     p_task_avoidance->run(gate_type);
+        //
+        //     Switch to Navigation
+        // if (p_task_avoidance->getTaskState() == TASK_FINISH)
+        // {
+        //     cur_task_id = NAVIGATION;
+        // }
+        // }
     else if (cur_task_id == HOVERONQR)
     {
         std::string cur_qr_inform = VisionInterface::getInstance()->getGroundQRinform();
@@ -141,15 +142,15 @@ int8_t vwpp::FlowController::run()
         last_qr_inform = cur_qr_inform;
 
     }
-    // else if (cur_task_id == DELIVERING)
-    // {
-    //     p_task_delivering->run();
-    //
-    //     if (p_task_delivering->getTaskState() == TASK_FINISH)
-    //     {
-    //         cur_task_id = NAVIGATION;
-    //     }
-    // }
+    else if (cur_task_id == DELIVERING)
+    {
+        p_task_delivering->run();
+
+        if (p_task_delivering->getTaskState() == TASK_FINISH)
+        {
+            cur_task_id = NAVIGATION;
+        }
+    }
     else if (cur_task_id == LANDING)
     {
         p_task_landing->run();
