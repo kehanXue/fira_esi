@@ -289,10 +289,28 @@ void MYCV::findQR(cv::Mat image)
         detect_QR = false;
         QR_inform = "";
     }
-    else
+    else if(abs(QR_location[0])<100 && abs(QR_location[1])<100)
     {
         detect_QR = true;
         QR_inform = inform[0];
+
+        std::string ss(5, '0');
+        ss[0] = QR_inform[0];
+        ss[1] = QR_inform[2];
+        ss[2] = QR_inform[4];
+        ss[3] = QR_inform[6];
+        ss[4] = QR_inform[8];
+
+        QR_inform = ss;
+
+#ifdef TEST
+        cv::circle(outimage, cv::Point(QR_location[0], QR_location[1]), 3, cv::Scalar(0,255,255), 3);
+#endif
+    }
+    else
+    {
+        detect_QR = false;
+        QR_inform = "";
     }
 }
 

@@ -11,11 +11,11 @@ double_t convertCurYaw2FabsYawThetaBetweenPI(double_t _target_yaw, double_t _cur
 
     while (yaw_theta > M_PI)
     {
-        yaw_theta -= 2*M_PI;
+        yaw_theta -= 2 * M_PI;
     }
     while (yaw_theta < -M_PI)
     {
-        yaw_theta += 2*M_PI;
+        yaw_theta += 2 * M_PI;
     }
 
     return (_target_yaw - yaw_theta);

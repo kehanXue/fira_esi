@@ -238,7 +238,8 @@ vwpp::TaskHoverOnQR::TaskHoverOnQR()
 {
     p_task_base = new TaskBase(HOVERONQR);
 
-    cur_action_id = HOVERING;
+    // cur_action_id = HOVERING;
+    cur_action_id = ROTATION;
 
     p_task_base->task_state = TASK_START;
 }
@@ -295,15 +296,21 @@ char vwpp::TaskHoverOnQR::run(TaskID _cur_task_id, std::string _qr_inform)
             }
             if (inter_hovering_time == 2)
             {
-                static JudgeAchieveCounter judge_achieve_counter(
-                        DynamicRecfgInterface::getInstance()->getJudgeAchieveCounterThreshold());
-                if (judge_achieve_counter.isAchieve())
-                {
-                    p_task_base->task_state = TASK_FINISH;
-                    inter_hovering_time = 1;
 
-                    return _qr_inform.at(_qr_inform.size() - 1);
-                }
+                p_task_base->task_state = TASK_FINISH;
+                inter_hovering_time = 1;
+
+                return _qr_inform.at(_qr_inform.size() - 1);
+
+                // static JudgeAchieveCounter judge_achieve_counter(
+                //         DynamicRecfgInterface::getInstance()->getJudgeAchieveCounterThreshold());
+                // if (judge_achieve_counter.isAchieve())
+                // {
+                //     p_task_base->task_state = TASK_FINISH;
+                //     inter_hovering_time = 1;
+                //
+                //     return _qr_inform.at(_qr_inform.size() - 1);
+                // }
             }
         }
 
@@ -331,6 +338,7 @@ char vwpp::TaskHoverOnQR::run(TaskID _cur_task_id, std::string _qr_inform)
         ROS_INFO("Current task HoverOnQR action: ROTATION");
         // TODO
         Direction target_direction = LOCAL_FORWARD;         // Init
+        ROS_ERROR("Current task id: %d", _cur_task_id);
         switch (_qr_inform.at(_cur_task_id))
         {
             case 'N':
@@ -362,38 +370,47 @@ char vwpp::TaskHoverOnQR::run(TaskID _cur_task_id, std::string _qr_inform)
                 yaw_target = M_PI;
                 break;
             case LOCAL_RIGHT:
-                yaw_target = M_PI * 1.5;
+                // yaw_target = M_PI * 1.5;
+                yaw_target = -M_PI / 2.;
                 break;
         }
 
         ROS_ERROR("On QR rotating to %lf", yaw_target);
-        if (fabs(yaw_target - PX4Interface::getInstance()->getCurYaw()) <=
+        ROS_ERROR("Current yaw: %lf", PX4Interface::getInstance()->getCurYaw());
+        ROS_ERROR("Yaw theta: %lf", (fmod(fabs(yaw_target - PX4Interface::getInstance()->getCurYaw()), 2 * M_PI)));
+        // TODO
+        if (fmod(fabs(yaw_target - PX4Interface::getInstance()->getCurYaw()), 2 * M_PI) <=
             vwpp::DynamicRecfgInterface::getInstance()->getRotateYawTolerance() * M_PI / 180.)
         {
+            ROS_INFO("Get in +1!");
             static JudgeAchieveCounter judge_achieve_counter(
                     DynamicRecfgInterface::getInstance()->getJudgeAchieveCounterThreshold());
             if (judge_achieve_counter.isAchieve())
             {
-                cur_action_id = HOVERING;
+                // cur_action_id = HOVERING;
+                cur_action_id = ROTATION;
                 inter_hovering_time += 1;
+                p_task_base->task_state = TASK_FINISH;
+                ROS_WARN("Rotation task finished!");
+                inter_hovering_time = 1;
+                return _qr_inform.at(_qr_inform.size() - 1);
             }
         }
 
-        else
-        {
-            static ActionRotating action_rotating(DynamicRecfgInterface::getInstance()->getNormalFlightAltitude());
+        static ActionRotating action_rotating(DynamicRecfgInterface::getInstance()->getNormalFlightAltitude());
 
-            DroneVelocity drone_velocity = action_rotating.calculateVelocity(yaw_target,
-                                                                             PX4Interface::getInstance()->getCurYaw());
+        DroneVelocity drone_velocity = action_rotating.calculateVelocity(yaw_target,
+                                                                         PX4Interface::getInstance()->getCurYaw());
 
-            geometry_msgs::Twist cmd_vel;
-            cmd_vel.linear.x = drone_velocity.x;
-            cmd_vel.linear.y = drone_velocity.y;
-            cmd_vel.linear.z = drone_velocity.z;
-            cmd_vel.angular.z = drone_velocity.yaw;
+        geometry_msgs::Twist cmd_vel;
+        // cmd_vel.linear.x = drone_velocity.x;
+        // cmd_vel.linear.y = drone_velocity.y;
+        cmd_vel.linear.x = 0;
+        cmd_vel.linear.y = 0;
+        cmd_vel.linear.z = drone_velocity.z;
+        cmd_vel.angular.z = drone_velocity.yaw;
 
-            PX4Interface::getInstance()->publishLocalVel(cmd_vel);
-        }
+        PX4Interface::getInstance()->publishLocalVel(cmd_vel);
 
     }
 

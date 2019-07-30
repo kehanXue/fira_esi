@@ -250,6 +250,7 @@ DroneVelocity ActionRotating::calculateVelocity(double_t _target_yaw, double_t _
     pid_controller_p_local_x.setTarget(this->initial_p_x);
     pid_controller_p_local_y.setTarget(this->initial_p_y);
     pid_controller_p_local_z.setTarget(this->target_altitude);
+    ROS_ERROR("target altitude: %lf", this->target_altitude);
     pid_controller_p_local_yaw.setTarget(_target_yaw);
 
     pid_controller_p_local_x.update(vwpp::PX4Interface::getInstance()->getCurX());

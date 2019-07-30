@@ -53,27 +53,34 @@ int8_t vwpp::FlowController::run()
     {
         p_task_navigation->run();
 
-        // Switch to Avoidance
-        // if (VisionInterface::getInstance()->getYellowGateState())
-        // {
-        //     gate_type = YELLOW;
-        //     cur_task_id = AVOIDANCE;
-        //     ROS_INFO("Task switch to AVOIDANCE!");
-        // }
-        // else if (VisionInterface::getInstance()->getRedGateState())
-        // {
-        //     gate_type = RED;
-        //     cur_task_id = AVOIDANCE;
-        //     ROS_INFO("Task switch to AVOIDANCE!");
-        // }
-
-
-        // Switch to HoverOnQR
-        if (VisionInterface::getInstance()->getGroundQRState())
+        // TODO
+        static int64_t cnt = 0;
+        cnt++;
+        if (cnt > 20)
         {
-            cur_task_id = HOVERONQR;
-            // cur_task_id = LANDING;
-            ROS_INFO("Task switch to HOVERONQR!");
+            // Switch to Avoidance
+            // if (VisionInterface::getInstance()->getYellowGateState())
+            // {
+            //     gate_type = YELLOW;
+            //     cur_task_id = AVOIDANCE;
+            //     ROS_INFO("Task switch to AVOIDANCE!");
+            // }
+            // else if (VisionInterface::getInstance()->getRedGateState())
+            // {
+            //     gate_type = RED;
+            //     cur_task_id = AVOIDANCE;
+            //     ROS_INFO("Task switch to AVOIDANCE!");
+            // }
+
+            // Switch to HoverOnQR
+            ROS_ERROR("cnt:!!!!!!!!!!!!!!!!!!!!!!%ld", cnt);
+            if (VisionInterface::getInstance()->getGroundQRState())
+            {
+                cnt = 0;
+                cur_task_id = HOVERONQR;
+                // cur_task_id = LANDING;
+                ROS_INFO("Task switch to HOVERONQR!");
+            }
         }
 
     }
@@ -97,36 +104,39 @@ int8_t vwpp::FlowController::run()
         }
         else
         {
+            static TaskID target_task_type_id = DELIVERING;
+
             if (cur_qr_inform.empty() && !last_qr_inform.empty())
             {
                 cur_qr_inform = last_qr_inform;
             }
-            task_type_id = p_task_hover_on_qr->run(cur_task_id, cur_qr_inform);
+            task_type_id = p_task_hover_on_qr->run(target_task_type_id, cur_qr_inform);
             if (p_task_hover_on_qr->getTaskState() == TASK_FINISH)
             {
 
-                static char target_task_type_id = '1';
-                if (task_type_id == '0')
+                ROS_INFO("task_type_id:%d and target_task_type_id:%d", task_type_id - '0', target_task_type_id + 1);
+
+                if ((task_type_id - '0') == target_task_type_id + 1)
                 {
-                    cur_task_id = NAVIGATION;
-                    last_qr_inform = "";
-                    ROS_INFO("Task switch to NAVIGATION!");
-                }
-                else if (task_type_id == target_task_type_id)
-                {
-                    if (target_task_type_id == '1')
+                    if (target_task_type_id == DELIVERING)
                     {
                         cur_task_id = DELIVERING;
                         last_qr_inform = "";
                         ROS_INFO("Task switch to DELIVERING!");
-                        target_task_type_id = '4';
+                        target_task_type_id = LANDING;
                     }
-                    else if (target_task_type_id == '4')
+                    else if (target_task_type_id == LANDING)
                     {
                         cur_task_id = LANDING;
                         last_qr_inform = "";
                         ROS_INFO("Task switch to LANDING!");
                     }
+                }
+                else
+                {
+                    cur_task_id = NAVIGATION;
+                    last_qr_inform = "";
+                    ROS_INFO("Task switch to NAVIGATION!");
                 }
 
             }
