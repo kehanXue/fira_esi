@@ -10,6 +10,13 @@
 #include <yaml-cpp/yaml.h>
 #include <zbar.h>
 
+#ifdef TEST_ROS
+#include <cv_bridge/cv_bridge.h>
+#include <image_transport/image_transport.h>
+#include <dynamic_reconfigure/server.h>
+// #include "../../../devel/include/my_cv/vision_dynamic_reconfigureConfig.h"
+#endif
+
 #include <algorithm>
 #include <cmath>
 #include <cstdio>
@@ -104,11 +111,19 @@ private:
     void color_test3();
 
 private:
-    std::string int2str(int val);
     int getoneint(std::string name);
-    void setoneint(int x, std::string name);
     cv::Scalar getScalar(std::string name);
+    std::string int2str(int val);
+    void setoneint(int x, std::string name);
     void setScalar(cv::Scalar color, std::string name);
+
+#ifdef TEST
+#ifdef TEST_ROS
+private:
+    dynamic_reconfigure::Server<dynamic_reconfigure::vision_dynamic_reconfigureConfig> *server;
+    dynamic_reconfigure::Server<dynamic_reconfigure::vision_dynamic_reconfigureConfig>::CallbackType *server_callback;
+#endif
+#endif
 };
 
 #endif // MYCV_H

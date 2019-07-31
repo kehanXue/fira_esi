@@ -21,6 +21,8 @@ namespace vwpp
 
         virtual ~VisionInterface();
 
+        void destory();
+
         int8_t update();
 
         std::string getGroundQRinform();

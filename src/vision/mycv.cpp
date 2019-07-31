@@ -1,5 +1,69 @@
 #include "vision/mycv.h"
 
+static int line_x = 0;
+static int x[24] = {0};
+
+#ifdef TEST
+#ifdef TEST_ROS
+void callback(dynamic_reconfigure::vision_dynamic_reconfigureConfig &config)
+{
+    line_x = config.line_threshold;
+
+#ifdef USE_HSV
+    x[0] = config.HSV_min_yellow1;
+    x[1] = config.HSV_min_yellow2;
+    x[2] = config.HSV_min_yellow3;
+    x[3] = config.HSV_max_yellow1;
+    x[4] = config.HSV_max_yellow2;
+    x[5] = config.HSV_max_yellow3;
+    x[6] = config.HSV_min_red1;
+    x[7] = config.HSV_min_red2;
+    x[8] = config.HSV_min_red3;
+    x[9] = config.HSV_max_red1;
+    x[10] = config.HSV_max_red2;
+    x[11] = config.HSV_max_red3;
+    x[12] = config.HSV_min_blueH1;
+    x[13] = config.HSV_min_blueH2;
+    x[14] = config.HSV_min_blueH3;
+    x[15] = config.HSV_max_blueH1;
+    x[16] = config.HSV_max_blueH2;
+    x[17] = config.HSV_max_blueH3;
+    x[18] = config.HSV_min_redX1;
+    x[19] = config.HSV_min_redX2;
+    x[20] = config.HSV_min_redX3;
+    x[21] = config.HSV_max_redX1;
+    x[22] = config.HSV_max_redX2;
+    x[23] = config.HSV_max_redX3;
+#endif
+#ifdef USE_BGR
+    x[0] = config.BGR_min_yellow1;
+    x[1] = config.BGR_min_yellow2;
+    x[2] = config.BGR_min_yellow3;
+    x[3] = config.BGR_max_yellow1;
+    x[4] = config.BGR_max_yellow2;
+    x[5] = config.BGR_max_yellow3;
+    x[6] = config.BGR_min_red1;
+    x[7] = config.BGR_min_red2;
+    x[8] = config.BGR_min_red3;
+    x[9] = config.BGR_max_red1;
+    x[10] = config.BGR_max_red2;
+    x[11] = config.BGR_max_red3;
+    x[12] = config.BGR_min_blueH1;
+    x[13] = config.BGR_min_blueH2;
+    x[14] = config.BGR_min_blueH3;
+    x[15] = config.BGR_max_blueH1;
+    x[16] = config.BGR_max_blueH2;
+    x[17] = config.BGR_max_blueH3;
+    x[18] = config.BGR_min_redX1;
+    x[19] = config.BGR_min_redX2;
+    x[20] = config.BGR_min_redX3;
+    x[21] = config.BGR_max_redX1;
+    x[22] = config.BGR_max_redX2;
+    x[23] = config.BGR_max_redX3;
+#endif
+}
+#endif
+#endif
 
 MYCV::MYCV(int flag, ros::NodeHandle *pnh)
 {
@@ -91,6 +155,73 @@ MYCV::MYCV(int flag, ros::NodeHandle *pnh)
     blueH_location[1]       =   0.0;
     redX_location[0]        =   0.0;
     redX_location[1]        =   0.0;
+
+#ifdef TEST
+#ifdef TEST_ROS
+    line_x = getoneint("line_threshold");
+#ifdef USE_HSV
+    x[0] = getoneint("HSV_min_yellow1");
+    x[1] = getoneint("HSV_min_yellow2");
+    x[2] = getoneint("HSV_min_yellow3");
+    x[3] = getoneint("HSV_max_yellow1");
+    x[4] = getoneint("HSV_max_yellow2");
+    x[5] = getoneint("HSV_max_yellow3");
+    x[6] = getoneint("HSV_min_red1");
+    x[7] = getoneint("HSV_min_red2");
+    x[8] = getoneint("HSV_min_red3");
+    x[9] = getoneint("HSV_max_red1");
+    x[10] = getoneint("HSV_max_red2");
+    x[11] = getoneint("HSV_max_red3");
+    x[12] = getoneint("HSV_min_blueH1");
+    x[13] = getoneint("HSV_min_blueH2");
+    x[14] = getoneint("HSV_min_blueH3");
+    x[15] = getoneint("HSV_max_blueH1");
+    x[16] = getoneint("HSV_max_blueH2");
+    x[17] = getoneint("HSV_max_blueH3");
+    x[18] = getoneint("HSV_min_redX1");
+    x[19] = getoneint("HSV_min_redX2");
+    x[20] = getoneint("HSV_min_redX3");
+    x[21] = getoneint("HSV_max_redX1");
+    x[22] = getoneint("HSV_max_redX2");
+    x[23] = getoneint("HSV_max_redX3");
+#endif
+#ifdef USE_BGR
+    x[0] = getoneint("BGR_min_yellow1");
+    x[1] = getoneint("BGR_min_yellow2");
+    x[2] = getoneint("BGR_min_yellow3");
+    x[3] = getoneint("BGR_max_yellow1");
+    x[4] = getoneint("BGR_max_yellow2");
+    x[5] = getoneint("BGR_max_yellow3");
+    x[6] = getoneint("BGR_min_red1");
+    x[7] = getoneint("BGR_min_red2");
+    x[8] = getoneint("BGR_min_red3");
+    x[9] = getoneint("BGR_max_red1");
+    x[10] = getoneint("BGR_max_red2");
+    x[11] = getoneint("BGR_max_red3");
+    x[12] = getoneint("BGR_min_blueH1");
+    x[13] = getoneint("BGR_min_blueH2");
+    x[14] = getoneint("BGR_min_blueH3");
+    x[15] = getoneint("BGR_max_blueH1");
+    x[16] = getoneint("BGR_max_blueH2");
+    x[17] = getoneint("BGR_max_blueH3");
+    x[18] = getoneint("BGR_min_redX1");
+    x[19] = getoneint("BGR_min_redX2");
+    x[20] = getoneint("BGR_min_redX3");
+    x[21] = getoneint("BGR_max_redX1");
+    x[22] = getoneint("BGR_max_redX2");
+    x[23] = getoneint("BGR_max_redX3");
+#endif
+    static bool test_ros_first = true;
+    if(test_ros_first)
+    {
+        test_ros_first = false;
+        server = new(dynamic_reconfigure::Server<dynamic_reconfigure::vision_dynamic_reconfigureConfig>);
+        server_callback = new(dynamic_reconfigure::Server<dynamic_reconfigure::vision_dynamic_reconfigureConfig>::CallbackType);
+        *server_callback = boost::bind(&callback, _1);
+        server->setCallback(*server_callback);
+    }
+#endif
+#endif
 }
 
 void MYCV::cvmain()
@@ -147,12 +278,33 @@ void MYCV::cvmain()
     }
 
 #ifdef TEST
+#ifndef TEST_ROS
     if(flag_first)
     {
         flag_first = false;
         cv::namedWindow("VideoCapture image"+int2str(camera_type), 0);
     }
     cv::imshow("VideoCapture image"+int2str(camera_type), outimage);
+#endif
+
+#ifdef TEST_ROS
+    static image_transport::ImageTransport it(*nh);
+    static image_transport::Publisher pub0 = it.advertise("vision/out/downcamera", 1);
+    static image_transport::Publisher pub1 = it.advertise("vision/out/forwardcamera", 1);
+    std_msgs::Header header;
+    header.seq = 0;
+    header.stamp = ros::Time::now();
+    header.frame_id = "image"+int2str(camera_type);
+    sensor_msgs::ImagePtr msg = cv_bridge::CvImage(header, "bgr8", outimage).toImageMsg();
+    if(camera_type == Down_Camera)
+    {
+        pub0.publish(msg);
+    }
+    else if(camera_type == Forward_Camera)
+    {
+        pub1.publish(msg);
+    }
+#endif
 #endif
 }
 
@@ -162,14 +314,28 @@ void MYCV::findline(cv::Mat image)
     {
         flag_first_findlline = false;
         line_threshold = getoneint("line_threshold");
+        line_x = line_threshold;
     }
 
-    static int x = line_threshold;
-    if(x != line_threshold)
+#ifdef TEST
+#ifdef FIND_LINE
+#ifndef TEST_ROS
+    if(line_x != line_threshold)
     {
         setoneint(line_threshold, "line_threshold");
-        x = line_threshold;
+        line_x = line_threshold;
     }
+#endif
+
+#ifdef TEST_ROS
+    if(line_x != line_threshold)
+    {
+        setoneint(line_x, "line_threshold");
+        line_threshold = line_x;
+    }
+#endif
+#endif
+#endif
 
     Lineans.findmain(image, line_threshold, outimage);
     line_dis = Lineans.dis;
@@ -197,8 +363,10 @@ void MYCV::findgate(cv::Mat image)
 #endif
 
 #ifdef TEST
+#ifndef TEST_ROS
 #ifdef FIND_GATE
         color_test();
+#endif
 #endif
 #endif
     }
@@ -267,7 +435,7 @@ void MYCV::findQR(cv::Mat image)
 
         int QR_X = 0;
         int QR_Y = 0;
-        for(int i=0; i<symbol->get_location_size(); i++)
+        for(unsigned int i=0; i<symbol->get_location_size(); i++)
         {
             QR_X += symbol->get_location_x(i);
             QR_Y += symbol->get_location_y(i);
@@ -277,8 +445,8 @@ void MYCV::findQR(cv::Mat image)
         QR_location[1] = QR_Y/4.0;
 
 #ifdef TEST
-        cv::circle(outimage, cv::Point(QR_location[0], QR_location[1]), 5, cv::Scalar(0,255,0), 3);
-        cv::circle(outimage, cv::Point(QR_location[0], QR_location[1]), 20, cv::Scalar(0,255,0), 5);
+        cv::circle(outimage, cv::Point2d(QR_location[0], QR_location[1]), 5, cv::Scalar(0,255,0), 3);
+        cv::circle(outimage, cv::Point2d(QR_location[0], QR_location[1]), 20, cv::Scalar(0,255,0), 5);
 #endif
 
         resetpoint(QR_location, image);
@@ -304,7 +472,7 @@ void MYCV::findQR(cv::Mat image)
         QR_inform = ss;
 
 #ifdef TEST
-        cv::circle(outimage, cv::Point(QR_location[0], QR_location[1]), 3, cv::Scalar(0,255,255), 3);
+        cv::circle(outimage, cv::Point2d(QR_location[0], QR_location[1]), 3, cv::Scalar(0,255,255), 3);
 #endif
     }
     else
@@ -331,9 +499,11 @@ void MYCV::findblueH(cv::Mat image)
 #endif
 
 #ifdef TEST
+#ifndef TEST_ROS
 #ifdef FIND_BLUEH
         color_test2();
         cv::namedWindow("blueH", 0);
+#endif
 #endif
 #endif
     }
@@ -379,7 +549,20 @@ void MYCV::findblueH(cv::Mat image)
 
 #ifdef TEST
 #ifdef FIND_BLUEH
+#ifndef TEST_ROS
     cv::imshow("blueH", outimage_blueH);
+#endif
+
+#ifdef TEST_ROS
+    static image_transport::ImageTransport it(*nh);
+    static image_transport::Publisher pub = it.advertise("vision/out/blueH", 1);
+    std_msgs::Header header;
+    header.seq = 0;
+    header.stamp = ros::Time::now();
+    header.frame_id = "blueH";
+    sensor_msgs::ImagePtr msg = cv_bridge::CvImage(header, "mono8", outimage_blueH).toImageMsg();
+    pub.publish(msg);
+#endif
 #endif
 #endif
 
@@ -390,8 +573,8 @@ void MYCV::findblueH(cv::Mat image)
         blueH_location[1] = 1.0* sum_blue_cols / number_blue;
 
 #ifdef TEST
-        cv::circle(outimage, cv::Point(blueH_location[0], blueH_location[1]), 5, cv::Scalar(255,0,0), 3);
-        cv::circle(outimage, cv::Point(blueH_location[0], blueH_location[1]), 20, cv::Scalar(255,0,0), 5);
+        cv::circle(outimage, cv::Point2d(blueH_location[0], blueH_location[1]), 5, cv::Scalar(255,0,0), 3);
+        cv::circle(outimage, cv::Point2d(blueH_location[0], blueH_location[1]), 20, cv::Scalar(255,0,0), 5);
 #endif
     }
     else
@@ -417,9 +600,11 @@ void MYCV::findredX(cv::Mat image)
 #endif
 
 #ifdef TEST
+#ifndef TEST_ROS
 #ifdef FIND_REDX
         color_test3();
         cv::namedWindow("redX", 0);
+#endif
 #endif
 #endif
     }
@@ -467,7 +652,20 @@ void MYCV::findredX(cv::Mat image)
 
 #ifdef TEST
 #ifdef FIND_REDX
+#ifndef TEST_ROS
     cv::imshow("redX", outimage_redX);
+#endif
+
+#ifdef TEST_ROS
+    static image_transport::ImageTransport it(*nh);
+    static image_transport::Publisher pub = it.advertise("vision/out/redX", 1);
+    std_msgs::Header header;
+    header.seq = 0;
+    header.stamp = ros::Time::now();
+    header.frame_id = "redX";
+    sensor_msgs::ImagePtr msg = cv_bridge::CvImage(header, "mono8", outimage_redX).toImageMsg();
+    pub.publish(msg);
+#endif
 #endif
 #endif
 
@@ -478,8 +676,8 @@ void MYCV::findredX(cv::Mat image)
         redX_location[1] = 1.0* sum_red_cols / number_red;
 
 #ifdef TEST
-        cv::circle(outimage, cv::Point(redX_location[0], redX_location[1]), 5, cv::Scalar(0,0,255), 3);
-        cv::circle(outimage, cv::Point(redX_location[0], redX_location[1]), 20, cv::Scalar(0,0,255), 5);
+        cv::circle(outimage, cv::Point2d(redX_location[0], redX_location[1]), 5, cv::Scalar(0,0,255), 3);
+        cv::circle(outimage, cv::Point2d(redX_location[0], redX_location[1]), 20, cv::Scalar(0,0,255), 5);
 #endif
     }
     else
@@ -497,6 +695,7 @@ cv::Point3d MYCV::color_thing(cv::Mat image, cv::Scalar min_color, cv::Scalar ma
 
 #ifdef TEST
 #ifdef FIND_GATE
+#ifndef TEST_ROS
     static bool flag_first = true;
     static bool flag_second = true;
     if(flag_first || flag_second)
@@ -512,6 +711,26 @@ cv::Point3d MYCV::color_thing(cv::Mat image, cv::Scalar min_color, cv::Scalar ma
         cv::namedWindow(name, 0);
     }
     cv::imshow(name, thresholdimage);
+#endif
+
+#ifdef TEST_ROS
+    static image_transport::ImageTransport it(*nh);
+    static image_transport::Publisher pub = it.advertise("vision/out/yellow", 1);
+    static image_transport::Publisher pub2 = it.advertise("vision/out/red", 1);
+    std_msgs::Header header;
+    header.seq = 0;
+    header.stamp = ros::Time::now();
+    header.frame_id = name;
+    sensor_msgs::ImagePtr msg = cv_bridge::CvImage(header, "mono8", thresholdimage).toImageMsg();
+    if(name == "yellow")
+    {
+        pub.publish(msg);
+    }
+    else if(name == "red")
+    {
+        pub2.publish(msg);
+    }
+#endif
 #endif
 #endif
 
@@ -580,7 +799,7 @@ cv::Point3d MYCV::color_thing(cv::Mat image, cv::Scalar min_color, cv::Scalar ma
             else
             {
                 return cv::Point3d(rect_array[i].x+rect_array[i].width/2.0, rect_array[i].y+rect_array[i].height/2.0,
-                                   image.cols/rect_array[i].width*0.75*sqrt(3.0));
+                                   1.0*image.cols/rect_array[i].width*0.75*sqrt(3.0));
             }
         }
     }
@@ -626,8 +845,6 @@ void MYCV::resetpoint(double point[], cv::Mat image)
     point[0] = mid.x;
     point[1] = mid.y;
 }
-
-static int x[24] = {0};
 
 void MYCV::check()
 {
@@ -848,13 +1065,6 @@ void MYCV::color_test3()
 #endif
 }
 
-std::string MYCV::int2str(int val)
-{
-    std::ostringstream out;
-    out<<val;
-    return out.str();
-}
-
 int MYCV::getoneint(std::string name)
 {
     int x=0;
@@ -862,6 +1072,24 @@ int MYCV::getoneint(std::string name)
     nh->getParam(param_topic+name, x);
 
     return x;
+}
+
+cv::Scalar MYCV::getScalar(std::string name)
+{
+    int x1=0, x2=0, x3=0;
+
+    nh->getParam(param_topic+name+"1", x1);
+    nh->getParam(param_topic+name+"2", x2);
+    nh->getParam(param_topic+name+"3", x3);
+
+    return cv::Scalar(x1,x2,x3);
+}
+
+std::string MYCV::int2str(int val)
+{
+    std::ostringstream out;
+    out<<val;
+    return out.str();
 }
 
 void MYCV::setoneint(int x, std::string name)
@@ -876,17 +1104,6 @@ void MYCV::setoneint(int x, std::string name)
     file.flush();
     file << yamlConfig;
     file.close();
-}
-
-cv::Scalar MYCV::getScalar(std::string name)
-{
-    double x1=0.0, x2=0.0, x3=0.0;
-
-    nh->getParam(param_topic+name+"1", x1);
-    nh->getParam(param_topic+name+"2", x2);
-    nh->getParam(param_topic+name+"3", x3);
-
-    return cv::Scalar(x1,x2,x3);
 }
 
 void MYCV::setScalar(cv::Scalar color, std::string name)
@@ -908,9 +1125,20 @@ void MYCV::setScalar(cv::Scalar color, std::string name)
 
 void MYCV::destory()
 {
-    vc.release();
-    zed.close();
+    if(vc.isOpened())
+    {
+        vc.release();
+    }
+    if(zed.isOpened())
+    {
+        zed.close();
+    }
+
+#ifdef TEST
+#ifndef TEST_ROS
     cv::destroyAllWindows();
+#endif
+#endif
 }
 
 void MYCV::open_findline()

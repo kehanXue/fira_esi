@@ -22,6 +22,7 @@ void FindLines::findmain(cv::Mat image, int &line_threshold, cv::Mat &outimage)
 
 #ifdef TEST
 #ifdef FIND_LINE
+#ifndef TEST_ROS
 	if(flag_first)
 	{
 		flag_first = false;
@@ -31,13 +32,36 @@ void FindLines::findmain(cv::Mat image, int &line_threshold, cv::Mat &outimage)
 	}
 	cv::imshow("line_threshold", image);
 #endif
+
+#ifdef TEST_ROS
+	static ros::NodeHandle nh;
+	static image_transport::ImageTransport it(nh);
+	static image_transport::Publisher pub = it.advertise("vision/out/line_threshold", 1);
+	std_msgs::Header header;
+	header.seq = 0;
+	header.stamp = ros::Time::now();
+	header.frame_id = "line_threshold";
+	sensor_msgs::ImagePtr msg = cv_bridge::CvImage(header, "mono8", image).toImageMsg();
+	pub.publish(msg);
+#endif
+#endif
 #endif
 
 	cv::Canny(image, image, 50, 100);
 
 #ifdef TEST
 #ifdef FIND_LINE
-	//cv::imshow("line_canny", image);
+#ifndef TEST_ROS
+	cv::imshow("line_canny", image);
+#endif
+
+#ifdef TEST_ROS
+	static image_transport::Publisher pub2 = it.advertise("vision/out/line_canny", 1);
+	header.stamp = ros::Time::now();
+	header.frame_id = "line_canny";
+	msg = cv_bridge::CvImage(header, "mono8", image).toImageMsg();
+	pub2.publish(msg);
+#endif
 #endif
 #endif
 
@@ -137,7 +161,7 @@ void FindLines::findmain(cv::Mat image, int &line_threshold, cv::Mat &outimage)
 
 LineSort FindLines::finde(cv::Mat &image)
 {
-	unsigned int midnum = 0;
+	unsigned long midnum = 0;
 	cv::Point maina, mainb;
 	if(!ans.empty())
 	{
@@ -297,6 +321,24 @@ void FindLines::outputans()
 		if(aim.A.y==aim.B.y)
 			rot	= 0.0;
 		else
-			rot	= atan(1.0*(aim.A.x-aim.B.x)/Image_Height);
+			rot	= atan(1.0*(aim.A.y-aim.B.y)/Image_Width);
 	}
+}
+
+void FindLines::turndir()
+{
+	vertical 	= !vertical;
+	transverse 	= !transverse;
+}
+
+void FindLines::turnver()
+{
+	vertical 	= true;
+	transverse 	= false;
+}
+
+void FindLines::turntra()
+{
+	vertical 	= false;
+	transverse 	= true;
 }

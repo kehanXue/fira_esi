@@ -9,7 +9,7 @@
 #define Image_Height		480
 //#define Image_Width		1920
 //#define Image_Height		1080
-#define	KP_Of_Translation	1.0
+#define	KP_Of_Translation	0.95
 #define	Maxk				1000
 
 class LineSort
