@@ -106,6 +106,8 @@ namespace vwpp
 
         TaskBase* p_task_base;
 
+        ActionTrackingLine* p_action_tracking_line;
+
         ActionID cur_action_id;
 
         int64_t runtime;
@@ -134,6 +136,8 @@ namespace vwpp
 
         int8_t run(GateType _gate_type);
 
+        int8_t resetAdjustAltitudeOnXY(double_t _hover_x, double_t _hover_y, double_t _hold_yaw);
+
     private:
 
         TaskBase* p_task_base;
@@ -141,6 +145,10 @@ namespace vwpp
         ActionID cur_action_id;
 
         double_t altitude_target;
+
+        ActionAdjustAltitude* p_action_adjust_altitude;
+        ActionTrackingLine* p_action_tracking_line;
+
 
         // TODO Timer
         int64_t forward_counter;
