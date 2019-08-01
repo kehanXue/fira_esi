@@ -13,131 +13,138 @@
 #include "controller/PIDController.h"
 #include "utils/utils.h"
 
-
-enum ActionID
+namespace vwpp
 {
-    TRACKINGLINE = 0,
-    ADJUSTALTITUDE,
-    HOVERING,
-    ROTATION,
-    OPENCLAW,
-    CIRCULARMOTION  //TODO
-};
-
-struct DroneVelocity
-{
-    double_t x;
-    double_t y;
-    double_t z;
-    double_t yaw;
-};
 
 
-class ActionBase
-{
-public:
-    ActionBase();
+    enum ActionID
+    {
+        TRACKINGLINE = 0,
+        ADJUSTALTITUDE,
+        HOVERING,
+        ROTATION,
+        OPENCLAW,
+        CIRCULARMOTION  //TODO
+    };
 
-    virtual ~ActionBase();
-
-    ActionID action_id;
-
-private:
-
-};
-
-class ActionTrackingLine
-{
-public:
-
-    explicit ActionTrackingLine(double_t _target_altitude);
-
-    virtual ~ActionTrackingLine();
-
-    ActionID getActionID();
-
-    DroneVelocity calculateVelocity(double_t _cur_line_v_y, double_t _cur_v_yaw,
-                                    double_t _forward_vel = vwpp::DynamicRecfgInterface::getInstance()->getForwardVel());
-
-private:
-
-    double_t target_altitude;
-
-    // TODO ptr
-    tf::TransformListener odom_base_tf_listener;
-
-    ActionID action_id;
-};
+    struct DroneVelocity
+    {
+        double_t x;
+        double_t y;
+        double_t z;
+        double_t yaw;
+    };
 
 
-class ActionAdjustAltitude
-{
-public:
+    class ActionBase
+    {
+    public:
+        ActionBase();
 
-    ActionAdjustAltitude();
+        virtual ~ActionBase();
 
-    virtual ~ActionAdjustAltitude();
+        ActionID action_id;
 
-    ActionID getActionId() const;
+    private:
 
-    DroneVelocity calculateVelocity(double_t _target_altitude, double_t _cur_altitude);
+    };
 
-private:
+    class ActionTrackingLine
+    {
+    public:
 
-    double_t initial_p_x;
-    double_t initial_p_y;
-    double_t initial_p_yaw;
+        explicit ActionTrackingLine(double_t _target_altitude);
 
-    ActionID action_id;
+        virtual ~ActionTrackingLine();
 
-};
+        ActionID getActionID();
+
+        TargetVelXYPosZYaw calculateVelocity(double_t _cur_line_v_y, double_t _cur_v_yaw,
+                                        double_t _forward_vel = vwpp::DynamicRecfgInterface::getInstance()->getForwardVel());
 
 
-class ActionHovering
-{
-public:
 
-    explicit ActionHovering(double_t _target_altitude);
+    private:
 
-    virtual ~ActionHovering();
+        double_t target_altitude;
 
-    ActionID getActionId() const;
+        // TODO ptr
+        tf::TransformListener odom_base_tf_listener;
 
-    DroneVelocity calculateVelocity(double_t _cur_v_x, double_t _cur_v_y);
+        ActionID action_id;
+    };
 
-private:
 
-    double_t target_altitude;
-    double_t target_yaw;
+    class ActionAdjustAltitude
+    {
+    public:
 
-    tf::TransformListener odom_base_tf_listener;
+        ActionAdjustAltitude();
 
-    ActionID action_id;
-};
+        virtual ~ActionAdjustAltitude();
 
-class ActionRotating
-{
-public:
+        ActionID getActionId() const;
 
-    explicit ActionRotating(double_t _target_altitude);
+        TargetPosXYZYaw calculateVelocity(double_t _target_altitude, double_t _cur_altitude);
 
-    virtual ~ActionRotating();
+        int8_t setAdjustAltitudeXYYaw(double_t _on_x, double_t _on_y, double_t _on_yaw);
 
-    ActionID getActionId() const;
+    private:
 
-    DroneVelocity calculateVelocity(double_t _target_yaw, double_t _cur_yaw);
+        double_t on_p_x;
+        double_t on_p_y;
+        double_t on_p_yaw;
 
-    int8_t setHoverOnXY(double_t _hover_x, double_t _hover_y);
+        ActionID action_id;
 
-private:
+    };
 
-    double_t target_altitude;
 
-    // TODO Add to Constructor?
-    double_t initial_p_x;
-    double_t initial_p_y;
+    class ActionHovering
+    {
+    public:
 
-    ActionID action_id;
-};
+        explicit ActionHovering(double_t _target_altitude);
+
+        virtual ~ActionHovering();
+
+        ActionID getActionId() const;
+
+        TargetVelXYPosZYaw calculateVelocity(double_t _cur_v_x, double_t _cur_v_y);
+
+    private:
+
+        double_t target_altitude;
+        double_t target_yaw;
+
+        tf::TransformListener odom_base_tf_listener;
+
+        ActionID action_id;
+    };
+
+    class ActionRotating
+    {
+    public:
+
+        explicit ActionRotating(double_t _target_altitude);
+
+        virtual ~ActionRotating();
+
+        ActionID getActionId() const;
+
+        TargetPosXYZYaw calculateVelocity(double_t _target_yaw, double_t _cur_yaw);
+
+        int8_t setRotatingOnXY(double_t _hover_x, double_t _hover_y);
+
+    private:
+
+        double_t target_altitude;
+
+        double_t on_p_x;
+        double_t on_p_y;
+
+        ActionID action_id;
+    };
+}
 
 #endif //FIRA_ESI_ACTION_H_

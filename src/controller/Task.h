@@ -160,7 +160,7 @@ namespace vwpp
 
         char run(TaskID _cur_task_id, std::string _qr_inform);
 
-        int8_t resetHoverOnXY(double_t _hover_x, double_t _hover_y);
+        int8_t resetRotatingOnXY(double_t _hover_x, double_t _hover_y);
 
     private:
         TaskBase* p_task_base;

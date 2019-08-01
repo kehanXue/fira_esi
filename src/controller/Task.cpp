@@ -74,18 +74,13 @@ int8_t vwpp::TaskNavigation::run()
         static ActionTrackingLine action_tracking_line(
                 vwpp::DynamicRecfgInterface::getInstance()->getNormalFlightAltitude());
 
-        DroneVelocity drone_velocity =
+        TargetVelXYPosZYaw target_vel_xy_pos_z_yaw =
                 action_tracking_line.calculateVelocity(
                         vwpp::VisionInterface::getInstance()->getLineOffset(),
-                        vwpp::VisionInterface::getInstance()->getLineRotation());
+                        vwpp::VisionInterface::getInstance()->getLineRotation()
+                );
 
-        geometry_msgs::Twist cmd_vel;
-        cmd_vel.linear.x = drone_velocity.x;
-        cmd_vel.linear.y = drone_velocity.y;
-        cmd_vel.linear.z = drone_velocity.z;
-        cmd_vel.angular.z = drone_velocity.yaw;
-
-        PX4Interface::getInstance()->publishLocalVel(cmd_vel);
+        PX4Interface::getInstance()->publishTarget(target_vel_xy_pos_z_yaw);
     }
 
     return 0;
@@ -138,7 +133,7 @@ int8_t vwpp::TaskAvoidance::run(GateType _gate_type)
     // VisionInterface::getInstance()->update();
     // PX4Interface::getInstance()->update();
 
-    geometry_msgs::Twist cmd_vel;
+    // geometry_msgs::Twist cmd_vel;
     static int inter_adjust_altitude_time = 1;
 
     if (cur_action_id == ADJUSTALTITUDE)
@@ -159,15 +154,17 @@ int8_t vwpp::TaskAvoidance::run(GateType _gate_type)
             }
 
 
+            // TODO initial_x, y
             // TODO ptr
             static ActionAdjustAltitude action_adjust_altitude;
-            DroneVelocity drone_velocity = action_adjust_altitude.calculateVelocity(this->altitude_target,
-                                                                                    PX4Interface::getInstance()->getCurZ());
+            TargetPosXYZYaw target_pos_xyz_yaw = action_adjust_altitude.calculateVelocity(this->altitude_target,
+                                                                                          PX4Interface::getInstance()->getCurZ());
 
-            cmd_vel.linear.x = drone_velocity.x;
-            cmd_vel.linear.y = drone_velocity.y;
-            cmd_vel.linear.z = drone_velocity.z;
-            cmd_vel.angular.z = drone_velocity.yaw;
+            // cmd_vel.linear.x = drone_velocity.x;
+            // cmd_vel.linear.y = drone_velocity.y;
+            // cmd_vel.linear.z = drone_velocity.z;
+            // cmd_vel.angular.z = drone_velocity.yaw;
+            PX4Interface::getInstance()->publishTarget(target_pos_xyz_yaw);
 
 
             if (fabs(PX4Interface::getInstance()->getCurZ() - altitude_target) <=
@@ -188,14 +185,16 @@ int8_t vwpp::TaskAvoidance::run(GateType _gate_type)
                     vwpp::DynamicRecfgInterface::getInstance()->getNormalFlightAltitude();
 
 
+            // TODO initial_x, y
             static ActionAdjustAltitude action_adjust_altitude;
-            DroneVelocity drone_velocity = action_adjust_altitude.calculateVelocity(this->altitude_target,
-                                                                                    PX4Interface::getInstance()->getCurZ());
+            TargetPosXYZYaw target_pos_xyz_yaw = action_adjust_altitude.calculateVelocity(this->altitude_target,
+                                                                                          PX4Interface::getInstance()->getCurZ());
 
-            cmd_vel.linear.x = drone_velocity.x;
-            cmd_vel.linear.y = drone_velocity.y;
-            cmd_vel.linear.z = drone_velocity.z;
-            cmd_vel.angular.z = drone_velocity.yaw;
+            // cmd_vel.linear.x = drone_velocity.x;
+            // cmd_vel.linear.y = drone_velocity.y;
+            // cmd_vel.linear.z = drone_velocity.z;
+            // cmd_vel.angular.z = drone_velocity.yaw;
+            PX4Interface::getInstance()->publishTarget(target_pos_xyz_yaw);
 
 
             if (fabs(PX4Interface::getInstance()->getCurZ() - altitude_target) <=
@@ -228,20 +227,21 @@ int8_t vwpp::TaskAvoidance::run(GateType _gate_type)
         }
 
         static ActionTrackingLine action_tracking_line(this->altitude_target);
-        DroneVelocity drone_velocity =
+        TargetVelXYPosZYaw target_vel_xy_pos_z_yaw =
                 action_tracking_line.calculateVelocity(
                         vwpp::VisionInterface::getInstance()->getLineOffset(),
                         vwpp::VisionInterface::getInstance()->getLineRotation());
 
 
-        cmd_vel.linear.x = drone_velocity.x;
-        cmd_vel.linear.y = drone_velocity.y;
-        cmd_vel.linear.z = drone_velocity.z;
-        cmd_vel.angular.z = drone_velocity.yaw;
+        PX4Interface::getInstance()->publishTarget(target_vel_xy_pos_z_yaw);
+        // cmd_vel.linear.x = drone_velocity.x;
+        // cmd_vel.linear.y = drone_velocity.y;
+        // cmd_vel.linear.z = drone_velocity.z;
+        // cmd_vel.angular.z = drone_velocity.yaw;
 
     }
 
-    PX4Interface::getInstance()->publishLocalVel(cmd_vel);
+    // PX4Interface::getInstance()->publishSetpointVel(cmd_vel);
     p_task_base->task_state = TASK_PROCESSING;
     return 0;
 
@@ -345,7 +345,7 @@ char vwpp::TaskHoverOnQR::run(TaskID _cur_task_id, std::string _qr_inform)
         cmd_vel.linear.z = drone_velocity.z;
         cmd_vel.angular.z = drone_velocity.yaw;
 
-        PX4Interface::getInstance()->publishLocalVel(cmd_vel);
+        // PX4Interface::getInstance()->publishSetpointVel(cmd_vel);
 
     }
     else if (cur_action_id == ROTATION)
@@ -413,18 +413,24 @@ char vwpp::TaskHoverOnQR::run(TaskID _cur_task_id, std::string _qr_inform)
         }
         // action_rotating(DynamicRecfgInterface::getInstance()->getNormalFlightAltitude());
 
-        DroneVelocity drone_velocity = action_rotating.calculateVelocity(yaw_target,
-                                                                         PX4Interface::getInstance()->getCurYaw());
 
-        geometry_msgs::Twist cmd_vel;
-        cmd_vel.linear.x = drone_velocity.x;
-        cmd_vel.linear.y = drone_velocity.y;
+        TargetPosXYZYaw target_pos_xyz_yaw = action_rotating.calculateVelocity(yaw_target,
+                                                                               PX4Interface::getInstance()->getCurYaw());
+
+        PX4Interface::getInstance()->publishTarget(target_pos_xyz_yaw);
+
+        // DroneVelocity drone_velocity = action_rotating.calculateVelocity(yaw_target,
+        //                                                                  PX4Interface::getInstance()->getCurYaw());
+
+        // geometry_msgs::Twist cmd_vel;
+        // cmd_vel.linear.x = drone_velocity.x;
+        // cmd_vel.linear.y = drone_velocity.y;
         // cmd_vel.linear.x = 0;
         // cmd_vel.linear.y = 0;
-        cmd_vel.linear.z = drone_velocity.z;
-        cmd_vel.angular.z = drone_velocity.yaw;
+        // cmd_vel.linear.z = drone_velocity.z;
+        // cmd_vel.angular.z = drone_velocity.yaw;
 
-        PX4Interface::getInstance()->publishLocalVel(cmd_vel);
+        // PX4Interface::getInstance()->publishSetpointVel(cmd_vel);
 
     }
 
@@ -433,9 +439,9 @@ char vwpp::TaskHoverOnQR::run(TaskID _cur_task_id, std::string _qr_inform)
 }
 
 
-int8_t vwpp::TaskHoverOnQR::resetHoverOnXY(double_t _hover_x, double_t _hover_y)
+int8_t vwpp::TaskHoverOnQR::resetRotatingOnXY(double_t _hover_x, double_t _hover_y)
 {
-    action_rotating.setHoverOnXY(_hover_x, _hover_y);
+    action_rotating.setRotatingOnXY(_hover_x, _hover_y);
     return 0;
 }
 
@@ -485,18 +491,19 @@ int8_t vwpp::TaskDelivering::run()
         static ActionTrackingLine action_tracking_line(
                 DynamicRecfgInterface::getInstance()->getNormalFlightAltitude());
 
-        DroneVelocity drone_velocity =
+        TargetVelXYPosZYaw target_vel_xy_pos_z_yaw =
                 action_tracking_line.calculateVelocity(
                         vwpp::VisionInterface::getInstance()->getLineOffset(),
                         vwpp::VisionInterface::getInstance()->getLineRotation());
 
-        geometry_msgs::Twist cmd_vel;
-        cmd_vel.linear.x = drone_velocity.x;
-        cmd_vel.linear.y = drone_velocity.y;
-        cmd_vel.linear.z = drone_velocity.z;
-        cmd_vel.angular.z = drone_velocity.yaw;
-
-        PX4Interface::getInstance()->publishLocalVel(cmd_vel);
+        PX4Interface::getInstance()->publishTarget(target_vel_xy_pos_z_yaw);
+        // geometry_msgs::Twist cmd_vel;
+        // cmd_vel.linear.x = drone_velocity.x;
+        // cmd_vel.linear.y = drone_velocity.y;
+        // cmd_vel.linear.z = drone_velocity.z;
+        // cmd_vel.angular.z = drone_velocity.yaw;
+        //
+        // PX4Interface::getInstance()->publishSetpointVel(cmd_vel);
     }
     else if (cur_action_id == HOVERING)
     {
@@ -513,6 +520,7 @@ int8_t vwpp::TaskDelivering::run()
                 cur_action_id = OPENCLAW;
             }
         }
+        // TODO
 
         static ActionHovering action_hovering(DynamicRecfgInterface::getInstance()->getNormalFlightAltitude());
         DroneVelocity drone_velocity =
@@ -525,7 +533,7 @@ int8_t vwpp::TaskDelivering::run()
         cmd_vel.linear.z = drone_velocity.z;
         cmd_vel.angular.z = drone_velocity.yaw;
 
-        PX4Interface::getInstance()->publishLocalVel(cmd_vel);
+        PX4Interface::getInstance()->publishSetpointVel(cmd_vel);
     }
     else if (cur_action_id == OPENCLAW)
     {
@@ -541,7 +549,7 @@ int8_t vwpp::TaskDelivering::run()
     {
 
         // TODO Maybe problems
-        if (fabs(PX4Interface::getInstance()->getCurYaw() - back_toward_yaw) <=
+        if (fmod(fabs(PX4Interface::getInstance()->getCurYaw() - back_toward_yaw), 2 * M_PI) <=
             vwpp::DynamicRecfgInterface::getInstance()->getRotateYawTolerance() * M_PI / 180.)
         {
             static JudgeAchieveCounter judge_achieve_counter(
@@ -554,17 +562,18 @@ int8_t vwpp::TaskDelivering::run()
         }
 
         static ActionRotating action_rotating(DynamicRecfgInterface::getInstance()->getNormalFlightAltitude());
-        DroneVelocity drone_velocity =
+        TargetPosXYZYaw target_pos_xyz_yaw =
                 action_rotating.calculateVelocity(back_toward_yaw,
                                                   PX4Interface::getInstance()->getCurYaw());
 
-        geometry_msgs::Twist cmd_vel;
-        cmd_vel.linear.x = drone_velocity.x;
-        cmd_vel.linear.y = drone_velocity.y;
-        cmd_vel.linear.z = drone_velocity.z;
-        cmd_vel.angular.z = drone_velocity.yaw;
+        PX4Interface::getInstance()->publishTarget(target_pos_xyz_yaw);
+        // geometry_msgs::Twist cmd_vel;
+        // cmd_vel.linear.x = drone_velocity.x;
+        // cmd_vel.linear.y = drone_velocity.y;
+        // cmd_vel.linear.z = drone_velocity.z;
+        // cmd_vel.angular.z = drone_velocity.yaw;
 
-        PX4Interface::getInstance()->publishLocalVel(cmd_vel);
+        // PX4Interface::getInstance()->publishSetpointVel(cmd_vel);
     }
 
     p_task_base->task_state = TASK_PROCESSING;
@@ -615,17 +624,18 @@ int8_t vwpp::TaskLanding::run()
 
         static ActionTrackingLine action_tracking_line(DynamicRecfgInterface::getInstance()->getNormalFlightAltitude());
 
-        DroneVelocity drone_velocity =
+        TargetVelXYPosZYaw target_vel_xy_pos_z_yaw =
                 action_tracking_line.calculateVelocity(VisionInterface::getInstance()->getLineOffset(),
                                                        VisionInterface::getInstance()->getLineRotation());
 
-        geometry_msgs::Twist cmd_vel;
-        cmd_vel.linear.x = drone_velocity.x;
-        cmd_vel.linear.y = drone_velocity.y;
-        cmd_vel.linear.z = drone_velocity.z;
-        cmd_vel.angular.z = drone_velocity.yaw;
-
-        PX4Interface::getInstance()->publishLocalVel(cmd_vel);
+        PX4Interface::getInstance()->publishTarget(target_vel_xy_pos_z_yaw);
+        // geometry_msgs::Twist cmd_vel;
+        // cmd_vel.linear.x = drone_velocity.x;
+        // cmd_vel.linear.y = drone_velocity.y;
+        // cmd_vel.linear.z = drone_velocity.z;
+        // cmd_vel.angular.z = drone_velocity.yaw;
+        //
+        // PX4Interface::getInstance()->publishSetpointVel(cmd_vel);
     }
     else if (cur_action_id == HOVERING)
     {
@@ -643,6 +653,7 @@ int8_t vwpp::TaskLanding::run()
             }
         }
 
+        // TODO
         static ActionHovering action_hovering(DynamicRecfgInterface::getInstance()->getNormalFlightAltitude());
         DroneVelocity drone_velocity = action_hovering.calculateVelocity(VisionInterface::getInstance()->getBlueHx(),
                                                                          VisionInterface::getInstance()->getBlueHy());
@@ -654,7 +665,7 @@ int8_t vwpp::TaskLanding::run()
         cmd_vel.linear.z = drone_velocity.z;
         cmd_vel.angular.z = drone_velocity.yaw;
 
-        PX4Interface::getInstance()->publishLocalVel(cmd_vel);
+        PX4Interface::getInstance()->publishSetpointVel(cmd_vel);
     }
     else if (cur_action_id == ADJUSTALTITUDE)
     {
@@ -676,16 +687,18 @@ int8_t vwpp::TaskLanding::run()
         }
 
         static ActionAdjustAltitude action_adjust_altitude;
-        DroneVelocity drone_velocity = action_adjust_altitude.calculateVelocity(altitude_target,
-                                                                                PX4Interface::getInstance()->getCurZ());
+        TargetPosXYZYaw target_pos_xyz_yaw
+                = action_adjust_altitude.calculateVelocity(altitude_target,
+                                                           PX4Interface::getInstance()->getCurZ());
 
-        geometry_msgs::Twist cmd_vel;
-        cmd_vel.linear.x = drone_velocity.x;
-        cmd_vel.linear.y = drone_velocity.y;
-        cmd_vel.linear.z = drone_velocity.z;
-        cmd_vel.angular.z = drone_velocity.yaw;
-
-        PX4Interface::getInstance()->publishLocalVel(cmd_vel);
+        PX4Interface::getInstance()->publishTarget(target_pos_xyz_yaw);
+        // geometry_msgs::Twist cmd_vel;
+        // cmd_vel.linear.x = drone_velocity.x;
+        // cmd_vel.linear.y = drone_velocity.y;
+        // cmd_vel.linear.z = drone_velocity.z;
+        // cmd_vel.angular.z = drone_velocity.yaw;
+        //
+        // PX4Interface::getInstance()->publishSetpointVel(cmd_vel);
 
     }
 
@@ -749,18 +762,19 @@ int8_t vwpp::TaskTakeoff::run()
         }
 
         static ActionAdjustAltitude action_adjust_altitude;
-        DroneVelocity drone_velocity =
+        TargetPosXYZYaw target_pos_xyz_yaw =
                 action_adjust_altitude.calculateVelocity(altitude_target,
                                                          PX4Interface::getInstance()->getCurZ());
 
+        PX4Interface::getInstance()->publishTarget(target_pos_xyz_yaw);
 
-        geometry_msgs::Twist cmd_vel;
-        cmd_vel.linear.x = drone_velocity.x;
-        cmd_vel.linear.y = drone_velocity.y;
-        cmd_vel.linear.z = drone_velocity.z;
-        cmd_vel.angular.z = drone_velocity.yaw;
-
-        PX4Interface::getInstance()->publishLocalVel(cmd_vel);
+        // geometry_msgs::Twist cmd_vel;
+        // cmd_vel.linear.x = drone_velocity.x;
+        // cmd_vel.linear.y = drone_velocity.y;
+        // cmd_vel.linear.z = drone_velocity.z;
+        // cmd_vel.angular.z = drone_velocity.yaw;
+        //
+        // PX4Interface::getInstance()->publishSetpointVel(cmd_vel);
     }
 
     p_task_base->task_state = TASK_PROCESSING;

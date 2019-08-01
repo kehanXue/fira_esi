@@ -569,8 +569,8 @@ void MYCV::findblueH(cv::Mat image)
     if (number_blue>image.rows*image.cols/25)
     {
         detect_blueH = true;
-        blueH_location[0] = 1.0* sum_blue_rows / number_blue;
-        blueH_location[1] = 1.0* sum_blue_cols / number_blue;
+        blueH_location[1] = 1.0* sum_blue_rows / number_blue;
+        blueH_location[0] = 1.0* sum_blue_cols / number_blue;
 
 #ifdef TEST
         cv::circle(outimage, cv::Point2d(blueH_location[0], blueH_location[1]), 5, cv::Scalar(255,0,0), 3);
@@ -672,8 +672,8 @@ void MYCV::findredX(cv::Mat image)
     if (number_red>image.rows*image.cols/25)
     {
         detect_redX = true;
-        redX_location[0] = 1.0* sum_red_rows / number_red;
-        redX_location[1] = 1.0* sum_red_cols / number_red;
+        redX_location[1] = 1.0* sum_red_rows / number_red;
+        redX_location[0] = 1.0* sum_red_cols / number_red;
 
 #ifdef TEST
         cv::circle(outimage, cv::Point2d(redX_location[0], redX_location[1]), 5, cv::Scalar(0,0,255), 3);

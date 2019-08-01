@@ -75,7 +75,8 @@ int8_t vwpp::FlowController::run()
             {
                 p_task_navigation->restart();
                 cur_task_id = HOVERONQR;
-                p_task_hover_on_qr->resetHoverOnXY(PX4Interface::getInstance()->getCurX(), PX4Interface::getInstance()->getCurY());
+                p_task_hover_on_qr->resetRotatingOnXY(PX4Interface::getInstance()->getCurX(),
+                                                      PX4Interface::getInstance()->getCurY());
                 // cur_task_id = LANDING;
                 ROS_INFO("Task switch to HOVERONQR!");
             }
