@@ -85,7 +85,6 @@ ActionHovering::ActionHovering(double_t _target_altitude) :
         target_altitude(_target_altitude)
 {
     target_yaw = vwpp::PX4Interface::getInstance()->getCurYaw();
-
 }
 
 
@@ -178,6 +177,13 @@ TargetVelXYPosZYaw ActionHovering::calculateVelocity(double_t _cur_v_x, double_t
     //
     //
     // return drone_velocity;
+}
+
+
+int8_t ActionHovering::resetTargetYaw(double_t _target_yaw)
+{
+    this->target_yaw = _target_yaw;
+    return 0;
 }
 
 

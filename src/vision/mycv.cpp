@@ -3,67 +3,67 @@
 static int line_x = 0;
 static int x[24] = {0};
 
-#ifdef TEST
-#ifdef TEST_ROS
-void callback(dynamic_reconfigure::vision_dynamic_reconfigureConfig &config)
-{
-    line_x = config.line_threshold;
-
-#ifdef USE_HSV
-    x[0] = config.HSV_min_yellow1;
-    x[1] = config.HSV_min_yellow2;
-    x[2] = config.HSV_min_yellow3;
-    x[3] = config.HSV_max_yellow1;
-    x[4] = config.HSV_max_yellow2;
-    x[5] = config.HSV_max_yellow3;
-    x[6] = config.HSV_min_red1;
-    x[7] = config.HSV_min_red2;
-    x[8] = config.HSV_min_red3;
-    x[9] = config.HSV_max_red1;
-    x[10] = config.HSV_max_red2;
-    x[11] = config.HSV_max_red3;
-    x[12] = config.HSV_min_blueH1;
-    x[13] = config.HSV_min_blueH2;
-    x[14] = config.HSV_min_blueH3;
-    x[15] = config.HSV_max_blueH1;
-    x[16] = config.HSV_max_blueH2;
-    x[17] = config.HSV_max_blueH3;
-    x[18] = config.HSV_min_redX1;
-    x[19] = config.HSV_min_redX2;
-    x[20] = config.HSV_min_redX3;
-    x[21] = config.HSV_max_redX1;
-    x[22] = config.HSV_max_redX2;
-    x[23] = config.HSV_max_redX3;
-#endif
-#ifdef USE_BGR
-    x[0] = config.BGR_min_yellow1;
-    x[1] = config.BGR_min_yellow2;
-    x[2] = config.BGR_min_yellow3;
-    x[3] = config.BGR_max_yellow1;
-    x[4] = config.BGR_max_yellow2;
-    x[5] = config.BGR_max_yellow3;
-    x[6] = config.BGR_min_red1;
-    x[7] = config.BGR_min_red2;
-    x[8] = config.BGR_min_red3;
-    x[9] = config.BGR_max_red1;
-    x[10] = config.BGR_max_red2;
-    x[11] = config.BGR_max_red3;
-    x[12] = config.BGR_min_blueH1;
-    x[13] = config.BGR_min_blueH2;
-    x[14] = config.BGR_min_blueH3;
-    x[15] = config.BGR_max_blueH1;
-    x[16] = config.BGR_max_blueH2;
-    x[17] = config.BGR_max_blueH3;
-    x[18] = config.BGR_min_redX1;
-    x[19] = config.BGR_min_redX2;
-    x[20] = config.BGR_min_redX3;
-    x[21] = config.BGR_max_redX1;
-    x[22] = config.BGR_max_redX2;
-    x[23] = config.BGR_max_redX3;
-#endif
-}
-#endif
-#endif
+// #ifdef TEST
+// #ifdef TEST_ROS
+// void callback(dynamic_reconfigure::vision_dynamic_reconfigureConfig &config)
+// {
+//     line_x = config.line_threshold;
+//
+// #ifdef USE_HSV
+//     x[0] = config.HSV_min_yellow1;
+//     x[1] = config.HSV_min_yellow2;
+//     x[2] = config.HSV_min_yellow3;
+//     x[3] = config.HSV_max_yellow1;
+//     x[4] = config.HSV_max_yellow2;
+//     x[5] = config.HSV_max_yellow3;
+//     x[6] = config.HSV_min_red1;
+//     x[7] = config.HSV_min_red2;
+//     x[8] = config.HSV_min_red3;
+//     x[9] = config.HSV_max_red1;
+//     x[10] = config.HSV_max_red2;
+//     x[11] = config.HSV_max_red3;
+//     x[12] = config.HSV_min_blueH1;
+//     x[13] = config.HSV_min_blueH2;
+//     x[14] = config.HSV_min_blueH3;
+//     x[15] = config.HSV_max_blueH1;
+//     x[16] = config.HSV_max_blueH2;
+//     x[17] = config.HSV_max_blueH3;
+//     x[18] = config.HSV_min_redX1;
+//     x[19] = config.HSV_min_redX2;
+//     x[20] = config.HSV_min_redX3;
+//     x[21] = config.HSV_max_redX1;
+//     x[22] = config.HSV_max_redX2;
+//     x[23] = config.HSV_max_redX3;
+// #endif
+// #ifdef USE_BGR
+//     x[0] = config.BGR_min_yellow1;
+//     x[1] = config.BGR_min_yellow2;
+//     x[2] = config.BGR_min_yellow3;
+//     x[3] = config.BGR_max_yellow1;
+//     x[4] = config.BGR_max_yellow2;
+//     x[5] = config.BGR_max_yellow3;
+//     x[6] = config.BGR_min_red1;
+//     x[7] = config.BGR_min_red2;
+//     x[8] = config.BGR_min_red3;
+//     x[9] = config.BGR_max_red1;
+//     x[10] = config.BGR_max_red2;
+//     x[11] = config.BGR_max_red3;
+//     x[12] = config.BGR_min_blueH1;
+//     x[13] = config.BGR_min_blueH2;
+//     x[14] = config.BGR_min_blueH3;
+//     x[15] = config.BGR_max_blueH1;
+//     x[16] = config.BGR_max_blueH2;
+//     x[17] = config.BGR_max_blueH3;
+//     x[18] = config.BGR_min_redX1;
+//     x[19] = config.BGR_min_redX2;
+//     x[20] = config.BGR_min_redX3;
+//     x[21] = config.BGR_max_redX1;
+//     x[22] = config.BGR_max_redX2;
+//     x[23] = config.BGR_max_redX3;
+// #endif
+// }
+// #endif
+// #endif
 
 MYCV::MYCV(int flag, ros::NodeHandle *pnh)
 {
@@ -211,15 +211,15 @@ MYCV::MYCV(int flag, ros::NodeHandle *pnh)
     x[22] = getoneint("BGR_max_redX2");
     x[23] = getoneint("BGR_max_redX3");
 #endif
-    static bool test_ros_first = true;
-    if(test_ros_first)
-    {
-        test_ros_first = false;
-        server = new(dynamic_reconfigure::Server<dynamic_reconfigure::vision_dynamic_reconfigureConfig>);
-        server_callback = new(dynamic_reconfigure::Server<dynamic_reconfigure::vision_dynamic_reconfigureConfig>::CallbackType);
-        *server_callback = boost::bind(&callback, _1);
-        server->setCallback(*server_callback);
-    }
+    // static bool test_ros_first = true;
+    // if(test_ros_first)
+    // {
+    //     test_ros_first = false;
+    //     server = new(dynamic_reconfigure::Server<dynamic_reconfigure::vision_dynamic_reconfigureConfig>);
+    //     server_callback = new(dynamic_reconfigure::Server<dynamic_reconfigure::vision_dynamic_reconfigureConfig>::CallbackType);
+    //     *server_callback = boost::bind(&callback, _1);
+    //     server->setCallback(*server_callback);
+    // }
 #endif
 #endif
 }
@@ -447,6 +447,7 @@ void MYCV::findQR(cv::Mat image)
         cv::circle(outimage, cv::Point2d(QR_location[0], QR_location[1]), 5, cv::Scalar(0,255,0), 3);
         cv::circle(outimage, cv::Point2d(QR_location[0], QR_location[1]), 20, cv::Scalar(0,255,0), 5);
 #endif
+        resetpoint(QR_location, image);
     }
 
     int QR_rect_size = 170;
@@ -473,10 +474,9 @@ void MYCV::findQR(cv::Mat image)
 #ifdef TEST
         cv::rectangle(outimage, cv::Point(outimage.cols/2-QR_rect_size, outimage.rows/2-QR_rect_size),
                 cv::Point(outimage.cols/2+QR_rect_size, outimage.rows/2+QR_rect_size), cv::Scalar(255,255,0));
-        cv::circle(outimage, cv::Point2d(QR_location[0], QR_location[1]), 3, cv::Scalar(0,255,255), 3);
+        // cv::circle(outimage, cv::Point2d(QR_location[0], QR_location[1]), 3, cv::Scalar(0,255,255), 3);
 #endif
 
-        resetpoint(QR_location, image);
     }
     else
     {
@@ -569,7 +569,7 @@ void MYCV::findblueH(cv::Mat image)
 #endif
 #endif
 
-    if (number_blue>image.rows*image.cols/25)
+    if (number_blue > 1000)
     {
         detect_blueH = true;
         blueH_location[1] = 1.0* sum_blue_rows / number_blue;
@@ -579,6 +579,7 @@ void MYCV::findblueH(cv::Mat image)
         cv::circle(outimage, cv::Point2d(blueH_location[0], blueH_location[1]), 5, cv::Scalar(255,0,0), 3);
         cv::circle(outimage, cv::Point2d(blueH_location[0], blueH_location[1]), 20, cv::Scalar(255,0,0), 5);
 #endif
+        resetpoint(blueH_location, image);
     }
     else
     {
@@ -672,7 +673,7 @@ void MYCV::findredX(cv::Mat image)
 #endif
 #endif
 
-    if (number_red>image.rows*image.cols/25)
+    if (number_red > 1000)
     {
         detect_redX = true;
         redX_location[1] = 1.0* sum_red_rows / number_red;
@@ -682,6 +683,7 @@ void MYCV::findredX(cv::Mat image)
         cv::circle(outimage, cv::Point2d(redX_location[0], redX_location[1]), 5, cv::Scalar(0,0,255), 3);
         cv::circle(outimage, cv::Point2d(redX_location[0], redX_location[1]), 20, cv::Scalar(0,0,255), 5);
 #endif
+        resetpoint(redX_location, image);
     }
     else
     {

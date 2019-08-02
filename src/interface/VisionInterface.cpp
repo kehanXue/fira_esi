@@ -174,13 +174,13 @@ double_t vwpp::VisionInterface::getRedGateDepth()
 
 bool vwpp::VisionInterface::getBlueHState()
 {
-    return forward_camera->detect_blueH;
+    return down_camera->detect_blueH;
 }
 
 
 bool vwpp::VisionInterface::getRedXState()
 {
-    return forward_camera->detect_redX;
+    return down_camera->detect_redX;
 }
 
 

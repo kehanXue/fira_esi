@@ -120,8 +120,8 @@ private:
 #ifdef TEST
 #ifdef TEST_ROS
 private:
-    dynamic_reconfigure::Server<dynamic_reconfigure::vision_dynamic_reconfigureConfig> *server;
-    dynamic_reconfigure::Server<dynamic_reconfigure::vision_dynamic_reconfigureConfig>::CallbackType *server_callback;
+    // dynamic_reconfigure::Server<dynamic_reconfigure::vision_dynamic_reconfigureConfig> *server;
+    // dynamic_reconfigure::Server<dynamic_reconfigure::vision_dynamic_reconfigureConfig>::CallbackType *server_callback;
 #endif
 #endif
 };

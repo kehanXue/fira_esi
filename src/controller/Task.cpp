@@ -320,7 +320,6 @@ vwpp::TaskHoverOnQR::TaskHoverOnQR() :
         cur_action_id(ROTATION)
 {
     p_task_base = new TaskBase(HOVERONQR);
-
     p_task_base->task_state = TASK_START;
 }
 
@@ -480,9 +479,14 @@ int8_t vwpp::TaskDelivering::run()
 
     if (cur_action_id == TRACKINGLINE)
     {
+        ROS_WARN("RedX State: %d",
+                 VisionInterface::getInstance()->getRedXState());
+
         if (VisionInterface::getInstance()->getRedXState())
         {
+            p_action_hovering->resetTargetYaw(PX4Interface::getInstance()->getCurYaw());
             cur_action_id = HOVERING;
+            ROS_WARN("Action switch to HOVERING");
         }
 
         TargetVelXYPosZYaw target_vel_xy_pos_z_yaw =
@@ -501,6 +505,10 @@ int8_t vwpp::TaskDelivering::run()
     }
     else if (cur_action_id == HOVERING)
     {
+        ROS_ERROR("Current RedX: %lf, RedY: %lf",
+                  VisionInterface::getInstance()->getRedXx(),
+                  VisionInterface::getInstance()->getRedXy());
+
         if (fabs(VisionInterface::getInstance()->getRedXx() - 0.) <=
             vwpp::DynamicRecfgInterface::getInstance()->getRedXOffsetXTolerance() &&
             fabs(VisionInterface::getInstance()->getRedXy() - 0.) <=
@@ -510,6 +518,7 @@ int8_t vwpp::TaskDelivering::run()
                     DynamicRecfgInterface::getInstance()->getJudgeAchieveCounterThreshold());
             if (judge_achieve_counter.isAchieve())
             {
+                ROS_WARN("Action switch to OPENCLAW");
                 cur_action_id = OPENCLAW;
             }
         }
@@ -533,6 +542,9 @@ int8_t vwpp::TaskDelivering::run()
         // Action::getInstance()->openClaw();
 
         cur_action_id = ROTATION;
+        p_action_rotating->resetRotatingOnXY(PX4Interface::getInstance()->getCurX(),
+                                             PX4Interface::getInstance()->getCurY());
+        ROS_WARN("Action switch to ROTATION");
         back_toward_yaw = (PX4Interface::getInstance()->getCurYaw() + M_PI);
     }
     else if (cur_action_id == ROTATION)
@@ -549,17 +561,20 @@ int8_t vwpp::TaskDelivering::run()
             }
         }
 
-        TargetPosXYZYaw target_pos_xyz_yaw =
-                p_action_rotating->calculateVelocity(back_toward_yaw);
+        // TargetPosXYZYaw target_pos_xyz_yaw =
+        //         p_action_rotating->calculateVelocity(back_toward_yaw);
 
-        PX4Interface::getInstance()->publishTarget(target_pos_xyz_yaw);
-        // geometry_msgs::Twist cmd_vel;
-        // cmd_vel.linear.x = drone_velocity.x;
-        // cmd_vel.linear.y = drone_velocity.y;
-        // cmd_vel.linear.z = drone_velocity.z;
-        // cmd_vel.angular.z = drone_velocity.yaw;
+        // PX4Interface::getInstance()->publishTarget(target_pos_xyz_yaw);
 
-        // PX4Interface::getInstance()->publishSetpointVel(cmd_vel);
+        DroneVelocity drone_velocity =
+                p_action_rotating->calculateVelocity(back_toward_yaw, PX4Interface::getInstance()->getCurYaw());
+        geometry_msgs::Twist cmd_vel;
+        cmd_vel.linear.x = drone_velocity.x;
+        cmd_vel.linear.y = drone_velocity.y;
+        cmd_vel.linear.z = drone_velocity.z;
+        cmd_vel.angular.z = drone_velocity.yaw;
+
+        PX4Interface::getInstance()->publishSetpointVel(cmd_vel);
     }
 
     p_task_base->task_state = TASK_PROCESSING;
@@ -588,6 +603,9 @@ vwpp::TaskLanding::TaskLanding() :
 vwpp::TaskLanding::~TaskLanding()
 {
     delete p_task_base;
+    delete p_action_tracking_line;
+    delete p_action_hovering;
+    delete p_action_adjust_altitude;
 }
 
 
@@ -609,12 +627,15 @@ int8_t vwpp::TaskLanding::run()
     {
         if (VisionInterface::getInstance()->getBlueHState())
         {
+            p_action_hovering->resetTargetYaw(PX4Interface::getInstance()->getCurYaw());
             cur_action_id = HOVERING;
+            ROS_WARN("Action switch to HOVERING");
         }
 
         TargetVelXYPosZYaw target_vel_xy_pos_z_yaw =
-                p_action_tracking_line->calculateVelocity(VisionInterface::getInstance()->getLineOffset(),
-                                                          VisionInterface::getInstance()->getLineRotation());
+                p_action_tracking_line->calculateVelocity(
+                        VisionInterface::getInstance()->getLineOffset(),
+                        VisionInterface::getInstance()->getLineRotation());
 
         PX4Interface::getInstance()->publishTarget(target_vel_xy_pos_z_yaw);
         // geometry_msgs::Twist cmd_vel;
@@ -627,6 +648,10 @@ int8_t vwpp::TaskLanding::run()
     }
     else if (cur_action_id == HOVERING)
     {
+        ROS_ERROR("Current BlueX: %lf, BlueY: %lf",
+                  VisionInterface::getInstance()->getBlueHx(),
+                  VisionInterface::getInstance()->getBlueHy());
+
         if (fabs(VisionInterface::getInstance()->getBlueHx() - 0.) <=
             vwpp::DynamicRecfgInterface::getInstance()->getBlueHOffsetXTolerance() &&
             fabs(VisionInterface::getInstance()->getBlueHy() - 0.) <=

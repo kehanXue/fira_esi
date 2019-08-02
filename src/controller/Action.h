@@ -113,6 +113,8 @@ namespace vwpp
 
         TargetVelXYPosZYaw calculateVelocity(double_t _cur_v_x, double_t _cur_v_y);
 
+        int8_t resetTargetYaw(double_t _target_yaw);
+
     private:
 
         double_t target_altitude;
