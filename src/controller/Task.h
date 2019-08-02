@@ -142,7 +142,7 @@ namespace vwpp
 
         int8_t run(GateType _gate_type);
 
-        int8_t resetAdjustAltitudeOnXY(double_t _hover_x, double_t _hover_y, double_t _hold_yaw);
+        int8_t resetAdjustAltitudeOnXYYaw(double_t _hover_x, double_t _hover_y, double_t _hold_yaw);
 
     private:
 
@@ -180,10 +180,9 @@ namespace vwpp
 
     private:
         TaskBase* p_task_base;
-
-        // TODO Add to task_base
         ActionID cur_action_id;
 
+        // TODO
         ActionRotating action_rotating;
     };
 
@@ -204,8 +203,11 @@ namespace vwpp
     private:
 
         TaskBase* p_task_base;
-
         ActionID cur_action_id;
+
+        ActionTrackingLine* p_action_tracking_line;
+        ActionHovering* p_action_hovering;
+        ActionRotating* p_action_rotating;
     };
 
 
@@ -226,9 +228,11 @@ namespace vwpp
     private:
 
         TaskBase* p_task_base;
-
         ActionID cur_action_id;
 
+        ActionTrackingLine* p_action_tracking_line;
+        ActionHovering* p_action_hovering;
+        ActionAdjustAltitude* p_action_adjust_altitude;
     };
 
 }

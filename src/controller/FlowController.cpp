@@ -56,18 +56,24 @@ int8_t vwpp::FlowController::run()
         {
 
             // Switch to Avoidance
-            // if (VisionInterface::getInstance()->getYellowGateState())
-            // {
-            //     gate_type = YELLOW;
-            //     cur_task_id = AVOIDANCE;
-            //     ROS_INFO("Task switch to AVOIDANCE!");
-            // }
-            // else if (VisionInterface::getInstance()->getRedGateState())
-            // {
-            //     gate_type = RED;
-            //     cur_task_id = AVOIDANCE;
-            //     ROS_INFO("Task switch to AVOIDANCE!");
-            // }
+            if (VisionInterface::getInstance()->getYellowGateState())
+            {
+                gate_type = YELLOW;
+                cur_task_id = AVOIDANCE;
+                p_task_avoidance->resetAdjustAltitudeOnXYYaw(PX4Interface::getInstance()->getCurX(),
+                                                             PX4Interface::getInstance()->getCurY(),
+                                                             PX4Interface::getInstance()->getCurYaw());
+                ROS_INFO("Task switch to AVOIDANCE!");
+            }
+            else if (VisionInterface::getInstance()->getRedGateState())
+            {
+                gate_type = RED;
+                cur_task_id = AVOIDANCE;
+                p_task_avoidance->resetAdjustAltitudeOnXYYaw(PX4Interface::getInstance()->getCurX(),
+                                                             PX4Interface::getInstance()->getCurY(),
+                                                             PX4Interface::getInstance()->getCurYaw());
+                ROS_INFO("Task switch to AVOIDANCE!");
+            }
 
 
             // Switch to HoverOnQR

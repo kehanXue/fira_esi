@@ -443,21 +443,20 @@ void MYCV::findQR(cv::Mat image)
 
         QR_location[0] = QR_X/4.0;
         QR_location[1] = QR_Y/4.0;
-
 #ifdef TEST
         cv::circle(outimage, cv::Point2d(QR_location[0], QR_location[1]), 5, cv::Scalar(0,255,0), 3);
         cv::circle(outimage, cv::Point2d(QR_location[0], QR_location[1]), 20, cv::Scalar(0,255,0), 5);
 #endif
-
-        resetpoint(QR_location, image);
     }
+
+    int QR_rect_size = 170;
 
     if(inform.empty())
     {
         detect_QR = false;
         QR_inform = "";
     }
-    else if(fabs(QR_location[0])<170 && fabs(QR_location[1])<170)
+    else if(fabs(QR_location[0])<QR_rect_size && fabs(QR_location[1])<QR_rect_size)
     {
         detect_QR = true;
         QR_inform = inform[0];
@@ -472,8 +471,12 @@ void MYCV::findQR(cv::Mat image)
         QR_inform = ss;
 
 #ifdef TEST
+        cv::rectangle(outimage, cv::Point(outimage.cols/2-QR_rect_size, outimage.rows/2-QR_rect_size),
+                cv::Point(outimage.cols/2+QR_rect_size, outimage.rows/2+QR_rect_size), cv::Scalar(255,255,0));
         cv::circle(outimage, cv::Point2d(QR_location[0], QR_location[1]), 3, cv::Scalar(0,255,255), 3);
 #endif
+
+        resetpoint(QR_location, image);
     }
     else
     {

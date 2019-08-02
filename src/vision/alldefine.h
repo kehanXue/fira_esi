@@ -1,7 +1,7 @@
 #ifndef ALLDEFINE_H
 #define ALLDEFINE_H
 
-//#define TEST
+#define TEST
 #define TEST_ROS
 
 //#define USE_HSV

@@ -14,7 +14,7 @@
 #include <cv_bridge/cv_bridge.h>
 #include <image_transport/image_transport.h>
 #include <dynamic_reconfigure/server.h>
-// #include "../../../devel/include/my_cv/vision_dynamic_reconfigureConfig.h"
+#include "fira_esi/vision_dynamic_reconfigureConfig.h"
 #endif
 
 #include <algorithm>
