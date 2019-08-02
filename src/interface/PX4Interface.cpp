@@ -252,7 +252,7 @@ int8_t PX4Interface::publishTarget(const TargetPosXYZYaw _target_pos_xyz_yaw)
     position_target.yaw = _target_pos_xyz_yaw.yaw;
 
     boost::unique_lock<boost::mutex> uq_lock_raw(mutex_cmd_pub);
-    this->px4_setpoint_raw_pub.publish(_target_pos_xyz_yaw);
+    this->px4_setpoint_raw_pub.publish(position_target);
     return 0;
 }
 
@@ -273,7 +273,7 @@ int8_t PX4Interface::publishTarget(const TargetVelXYPosZYaw _target_vel_xy_pos_z
     position_target.yaw = _target_vel_xy_pos_z_yaw.yaw;
 
     boost::unique_lock<boost::mutex> uq_lock_raw(mutex_cmd_pub);
-    this->px4_setpoint_raw_pub.publish(_target_vel_xy_pos_z_yaw);
+    this->px4_setpoint_raw_pub.publish(position_target);
     return 0;
 }
 

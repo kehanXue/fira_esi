@@ -71,6 +71,7 @@ int8_t vwpp::FlowController::run()
 
 
             // Switch to HoverOnQR
+            ROS_ERROR("Navigation finished!");
             if (VisionInterface::getInstance()->getGroundQRState())
             {
                 p_task_navigation->restart();

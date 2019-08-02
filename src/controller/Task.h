@@ -46,6 +46,12 @@ namespace vwpp
         TASK_FINISH
     };
 
+    enum ActionRuntime
+    {
+        FIRST_IN = 1,
+        SECOND_IN
+    };
+
     class TaskBase
     {
     public:
@@ -147,11 +153,13 @@ namespace vwpp
         double_t altitude_target;
 
         ActionAdjustAltitude* p_action_adjust_altitude;
-        ActionTrackingLine* p_action_tracking_line;
+        ActionTrackingLine* p_action_tracking_line{};
 
 
         // TODO Timer
         int64_t forward_counter;
+
+        ActionRuntime inter_adjust_altitude_time;
     };
 
     class TaskHoverOnQR

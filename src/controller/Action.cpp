@@ -92,7 +92,7 @@ ActionTrackingLine::calculateVelocity(double_t _cur_line_v_y, double_t _cur_v_ya
     target_vel_xy_pos_z_yaw.vy = linear_local_vel.vector.y;
     target_vel_xy_pos_z_yaw.pz = this->target_altitude;
     // TODO Maybe
-    target_vel_xy_pos_z_yaw.yaw = (PX4Interface::getInstance()->getCurYaw() + _cur_v_yaw);
+    target_vel_xy_pos_z_yaw.yaw = (PX4Interface::getInstance()->getCurYaw() - _cur_v_yaw);
 
     return target_vel_xy_pos_z_yaw;
 }
@@ -277,7 +277,7 @@ TargetPosXYZYaw ActionRotating::calculateVelocity(double_t _target_yaw, double_t
 }
 
 
-int8_t ActionRotating::setRotatingOnXY(double_t _hover_x, double_t _hover_y)
+int8_t ActionRotating::resetRotatingOnXY(double_t _hover_x, double_t _hover_y)
 {
     on_p_x = _hover_x;
     on_p_y = _hover_y;
@@ -302,56 +302,59 @@ ActionID ActionAdjustAltitude::getActionId() const
     return action_id;
 }
 
-
-TargetPosXYZYaw ActionAdjustAltitude::calculateVelocity(double_t _target_altitude, double_t _cur_altitude)
+DroneVelocity ActionAdjustAltitude::calculateVelocity(double_t _target_altitude, double_t _cur_altitude)
 {
-    // static vwpp::PIDController
-    //         pid_controller_p_local_x(vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PXKp(),
-    //                                  vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PXKi(),
-    //                                  vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PXKd(),
-    //                                  vwpp::DynamicRecfgInterface::getInstance()->isPidPV2PXHasThreshold(),
-    //                                  vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PXThreshold());
-    //
-    // static vwpp::PIDController
-    //         pid_controller_p_local_y(vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PYKp(),
-    //                                  vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PYKi(),
-    //                                  vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PYKd(),
-    //                                  vwpp::DynamicRecfgInterface::getInstance()->isPidPV2PYHasThreshold(),
-    //                                  vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PYThreshold());
-    //
-    // static vwpp::PIDController
-    //         pid_controller_p_local_z(vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PZKp(),
-    //                                  vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PZKi(),
-    //                                  vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PZKd(),
-    //                                  vwpp::DynamicRecfgInterface::getInstance()->isPidPV2PZHasThreshold(),
-    //                                  vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PZThreshold());
+    static vwpp::PIDController
+            pid_controller_p_local_x(vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PXKp(),
+                                     vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PXKi(),
+                                     vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PXKd(),
+                                     vwpp::DynamicRecfgInterface::getInstance()->isPidPV2PXHasThreshold(),
+                                     vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PXThreshold());
 
-    // static vwpp::PIDController
-    //         pid_controller_p_local_yaw(vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PYawKp(),
-    //                                    vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PYawKi(),
-    //                                    vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PYawKd(),
-    //                                    vwpp::DynamicRecfgInterface::getInstance()->isPidPV2PYawHasThreshold(),
-    //                                    vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PYawThreshold());
+    static vwpp::PIDController
+            pid_controller_p_local_y(vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PYKp(),
+                                     vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PYKi(),
+                                     vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PYKd(),
+                                     vwpp::DynamicRecfgInterface::getInstance()->isPidPV2PYHasThreshold(),
+                                     vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PYThreshold());
 
-    // pid_controller_p_local_x.setTarget(this->on_p_x);
-    // pid_controller_p_local_y.setTarget(this->on_p_y);
-    // pid_controller_p_local_z.setTarget(_target_altitude);
-    // pid_controller_p_local_yaw.setTarget(this->on_p_yaw);
+    static vwpp::PIDController
+            pid_controller_p_local_z(vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PZKp(),
+                                     vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PZKi(),
+                                     vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PZKd(),
+                                     vwpp::DynamicRecfgInterface::getInstance()->isPidPV2PZHasThreshold(),
+                                     vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PZThreshold());
 
-    // pid_controller_p_local_x.update(vwpp::PX4Interface::getInstance()->getCurX());
-    // pid_controller_p_local_y.update(vwpp::PX4Interface::getInstance()->getCurY());
-    // pid_controller_p_local_z.update(vwpp::PX4Interface::getInstance()->getCurZ());
-    // pid_controller_p_local_yaw.update(
-    //         convertCurYaw2FabsYawThetaBetweenPI(on_p_yaw, vwpp::PX4Interface::getInstance()->getCurYaw()));
+    static vwpp::PIDController
+            pid_controller_p_local_yaw(vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PYawKp(),
+                                       vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PYawKi(),
+                                       vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PYawKd(),
+                                       vwpp::DynamicRecfgInterface::getInstance()->isPidPV2PYawHasThreshold(),
+                                       vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PYawThreshold());
 
-    // DroneVelocity drone_velocity{};
-    // drone_velocity.x = pid_controller_p_local_x.output();
-    // drone_velocity.y = pid_controller_p_local_y.output();
-    // drone_velocity.z = pid_controller_p_local_z.output();
-    // drone_velocity.yaw = pid_controller_p_local_yaw.output();
-    //
-    // return drone_velocity;
+    pid_controller_p_local_x.setTarget(this->on_p_x);
+    pid_controller_p_local_y.setTarget(this->on_p_y);
+    pid_controller_p_local_z.setTarget(_target_altitude);
+    pid_controller_p_local_yaw.setTarget(this->on_p_yaw);
 
+    pid_controller_p_local_x.update(vwpp::PX4Interface::getInstance()->getCurX());
+    pid_controller_p_local_y.update(vwpp::PX4Interface::getInstance()->getCurY());
+    pid_controller_p_local_z.update(_cur_altitude);
+    pid_controller_p_local_yaw.update(
+            convertCurYaw2FabsYawThetaBetweenPI(on_p_yaw, vwpp::PX4Interface::getInstance()->getCurYaw()));
+
+    DroneVelocity drone_velocity{};
+    drone_velocity.x = pid_controller_p_local_x.output();
+    drone_velocity.y = pid_controller_p_local_y.output();
+    drone_velocity.z = pid_controller_p_local_z.output();
+    drone_velocity.yaw = pid_controller_p_local_yaw.output();
+
+    return drone_velocity;
+
+}
+
+TargetPosXYZYaw ActionAdjustAltitude::calculateVelocity(double_t _target_altitude)
+{
     TargetPosXYZYaw target_pos_xyz_yaw{};
     target_pos_xyz_yaw.px = on_p_x;
     target_pos_xyz_yaw.py = on_p_y;
@@ -370,5 +373,7 @@ int8_t ActionAdjustAltitude::setAdjustAltitudeXYYaw(double_t _on_x, double_t _on
 
     return 0;
 }
+
+
 
 

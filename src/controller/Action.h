@@ -85,7 +85,8 @@ namespace vwpp
 
         ActionID getActionId() const;
 
-        TargetPosXYZYaw calculateVelocity(double_t _target_altitude, double_t _cur_altitude);
+        TargetPosXYZYaw calculateVelocity(double_t _target_altitude);
+        DroneVelocity calculateVelocity(double_t _target_altitude, double_t _cur_altitude);
 
         int8_t setAdjustAltitudeXYYaw(double_t _on_x, double_t _on_y, double_t _on_yaw);
 
@@ -134,7 +135,7 @@ namespace vwpp
 
         TargetPosXYZYaw calculateVelocity(double_t _target_yaw, double_t _cur_yaw);
 
-        int8_t setRotatingOnXY(double_t _hover_x, double_t _hover_y);
+        int8_t resetRotatingOnXY(double_t _hover_x, double_t _hover_y);
 
     private:
 
