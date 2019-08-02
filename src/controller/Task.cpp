@@ -538,14 +538,22 @@ int8_t vwpp::TaskDelivering::run()
     }
     else if (cur_action_id == OPENCLAW)
     {
-        // TODO
-        // Action::getInstance()->openClaw();
+        static int64_t runtime = 0;
+        runtime++;
 
-        cur_action_id = ROTATION;
-        p_action_rotating->resetRotatingOnXY(PX4Interface::getInstance()->getCurX(),
-                                             PX4Interface::getInstance()->getCurY());
-        ROS_WARN("Action switch to ROTATION");
-        back_toward_yaw = (PX4Interface::getInstance()->getCurYaw() + M_PI);
+        std_msgs::Bool open_claw_msg;
+        open_claw_msg.data = true;
+        ClawInterface::getInstance()->publishOpenClawMsg(open_claw_msg);
+
+        if (runtime >= DynamicRecfgInterface::getInstance()->getOpenClawMsgSendFrequency())
+        {
+            cur_action_id = ROTATION;
+            p_action_rotating->resetRotatingOnXY(PX4Interface::getInstance()->getCurX(),
+                                                 PX4Interface::getInstance()->getCurY());
+            ROS_WARN("Action switch to ROTATION");
+            back_toward_yaw = (PX4Interface::getInstance()->getCurYaw() + M_PI);
+        }
+
     }
     else if (cur_action_id == ROTATION)
     {

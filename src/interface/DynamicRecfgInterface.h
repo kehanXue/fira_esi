@@ -140,9 +140,10 @@ namespace vwpp
         double_t qr_offset_y_tolerance{};
 
         /* NAVIGATION Task per sustain time */
-        double_t navigation_per_sustain_time;
-    public:
-        double_t getNavigationPerSustainTime() const;
+        int64_t navigation_per_sustain_time;
+
+        /* Open claw message send frequency */
+        int64_t open_claw_msg_send_frequency;
 
     private:
 
@@ -262,6 +263,9 @@ namespace vwpp
 
         int64_t getJudgeAchieveCounterThreshold() const;
 
+        int64_t getNavigationPerSustainTime() const;
+
+        int64_t getOpenClawMsgSendFrequency() const;
     };
 
 

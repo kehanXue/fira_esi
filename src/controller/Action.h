@@ -60,7 +60,7 @@ namespace vwpp
         ActionID getActionID();
 
         TargetVelXYPosZYaw calculateVelocity(double_t _cur_line_v_y, double_t _cur_v_yaw,
-                                        double_t _forward_vel = vwpp::DynamicRecfgInterface::getInstance()->getForwardVel());
+                                             double_t _forward_vel = vwpp::DynamicRecfgInterface::getInstance()->getForwardVel());
 
 
 
@@ -86,6 +86,7 @@ namespace vwpp
         ActionID getActionId() const;
 
         TargetPosXYZYaw calculateVelocity(double_t _target_altitude);
+
         DroneVelocity calculateVelocity(double_t _target_altitude, double_t _cur_altitude);
 
         int8_t setAdjustAltitudeXYYaw(double_t _on_x, double_t _on_y, double_t _on_yaw);
@@ -136,6 +137,7 @@ namespace vwpp
         ActionID getActionId() const;
 
         TargetPosXYZYaw calculateVelocity(double_t _target_yaw);
+
         DroneVelocity calculateVelocity(double_t _target_yaw, double_t _cur_yaw);
 
         int8_t resetRotatingOnXY(double_t _hover_x, double_t _hover_y);
