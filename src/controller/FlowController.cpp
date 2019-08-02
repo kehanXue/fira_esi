@@ -56,26 +56,34 @@ int8_t vwpp::FlowController::run()
         {
 
             // Switch to Avoidance
-            // if (VisionInterface::getInstance()->getYellowGateState())
-            // {
-            //     gate_type = YELLOW;
-            //     cur_task_id = AVOIDANCE;
-            //     ROS_INFO("Task switch to AVOIDANCE!");
-            // }
-            // else if (VisionInterface::getInstance()->getRedGateState())
-            // {
-            //     gate_type = RED;
-            //     cur_task_id = AVOIDANCE;
-            //     ROS_INFO("Task switch to AVOIDANCE!");
-            // }
+            if (VisionInterface::getInstance()->getYellowGateState())
+            {
+                gate_type = YELLOW;
+                cur_task_id = AVOIDANCE;
+                p_task_avoidance->resetAdjustAltitudeOnXYYaw(PX4Interface::getInstance()->getCurX(),
+                                                             PX4Interface::getInstance()->getCurY(),
+                                                             PX4Interface::getInstance()->getCurYaw());
+                ROS_INFO("Task switch to AVOIDANCE!");
+            }
+            else if (VisionInterface::getInstance()->getRedGateState())
+            {
+                gate_type = RED;
+                cur_task_id = AVOIDANCE;
+                p_task_avoidance->resetAdjustAltitudeOnXYYaw(PX4Interface::getInstance()->getCurX(),
+                                                             PX4Interface::getInstance()->getCurY(),
+                                                             PX4Interface::getInstance()->getCurYaw());
+                ROS_INFO("Task switch to AVOIDANCE!");
+            }
 
 
             // Switch to HoverOnQR
+            ROS_ERROR("Navigation finished!");
             if (VisionInterface::getInstance()->getGroundQRState())
             {
                 p_task_navigation->restart();
                 cur_task_id = HOVERONQR;
-                p_task_hover_on_qr->resetHoverOnXY(PX4Interface::getInstance()->getCurX(), PX4Interface::getInstance()->getCurY());
+                p_task_hover_on_qr->resetRotatingOnXY(PX4Interface::getInstance()->getCurX(),
+                                                      PX4Interface::getInstance()->getCurY());
                 // cur_task_id = LANDING;
                 ROS_INFO("Task switch to HOVERONQR!");
             }

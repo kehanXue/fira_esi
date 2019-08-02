@@ -24,11 +24,14 @@ PX4Interface::PX4Interface() :
     px4_pose_sub = nh.subscribe<geometry_msgs::PoseStamped>
             ("/mavros/local_position/pose", 1, &PX4Interface::px4_pose_cb, this);
 
-    px4_vel_pub = nh.advertise<geometry_msgs::Twist>
+    px4_setpoint_vel_pub = nh.advertise<geometry_msgs::Twist>
             ("/mavros/setpoint_velocity/cmd_vel_unstamped", 1);
 
-    px4_pose_pub = nh.advertise<geometry_msgs::PoseStamped>
+    px4_setpoint_pose_pub = nh.advertise<geometry_msgs::PoseStamped>
             ("/mavros/setpoint_position/local", 10);
+
+    px4_setpoint_raw_pub = nh.advertise<mavros_msgs::PositionTarget>
+            ("/mavros/setpoint_raw/local", 1);
 
     // Wait for FCU connection
     while (ros::ok() && !px4_cur_state.connected)
@@ -125,7 +128,7 @@ int8_t PX4Interface::switchOffboard()
         temp_pose.pose.position.y = 0;
         temp_pose.pose.position.z = 1;
 
-        vwpp::PX4Interface::getInstance()->publishLocalPose(temp_pose);
+        vwpp::PX4Interface::getInstance()->publishSetpointPose(temp_pose);
         ros::spinOnce();
         loop_rate.sleep();
     }
@@ -157,7 +160,7 @@ int8_t PX4Interface::unlockVehicle()
         temp_pose.pose.position.x = 0;
         temp_pose.pose.position.y = 0;
         temp_pose.pose.position.z = 1;
-        vwpp::PX4Interface::getInstance()->publishLocalPose(temp_pose);
+        vwpp::PX4Interface::getInstance()->publishSetpointPose(temp_pose);
         ros::spinOnce();
         loop_rate.sleep();
     }
@@ -212,21 +215,66 @@ void PX4Interface::px4_pose_cb(const geometry_msgs::PoseStamped::ConstPtr &msg)
 }
 
 
-int8_t PX4Interface::publishLocalVel(const geometry_msgs::Twist &_vel)
+int8_t PX4Interface::publishSetpointVel(const geometry_msgs::Twist &_vel)
 {
-    boost::unique_lock<boost::mutex> uq_lock_vel(mutex_vel_pub);
+    boost::unique_lock<boost::mutex> uq_lock_vel(mutex_cmd_pub);
 
     ROS_INFO("%lf,%lf,%lf,%lf", _vel.linear.x, _vel.linear.y, _vel.linear.z, _vel.angular.z);
-    this->px4_vel_pub.publish(_vel);
+    this->px4_setpoint_vel_pub.publish(_vel);
+
+    return 0;
 }
 
 
-int8_t PX4Interface::publishLocalPose(const geometry_msgs::PoseStamped &_pose)
+int8_t PX4Interface::publishSetpointPose(const geometry_msgs::PoseStamped &_pose)
 {
-    boost::unique_lock<boost::mutex> uq_lock_pose(mutex_vel_pose);
-    this->px4_pose_pub.publish(_pose);
+    boost::unique_lock<boost::mutex> uq_lock_pose(mutex_cmd_pub);
+    this->px4_setpoint_pose_pub.publish(_pose);
+
+    return 0;
 }
 
 
+int8_t PX4Interface::publishTarget(const TargetPosXYZYaw _target_pos_xyz_yaw)
+{
+
+    mavros_msgs::PositionTarget position_target;
+    position_target.coordinate_frame = position_target.FRAME_LOCAL_NED;
+    position_target.type_mask =
+            position_target.IGNORE_AFX | position_target.IGNORE_AFY | position_target.IGNORE_AFZ |
+            // position_target.IGNORE_PX | position_target.IGNORE_PY | position_target.IGNORE_PZ |
+            position_target.IGNORE_VZ | position_target.IGNORE_VY | position_target.IGNORE_VZ |
+            position_target.IGNORE_YAW_RATE;
+
+    position_target.position.x = _target_pos_xyz_yaw.px;
+    position_target.position.y = _target_pos_xyz_yaw.py;
+    position_target.position.z = _target_pos_xyz_yaw.pz;
+    position_target.yaw = _target_pos_xyz_yaw.yaw;
+
+    boost::unique_lock<boost::mutex> uq_lock_raw(mutex_cmd_pub);
+    this->px4_setpoint_raw_pub.publish(position_target);
+    return 0;
+}
+
+
+int8_t PX4Interface::publishTarget(const TargetVelXYPosZYaw _target_vel_xy_pos_z_yaw)
+{
+    mavros_msgs::PositionTarget position_target;
+    position_target.coordinate_frame = position_target.FRAME_LOCAL_NED;
+    position_target.type_mask =
+            position_target.IGNORE_AFX | position_target.IGNORE_AFY | position_target.IGNORE_AFZ |
+            position_target.IGNORE_PX | position_target.IGNORE_PY | // position_target.IGNORE_PZ |
+            // position_target.IGNORE_VZ | position_target.IGNORE_VY | position_target.IGNORE_VZ |
+            position_target.IGNORE_YAW_RATE;
+
+    position_target.velocity.x = _target_vel_xy_pos_z_yaw.vx;
+    position_target.velocity.y = _target_vel_xy_pos_z_yaw.vy;
+    position_target.position.z = _target_vel_xy_pos_z_yaw.pz;
+    position_target.yaw = _target_vel_xy_pos_z_yaw.yaw;
+
+    boost::unique_lock<boost::mutex> uq_lock_raw(mutex_cmd_pub);
+    this->px4_setpoint_raw_pub.publish(position_target);
+    return 0;
+}
 
 

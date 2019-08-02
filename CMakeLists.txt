@@ -29,6 +29,7 @@ find_package(CUDA ${ZED_CUDA_VERSION} EXACT REQUIRED)
 ## Generate dynamic reconfigure parameters in the 'cfg' folder
 generate_dynamic_reconfigure_options(
         cfg/fira_esi_dynamic_cfg.cfg
+        cfg/vision_dynamic_reconfigure.cfg
 )
 
 ## The catkin_package macro generates cmake config files for your package

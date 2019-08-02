@@ -4,6 +4,8 @@
 
 #include "Action.h"
 
+using namespace vwpp;
+
 
 ActionBase::ActionBase() :
         action_id(TRACKINGLINE)
@@ -34,7 +36,8 @@ ActionID ActionTrackingLine::getActionID()
 }
 
 
-DroneVelocity ActionTrackingLine::calculateVelocity(double_t _cur_line_v_y, double_t _cur_v_yaw, double_t _forward_vel)
+TargetVelXYPosZYaw
+ActionTrackingLine::calculateVelocity(double_t _cur_line_v_y, double_t _cur_v_yaw, double_t _forward_vel)
 {
     // v means data from vision, p means data from px4.
 
@@ -45,42 +48,15 @@ DroneVelocity ActionTrackingLine::calculateVelocity(double_t _cur_line_v_y, doub
                                     vwpp::DynamicRecfgInterface::getInstance()->isPidVV2PYHasThreshold(),
                                     vwpp::DynamicRecfgInterface::getInstance()->getPidVV2PYThreshold());
 
-    static vwpp::PIDController
-            pid_controller_p_local_z(vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PZKp(),
-                                     vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PZKi(),
-                                     vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PZKd(),
-                                     vwpp::DynamicRecfgInterface::getInstance()->isPidPV2PZHasThreshold(),
-                                     vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PZThreshold());
-
-    static vwpp::PIDController
-            pid_controller_v_body_yaw(vwpp::DynamicRecfgInterface::getInstance()->getPidVV2PYawKp(),
-                                      vwpp::DynamicRecfgInterface::getInstance()->getPidVV2PYawKi(),
-                                      vwpp::DynamicRecfgInterface::getInstance()->getPidVV2PYawKd(),
-                                      vwpp::DynamicRecfgInterface::getInstance()->isPidVV2PYawHasThreshold(),
-                                      vwpp::DynamicRecfgInterface::getInstance()->getPidVV2PYawThreshold());
-
-
     pid_controller_v_body_y.setTarget(0.);
-    pid_controller_p_local_z.setTarget(this->target_altitude);
-    ROS_WARN("tracking line z target:%lf",this->target_altitude);
-    pid_controller_v_body_yaw.setTarget(0.);
-
     pid_controller_v_body_y.update(_cur_line_v_y);
-    pid_controller_p_local_z.update(vwpp::PX4Interface::getInstance()->getCurZ());
-    pid_controller_v_body_yaw.update(
-            convertCurYaw2FabsYawThetaBetweenPI(pid_controller_v_body_yaw.getTarget(), _cur_v_yaw));
-
 
     geometry_msgs::Vector3Stamped linear_body_vel{};
-    // linear_body_vel.header.stamp = ros::Time::now();
     linear_body_vel.header.stamp = ros::Time(0);
-    // TODO param
     linear_body_vel.header.frame_id = "camera_link";
     ROS_WARN("forward velocity: %lf", _forward_vel);
     linear_body_vel.vector.x = _forward_vel;
     linear_body_vel.vector.y = pid_controller_v_body_y.output();
-    // TODO Test z
-    // linear_body_vel.vector.z = pid_controller_p_local_z.output();
     linear_body_vel.vector.z = 0;
 
     geometry_msgs::Vector3Stamped linear_local_vel{};
@@ -94,13 +70,13 @@ DroneVelocity ActionTrackingLine::calculateVelocity(double_t _cur_line_v_y, doub
         ros::Duration(vwpp::DynamicRecfgInterface::getInstance()->getTfBreakDuration()).sleep();
     }
 
-    DroneVelocity drone_velocity{};
-    drone_velocity.x = linear_local_vel.vector.x;
-    drone_velocity.y = linear_local_vel.vector.y;
-    drone_velocity.z = pid_controller_p_local_z.output();
-    drone_velocity.yaw = pid_controller_v_body_yaw.output();
+    TargetVelXYPosZYaw target_vel_xy_pos_z_yaw{};
+    target_vel_xy_pos_z_yaw.vx = linear_local_vel.vector.x;
+    target_vel_xy_pos_z_yaw.vy = linear_local_vel.vector.y;
+    target_vel_xy_pos_z_yaw.pz = this->target_altitude;
+    target_vel_xy_pos_z_yaw.yaw = (PX4Interface::getInstance()->getCurYaw() - _cur_v_yaw);
 
-    return drone_velocity;
+    return target_vel_xy_pos_z_yaw;
 }
 
 
@@ -123,7 +99,7 @@ ActionID ActionHovering::getActionId() const
 }
 
 
-DroneVelocity ActionHovering::calculateVelocity(double_t _cur_v_x, double_t _cur_v_y)
+TargetVelXYPosZYaw ActionHovering::calculateVelocity(double_t _cur_v_x, double_t _cur_v_y)
 {
 
     static vwpp::PIDController
@@ -139,33 +115,33 @@ DroneVelocity ActionHovering::calculateVelocity(double_t _cur_v_x, double_t _cur
                                     vwpp::DynamicRecfgInterface::getInstance()->getPidVV2PYKd(),
                                     vwpp::DynamicRecfgInterface::getInstance()->isPidVV2PYHasThreshold(),
                                     vwpp::DynamicRecfgInterface::getInstance()->getPidVV2PYThreshold());
-    static vwpp::PIDController
-            pid_controller_p_local_z(vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PZKp(),
-                                     vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PZKi(),
-                                     vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PZKd(),
-                                     vwpp::DynamicRecfgInterface::getInstance()->isPidPV2PZHasThreshold(),
-                                     vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PZThreshold());
-
-    static vwpp::PIDController
-            pid_controller_p_local_yaw(vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PYawKp(),
-                                       vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PYawKi(),
-                                       vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PYawKd(),
-                                       vwpp::DynamicRecfgInterface::getInstance()->isPidPV2PYawHasThreshold(),
-                                       vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PYawThreshold());
+    // static vwpp::PIDController
+    //         pid_controller_p_local_z(vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PZKp(),
+    //                                  vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PZKi(),
+    //                                  vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PZKd(),
+    //                                  vwpp::DynamicRecfgInterface::getInstance()->isPidPV2PZHasThreshold(),
+    //                                  vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PZThreshold());
+    //
+    // static vwpp::PIDController
+    //         pid_controller_p_local_yaw(vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PYawKp(),
+    //                                    vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PYawKi(),
+    //                                    vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PYawKd(),
+    //                                    vwpp::DynamicRecfgInterface::getInstance()->isPidPV2PYawHasThreshold(),
+    //                                    vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PYawThreshold());
 
 
     pid_controller_v_body_x.setTarget(0.);
     pid_controller_v_body_y.setTarget(0.);
-    pid_controller_p_local_z.setTarget(this->target_altitude);
+    // pid_controller_p_local_z.setTarget(this->target_altitude);
     // TODO
-    pid_controller_p_local_yaw.setTarget(this->target_yaw);
+    // pid_controller_p_local_yaw.setTarget(this->target_yaw);
 
 
     pid_controller_v_body_x.update(_cur_v_x);
     pid_controller_v_body_y.update(_cur_v_y);
-    pid_controller_p_local_z.update(vwpp::PX4Interface::getInstance()->getCurZ());
-    pid_controller_p_local_yaw.update(
-            convertCurYaw2FabsYawThetaBetweenPI(target_yaw, vwpp::PX4Interface::getInstance()->getCurZ()));
+    // pid_controller_p_local_z.update(vwpp::PX4Interface::getInstance()->getCurZ());
+    // pid_controller_p_local_yaw.update(
+    //         convertCurYaw2FabsYawThetaBetweenPI(target_yaw, vwpp::PX4Interface::getInstance()->getCurZ()));
 
     geometry_msgs::Vector3Stamped linear_body_vel{};
     // linear_body_vel.header.stamp = ros::Time::now();
@@ -173,7 +149,7 @@ DroneVelocity ActionHovering::calculateVelocity(double_t _cur_v_x, double_t _cur
     linear_body_vel.header.frame_id = "camera_link";
     linear_body_vel.vector.x = pid_controller_v_body_x.output();
     linear_body_vel.vector.y = pid_controller_v_body_y.output();
-    linear_body_vel.vector.z = pid_controller_p_local_z.output();
+    linear_body_vel.vector.z = 0;
 
     geometry_msgs::Vector3Stamped linear_local_vel{};
     try
@@ -186,14 +162,22 @@ DroneVelocity ActionHovering::calculateVelocity(double_t _cur_v_x, double_t _cur
         ros::Duration(vwpp::DynamicRecfgInterface::getInstance()->getTfBreakDuration()).sleep();
     }
 
-    DroneVelocity drone_velocity{};
-    drone_velocity.x = linear_local_vel.vector.x;
-    drone_velocity.y = linear_local_vel.vector.y;
-    drone_velocity.z = linear_local_vel.vector.z;
-    drone_velocity.yaw = pid_controller_p_local_yaw.output();
+    TargetVelXYPosZYaw target_vel_xy_pos_z_yaw{};
+    target_vel_xy_pos_z_yaw.vx = linear_local_vel.vector.x;
+    target_vel_xy_pos_z_yaw.vy = linear_local_vel.vector.y;
+    target_vel_xy_pos_z_yaw.pz = target_altitude;
+    target_vel_xy_pos_z_yaw.yaw = target_yaw;
 
+    return target_vel_xy_pos_z_yaw;
 
-    return drone_velocity;
+    // DroneVelocity drone_velocity{};
+    // drone_velocity.x = linear_local_vel.vector.x;
+    // drone_velocity.y = linear_local_vel.vector.y;
+    // drone_velocity.z = linear_local_vel.vector.z;
+    // drone_velocity.yaw = pid_controller_p_local_yaw.output();
+    //
+    //
+    // return drone_velocity;
 }
 
 
@@ -201,8 +185,8 @@ ActionRotating::ActionRotating(double_t _target_altitude) :
         action_id(ROTATION),
         target_altitude(_target_altitude)
 {
-    initial_p_x = vwpp::PX4Interface::getInstance()->getCurX();
-    initial_p_y = vwpp::PX4Interface::getInstance()->getCurY();
+    on_p_x = vwpp::PX4Interface::getInstance()->getCurX();
+    on_p_y = vwpp::PX4Interface::getInstance()->getCurY();
 }
 
 
@@ -247,8 +231,8 @@ DroneVelocity ActionRotating::calculateVelocity(double_t _target_yaw, double_t _
                                        vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PYawThreshold());
 
     // TODO Local->Body?
-    pid_controller_p_local_x.setTarget(this->initial_p_x);
-    pid_controller_p_local_y.setTarget(this->initial_p_y);
+    pid_controller_p_local_x.setTarget(this->on_p_x);
+    pid_controller_p_local_y.setTarget(this->on_p_y);
     pid_controller_p_local_z.setTarget(this->target_altitude);
     ROS_ERROR("target altitude: %lf", this->target_altitude);
     pid_controller_p_local_yaw.setTarget(_target_yaw);
@@ -268,19 +252,31 @@ DroneVelocity ActionRotating::calculateVelocity(double_t _target_yaw, double_t _
 }
 
 
-int8_t ActionRotating::setHoverOnXY(double_t _hover_x, double_t _hover_y)
+TargetPosXYZYaw ActionRotating::calculateVelocity(double_t _target_yaw)
 {
-    initial_p_x = _hover_x;
-    initial_p_y = _hover_y;
+    TargetPosXYZYaw target_pose_xyz_yaw{};
+    target_pose_xyz_yaw.px = on_p_x;
+    target_pose_xyz_yaw.py = on_p_y;
+    target_pose_xyz_yaw.pz = target_altitude;
+    target_pose_xyz_yaw.yaw = _target_yaw;
+
+    return target_pose_xyz_yaw;
+}
+
+
+int8_t ActionRotating::resetRotatingOnXY(double_t _hover_x, double_t _hover_y)
+{
+    on_p_x = _hover_x;
+    on_p_y = _hover_y;
 }
 
 
 ActionAdjustAltitude::ActionAdjustAltitude() :
         action_id(ADJUSTALTITUDE)
 {
-    initial_p_x = vwpp::PX4Interface::getInstance()->getCurX();
-    initial_p_y = vwpp::PX4Interface::getInstance()->getCurY();
-    initial_p_yaw = vwpp::PX4Interface::getInstance()->getCurYaw();
+    on_p_x = vwpp::PX4Interface::getInstance()->getCurX();
+    on_p_y = vwpp::PX4Interface::getInstance()->getCurY();
+    on_p_yaw = vwpp::PX4Interface::getInstance()->getCurYaw();
 }
 
 
@@ -324,16 +320,16 @@ DroneVelocity ActionAdjustAltitude::calculateVelocity(double_t _target_altitude,
                                        vwpp::DynamicRecfgInterface::getInstance()->isPidPV2PYawHasThreshold(),
                                        vwpp::DynamicRecfgInterface::getInstance()->getPidPV2PYawThreshold());
 
-    pid_controller_p_local_x.setTarget(this->initial_p_x);
-    pid_controller_p_local_y.setTarget(this->initial_p_y);
+    pid_controller_p_local_x.setTarget(this->on_p_x);
+    pid_controller_p_local_y.setTarget(this->on_p_y);
     pid_controller_p_local_z.setTarget(_target_altitude);
-    pid_controller_p_local_yaw.setTarget(this->initial_p_yaw);
+    pid_controller_p_local_yaw.setTarget(this->on_p_yaw);
 
     pid_controller_p_local_x.update(vwpp::PX4Interface::getInstance()->getCurX());
     pid_controller_p_local_y.update(vwpp::PX4Interface::getInstance()->getCurY());
-    pid_controller_p_local_z.update(vwpp::PX4Interface::getInstance()->getCurZ());
+    pid_controller_p_local_z.update(_cur_altitude);
     pid_controller_p_local_yaw.update(
-            convertCurYaw2FabsYawThetaBetweenPI(initial_p_yaw, vwpp::PX4Interface::getInstance()->getCurYaw()));
+            convertCurYaw2FabsYawThetaBetweenPI(on_p_yaw, vwpp::PX4Interface::getInstance()->getCurYaw()));
 
     DroneVelocity drone_velocity{};
     drone_velocity.x = pid_controller_p_local_x.output();
@@ -342,6 +338,31 @@ DroneVelocity ActionAdjustAltitude::calculateVelocity(double_t _target_altitude,
     drone_velocity.yaw = pid_controller_p_local_yaw.output();
 
     return drone_velocity;
+
 }
+
+
+TargetPosXYZYaw ActionAdjustAltitude::calculateVelocity(double_t _target_altitude)
+{
+    TargetPosXYZYaw target_pos_xyz_yaw{};
+    target_pos_xyz_yaw.px = on_p_x;
+    target_pos_xyz_yaw.py = on_p_y;
+    target_pos_xyz_yaw.pz = _target_altitude;
+    target_pos_xyz_yaw.yaw = on_p_yaw;
+
+    return target_pos_xyz_yaw;
+}
+
+
+int8_t ActionAdjustAltitude::setAdjustAltitudeXYYaw(double_t _on_x, double_t _on_y, double_t _on_yaw)
+{
+    on_p_x = _on_x;
+    on_p_y = _on_y;
+    on_p_yaw = _on_yaw;
+
+    return 0;
+}
+
+
 
 

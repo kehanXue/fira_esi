@@ -46,6 +46,12 @@ namespace vwpp
         TASK_FINISH
     };
 
+    enum ActionRuntime
+    {
+        FIRST_IN = 1,
+        SECOND_IN
+    };
+
     class TaskBase
     {
     public:
@@ -106,6 +112,8 @@ namespace vwpp
 
         TaskBase* p_task_base;
 
+        ActionTrackingLine* p_action_tracking_line;
+
         ActionID cur_action_id;
 
         int64_t runtime;
@@ -134,6 +142,8 @@ namespace vwpp
 
         int8_t run(GateType _gate_type);
 
+        int8_t resetAdjustAltitudeOnXYYaw(double_t _hover_x, double_t _hover_y, double_t _hold_yaw);
+
     private:
 
         TaskBase* p_task_base;
@@ -142,8 +152,14 @@ namespace vwpp
 
         double_t altitude_target;
 
+        ActionAdjustAltitude* p_action_adjust_altitude;
+        ActionTrackingLine* p_action_tracking_line{};
+
+
         // TODO Timer
         int64_t forward_counter;
+
+        ActionRuntime inter_adjust_altitude_time;
     };
 
     class TaskHoverOnQR
@@ -160,14 +176,13 @@ namespace vwpp
 
         char run(TaskID _cur_task_id, std::string _qr_inform);
 
-        int8_t resetHoverOnXY(double_t _hover_x, double_t _hover_y);
+        int8_t resetRotatingOnXY(double_t _hover_x, double_t _hover_y);
 
     private:
         TaskBase* p_task_base;
-
-        // TODO Add to task_base
         ActionID cur_action_id;
 
+        // TODO
         ActionRotating action_rotating;
     };
 
@@ -188,8 +203,11 @@ namespace vwpp
     private:
 
         TaskBase* p_task_base;
-
         ActionID cur_action_id;
+
+        ActionTrackingLine* p_action_tracking_line;
+        ActionHovering* p_action_hovering;
+        ActionRotating* p_action_rotating;
     };
 
 
@@ -210,9 +228,11 @@ namespace vwpp
     private:
 
         TaskBase* p_task_base;
-
         ActionID cur_action_id;
 
+        ActionTrackingLine* p_action_tracking_line;
+        ActionHovering* p_action_hovering;
+        ActionAdjustAltitude* p_action_adjust_altitude;
     };
 
 }

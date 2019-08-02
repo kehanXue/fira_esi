@@ -443,21 +443,20 @@ void MYCV::findQR(cv::Mat image)
 
         QR_location[0] = QR_X/4.0;
         QR_location[1] = QR_Y/4.0;
-
 #ifdef TEST
         cv::circle(outimage, cv::Point2d(QR_location[0], QR_location[1]), 5, cv::Scalar(0,255,0), 3);
         cv::circle(outimage, cv::Point2d(QR_location[0], QR_location[1]), 20, cv::Scalar(0,255,0), 5);
 #endif
-
-        resetpoint(QR_location, image);
     }
+
+    int QR_rect_size = 170;
 
     if(inform.empty())
     {
         detect_QR = false;
         QR_inform = "";
     }
-    else if(fabs(QR_location[0])<170 && fabs(QR_location[1])<170)
+    else if(fabs(QR_location[0])<QR_rect_size && fabs(QR_location[1])<QR_rect_size)
     {
         detect_QR = true;
         QR_inform = inform[0];
@@ -472,8 +471,12 @@ void MYCV::findQR(cv::Mat image)
         QR_inform = ss;
 
 #ifdef TEST
+        cv::rectangle(outimage, cv::Point(outimage.cols/2-QR_rect_size, outimage.rows/2-QR_rect_size),
+                cv::Point(outimage.cols/2+QR_rect_size, outimage.rows/2+QR_rect_size), cv::Scalar(255,255,0));
         cv::circle(outimage, cv::Point2d(QR_location[0], QR_location[1]), 3, cv::Scalar(0,255,255), 3);
 #endif
+
+        resetpoint(QR_location, image);
     }
     else
     {
@@ -569,8 +572,8 @@ void MYCV::findblueH(cv::Mat image)
     if (number_blue>image.rows*image.cols/25)
     {
         detect_blueH = true;
-        blueH_location[0] = 1.0* sum_blue_rows / number_blue;
-        blueH_location[1] = 1.0* sum_blue_cols / number_blue;
+        blueH_location[1] = 1.0* sum_blue_rows / number_blue;
+        blueH_location[0] = 1.0* sum_blue_cols / number_blue;
 
 #ifdef TEST
         cv::circle(outimage, cv::Point2d(blueH_location[0], blueH_location[1]), 5, cv::Scalar(255,0,0), 3);
@@ -672,8 +675,8 @@ void MYCV::findredX(cv::Mat image)
     if (number_red>image.rows*image.cols/25)
     {
         detect_redX = true;
-        redX_location[0] = 1.0* sum_red_rows / number_red;
-        redX_location[1] = 1.0* sum_red_cols / number_red;
+        redX_location[1] = 1.0* sum_red_rows / number_red;
+        redX_location[0] = 1.0* sum_red_cols / number_red;
 
 #ifdef TEST
         cv::circle(outimage, cv::Point2d(redX_location[0], redX_location[1]), 5, cv::Scalar(0,0,255), 3);
