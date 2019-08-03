@@ -52,30 +52,30 @@ int8_t vwpp::FlowController::run()
     else if (cur_task_id == NAVIGATION)
     {
         p_task_navigation->run();
+
+        // Switch to Avoidance
+        // if (VisionInterface::getInstance()->getYellowGateState())
+        // {
+        //     gate_type = YELLOW;
+        //     cur_task_id = AVOIDANCE;
+        //     p_task_avoidance->resetAdjustAltitudeOnXYYaw(PX4Interface::getInstance()->getCurX(),
+        //                                                  PX4Interface::getInstance()->getCurY(),
+        //                                                  PX4Interface::getInstance()->getCurYaw());
+        //     ROS_INFO("Task switch to AVOIDANCE!");
+        // }
+        ROS_ERROR("Red gate state: %d", VisionInterface::getInstance()->getRedGateState());
+        ROS_ERROR("Red gate depth: %lf", VisionInterface::getInstance()->getRedGateDepth());
+        if (VisionInterface::getInstance()->getRedGateState())
+        {
+            gate_type = RED;
+            cur_task_id = AVOIDANCE;
+            p_task_avoidance->resetAdjustAltitudeOnXYYaw(PX4Interface::getInstance()->getCurX(),
+                                                         PX4Interface::getInstance()->getCurY(),
+                                                         PX4Interface::getInstance()->getCurYaw());
+            ROS_INFO("Task switch to AVOIDANCE!");
+        }
         if (p_task_navigation->getTaskState() == TASK_FINISH)
         {
-
-            // Switch to Avoidance
-            // if (VisionInterface::getInstance()->getYellowGateState())
-            // {
-            //     gate_type = YELLOW;
-            //     cur_task_id = AVOIDANCE;
-            //     p_task_avoidance->resetAdjustAltitudeOnXYYaw(PX4Interface::getInstance()->getCurX(),
-            //                                                  PX4Interface::getInstance()->getCurY(),
-            //                                                  PX4Interface::getInstance()->getCurYaw());
-            //     ROS_INFO("Task switch to AVOIDANCE!");
-            // }
-            // else if (VisionInterface::getInstance()->getRedGateState())
-            // {
-            //     gate_type = RED;
-            //     cur_task_id = AVOIDANCE;
-            //     p_task_avoidance->resetAdjustAltitudeOnXYYaw(PX4Interface::getInstance()->getCurX(),
-            //                                                  PX4Interface::getInstance()->getCurY(),
-            //                                                  PX4Interface::getInstance()->getCurYaw());
-            //     ROS_INFO("Task switch to AVOIDANCE!");
-            // }
-
-
             // Switch to HoverOnQR
             ROS_ERROR("Navigation finished!");
             if (VisionInterface::getInstance()->getGroundQRState())
@@ -89,16 +89,16 @@ int8_t vwpp::FlowController::run()
             }
         }
     }
-        // else if (cur_task_id == AVOIDANCE)
-        // {
-        //     p_task_avoidance->run(gate_type);
-        //
+    else if (cur_task_id == AVOIDANCE)
+    {
+        p_task_avoidance->run(gate_type);
+
         //     Switch to Navigation
-        // if (p_task_avoidance->getTaskState() == TASK_FINISH)
-        // {
-        //     cur_task_id = NAVIGATION;
-        // }
-        // }
+        if (p_task_avoidance->getTaskState() == TASK_FINISH)
+        {
+            cur_task_id = NAVIGATION;
+        }
+    }
     else if (cur_task_id == HOVERONQR)
     {
         std::string cur_qr_inform = VisionInterface::getInstance()->getGroundQRinform();

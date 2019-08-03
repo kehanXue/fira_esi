@@ -1,21 +1,21 @@
 !!python/object/new:dynamic_reconfigure.encoding.Config
 dictitems:
-  altitude_tolerance: 0.14
-  altitude_when_red_gate: 1.6
-  altitude_when_yellow_gate: 0.5
-  avoidance_forward_time: 9.0
+  altitude_tolerance: 0.13
+  altitude_when_red_gate: 1.6199999999999999
+  altitude_when_yellow_gate: 0.38999999999999996
+  avoidance_forward_time: 10.0
   blue_h_offset_x_tolerance: 90.0
   blue_h_offset_y_tolerance: 90.0
-  forward_vel: 0.18
+  forward_vel: 0.24
   groups: !!python/object/new:dynamic_reconfigure.encoding.Config
     dictitems:
-      altitude_tolerance: 0.14
-      altitude_when_red_gate: 1.6
-      altitude_when_yellow_gate: 0.5
-      avoidance_forward_time: 9.0
+      altitude_tolerance: 0.13
+      altitude_when_red_gate: 1.6199999999999999
+      altitude_when_yellow_gate: 0.38999999999999996
+      avoidance_forward_time: 10.0
       blue_h_offset_x_tolerance: 90.0
       blue_h_offset_y_tolerance: 90.0
-      forward_vel: 0.18
+      forward_vel: 0.24
       groups: !!python/object/new:dynamic_reconfigure.encoding.Config
         state: []
       id: 0
@@ -23,7 +23,8 @@ dictitems:
       landing_altitude: 0.0
       name: Default
       navigation_per_sustain_time: 25
-      normal_flight_altitude: 0.51
+      normal_flight_altitude: 0.44
+      open_claw_msg_send_frequency: 70
       parameters: !!python/object/new:dynamic_reconfigure.encoding.Config
         state: []
       parent: 0
@@ -50,13 +51,13 @@ dictitems:
       pid_v_v2p_x_has_threshold: true
       pid_v_v2p_x_kd: 0.0
       pid_v_v2p_x_ki: 0.0
-      pid_v_v2p_x_kp: 0.015
-      pid_v_v2p_x_threshold: 0.1
+      pid_v_v2p_x_kp: 0.017
+      pid_v_v2p_x_threshold: 0.2
       pid_v_v2p_y_has_threshold: true
       pid_v_v2p_y_kd: 0.0
       pid_v_v2p_y_ki: 0.0
-      pid_v_v2p_y_kp: 0.015
-      pid_v_v2p_y_threshold: 0.1
+      pid_v_v2p_y_kp: 0.017
+      pid_v_v2p_y_threshold: 0.2
       pid_v_v2p_yaw_has_threshold: true
       pid_v_v2p_yaw_kd: 0.0
       pid_v_v2p_yaw_ki: 0.0
@@ -79,7 +80,8 @@ dictitems:
   judge_achieve_counter_threshold: 20
   landing_altitude: 0.0
   navigation_per_sustain_time: 25
-  normal_flight_altitude: 0.51
+  normal_flight_altitude: 0.44
+  open_claw_msg_send_frequency: 70
   pid_p_v2p_x_has_threshold: true
   pid_p_v2p_x_kd: 0.0
   pid_p_v2p_x_ki: 0.0
@@ -103,13 +105,13 @@ dictitems:
   pid_v_v2p_x_has_threshold: true
   pid_v_v2p_x_kd: 0.0
   pid_v_v2p_x_ki: 0.0
-  pid_v_v2p_x_kp: 0.015
-  pid_v_v2p_x_threshold: 0.1
+  pid_v_v2p_x_kp: 0.017
+  pid_v_v2p_x_threshold: 0.2
   pid_v_v2p_y_has_threshold: true
   pid_v_v2p_y_kd: 0.0
   pid_v_v2p_y_ki: 0.0
-  pid_v_v2p_y_kp: 0.015
-  pid_v_v2p_y_threshold: 0.1
+  pid_v_v2p_y_kp: 0.017
+  pid_v_v2p_y_threshold: 0.2
   pid_v_v2p_yaw_has_threshold: true
   pid_v_v2p_yaw_kd: 0.0
   pid_v_v2p_yaw_ki: 0.0

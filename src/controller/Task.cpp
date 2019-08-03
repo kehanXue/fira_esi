@@ -209,12 +209,10 @@ vwpp::TaskState vwpp::TaskAvoidance::getTaskState()
 }
 
 
-// Has bug! static!
 int8_t vwpp::TaskAvoidance::run(GateType _gate_type)
 {
     if (cur_action_id == ADJUSTALTITUDE)
     {
-
         if (inter_adjust_altitude_time == FIRST_IN)
         {
 
@@ -273,6 +271,7 @@ int8_t vwpp::TaskAvoidance::run(GateType _gate_type)
     else if (cur_action_id == TRACKINGLINE)
     {
         forward_counter++;
+        ROS_WARN("forward_counter: %ld", forward_counter);
 
         // 10: Controller Hz
         if (forward_counter >=
@@ -282,7 +281,7 @@ int8_t vwpp::TaskAvoidance::run(GateType _gate_type)
             this->resetAdjustAltitudeOnXYYaw(PX4Interface::getInstance()->getCurX(),
                                              PX4Interface::getInstance()->getCurY(),
                                              PX4Interface::getInstance()->getCurYaw());
-            // TODO
+
             this->altitude_target =
                     vwpp::DynamicRecfgInterface::getInstance()->getNormalFlightAltitude();
             inter_adjust_altitude_time = SECOND_IN;

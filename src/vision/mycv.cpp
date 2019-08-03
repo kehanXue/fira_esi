@@ -211,15 +211,15 @@ MYCV::MYCV(int flag, ros::NodeHandle *pnh)
     x[22] = getoneint("BGR_max_redX2");
     x[23] = getoneint("BGR_max_redX3");
 #endif
-    // static bool test_ros_first = true;
-    // if(test_ros_first)
-    // {
-    //     test_ros_first = false;
-    //     server = new(dynamic_reconfigure::Server<dynamic_reconfigure::vision_dynamic_reconfigureConfig>);
-    //     server_callback = new(dynamic_reconfigure::Server<dynamic_reconfigure::vision_dynamic_reconfigureConfig>::CallbackType);
-    //     *server_callback = boost::bind(&callback, _1);
-    //     server->setCallback(*server_callback);
-    // }
+    static bool test_ros_first = true;
+    if(test_ros_first)
+    {
+        test_ros_first = false;
+        // server = new(dynamic_reconfigure::Server<dynamic_reconfigure::vision_dynamic_reconfigureConfig>);
+        // server_callback = new(dynamic_reconfigure::Server<dynamic_reconfigure::vision_dynamic_reconfigureConfig>::CallbackType);
+        // *server_callback = boost::bind(&callback, _1);
+        // server->setCallback(*server_callback);
+    }
 #endif
 #endif
 }
@@ -364,7 +364,7 @@ void MYCV::findgate(cv::Mat image)
 
 #ifdef TEST
 #ifndef TEST_ROS
-#ifdef FIND_GATE
+        #ifdef FIND_GATE
         color_test();
 #endif
 #endif
@@ -385,9 +385,16 @@ void MYCV::findgate(cv::Mat image)
     yellow = color_thing(image, min_color[0], max_color[0], "yellow");
     red = color_thing(image, min_color[1], max_color[1], "red");
 
+    static std::vector<bool> detect_yellow(5, false);
+    for(unsigned int i=0; i<detect_yellow.size()-1; i++)
+    {
+        detect_yellow[i] = detect_yellow[i+1];
+    }
+
     if(fabs(yellow.x+1.0) <1.0 && fabs(yellow.y+1.0) <1.0 )
     {
         detect_yellow_gate = false;
+        detect_yellow[detect_yellow.size()-1] = detect_yellow_gate;
     }
     else
     {
@@ -396,11 +403,34 @@ void MYCV::findgate(cv::Mat image)
         yellow_gate_location[1] = yellow.y;
         yellow_gate_location[2] = yellow.z;
         resetpoint(yellow_gate_location, image);
+
+        detect_yellow[detect_yellow.size()-1] = detect_yellow_gate;
+        int flag = true;
+        for(unsigned int i=0; i<detect_yellow.size()-1; i++)
+        {
+            if(detect_yellow[i] == false)
+            {
+                flag = false;
+                break;
+            }
+        }
+
+        if(!(yellow_gate_location[2] < 1.5 && yellow_gate_location[2] > 0.8 && flag))
+        {
+            detect_yellow_gate = false;
+        }
+    }
+
+    static std::vector<bool> detect_red(5, false);
+    for(unsigned int i=0; i<detect_red.size()-1; i++)
+    {
+        detect_red[i] = detect_red[i+1];
     }
 
     if(fabs(red.x+1.0) <1.0 && fabs(red.y+1.0) <1.0 )
     {
         detect_red_gate = false;
+        detect_red[detect_red.size()-1] = detect_red_gate;
     }
     else
     {
@@ -409,6 +439,22 @@ void MYCV::findgate(cv::Mat image)
         red_gate_location[1] = red.y;
         red_gate_location[2] = red.z;
         resetpoint(red_gate_location, image);
+
+        detect_red[detect_red.size()-1] = detect_red_gate;
+        int flag = true;
+        for(unsigned int i=0; i<detect_red.size()-1; i++)
+        {
+            if(detect_red[i] == false)
+            {
+                flag = false;
+                break;
+            }
+        }
+
+        if(!(red_gate_location[2] < 1.5 && red_gate_location[2] > 0.8 && flag))
+        {
+            detect_red_gate = false;
+        }
     }
 
 }
@@ -423,7 +469,7 @@ void MYCV::findQR(cv::Mat image)
     int width = image.cols;
     int height = image.rows;
     zbar::Image zbarimage(static_cast<unsigned int>(width), static_cast<unsigned int>(height),
-            "Y800", image.data, static_cast<unsigned int>(width * height));
+                          "Y800", image.data, static_cast<unsigned int>(width * height));
 
     scanner.scan(zbarimage);
 
@@ -443,10 +489,12 @@ void MYCV::findQR(cv::Mat image)
 
         QR_location[0] = QR_X/4.0;
         QR_location[1] = QR_Y/4.0;
+
 #ifdef TEST
         cv::circle(outimage, cv::Point2d(QR_location[0], QR_location[1]), 5, cv::Scalar(0,255,0), 3);
         cv::circle(outimage, cv::Point2d(QR_location[0], QR_location[1]), 20, cv::Scalar(0,255,0), 5);
 #endif
+
         resetpoint(QR_location, image);
     }
 
@@ -473,10 +521,9 @@ void MYCV::findQR(cv::Mat image)
 
 #ifdef TEST
         cv::rectangle(outimage, cv::Point(outimage.cols/2-QR_rect_size, outimage.rows/2-QR_rect_size),
-                cv::Point(outimage.cols/2+QR_rect_size, outimage.rows/2+QR_rect_size), cv::Scalar(255,255,0));
-        // cv::circle(outimage, cv::Point2d(QR_location[0], QR_location[1]), 3, cv::Scalar(0,255,255), 3);
+                      cv::Point(outimage.cols/2+QR_rect_size, outimage.rows/2+QR_rect_size), cv::Scalar(255,255,0));
+        //cv::circle(outimage, cv::Point2d(QR_location[0], QR_location[1]), 3, cv::Scalar(0,255,255), 3);
 #endif
-
     }
     else
     {
@@ -503,7 +550,7 @@ void MYCV::findblueH(cv::Mat image)
 
 #ifdef TEST
 #ifndef TEST_ROS
-#ifdef FIND_BLUEH
+        #ifdef FIND_BLUEH
         color_test2();
         cv::namedWindow("blueH", 0);
 #endif
@@ -529,9 +576,9 @@ void MYCV::findblueH(cv::Mat image)
 
     cv::Mat outimage_blueH(image.rows, image.cols, CV_8UC1, cv::Scalar(0));
 
-    for (int i = 0; i<image.rows; i++)
+    for(int i = 0; i<image.rows; i++)
     {
-        for (int j = 0; j<image.cols; j++)
+        for(int j = 0; j<image.cols; j++)
         {
             //if (image.at<cv::Vec3b>(i,j)[0] > 70 &&
             //    image.at<cv::Vec3b>(i,j)[2] < 60)
@@ -569,7 +616,7 @@ void MYCV::findblueH(cv::Mat image)
 #endif
 #endif
 
-    if (number_blue > 1000)
+    if(number_blue>1000)
     {
         detect_blueH = true;
         blueH_location[1] = 1.0* sum_blue_rows / number_blue;
@@ -579,6 +626,7 @@ void MYCV::findblueH(cv::Mat image)
         cv::circle(outimage, cv::Point2d(blueH_location[0], blueH_location[1]), 5, cv::Scalar(255,0,0), 3);
         cv::circle(outimage, cv::Point2d(blueH_location[0], blueH_location[1]), 20, cv::Scalar(255,0,0), 5);
 #endif
+
         resetpoint(blueH_location, image);
     }
     else
@@ -605,7 +653,7 @@ void MYCV::findredX(cv::Mat image)
 
 #ifdef TEST
 #ifndef TEST_ROS
-#ifdef FIND_REDX
+        #ifdef FIND_REDX
         color_test3();
         cv::namedWindow("redX", 0);
 #endif
@@ -631,9 +679,9 @@ void MYCV::findredX(cv::Mat image)
 
     cv::Mat outimage_redX(image.rows, image.cols, CV_8UC1, cv::Scalar(0));
 
-    for (int i = 0; i < image.rows; i++)
+    for(int i = 0; i < image.rows; i++)
     {
-        for (int j = 0; j < image.cols; j++)
+        for(int j = 0; j < image.cols; j++)
         {
             /*if (image.at<cv::Vec3b>(i,j)[0] < 75 &&
                 image.at<cv::Vec3b>(i,j)[1] < 75 &&
@@ -650,7 +698,6 @@ void MYCV::findredX(cv::Mat image)
                 sum_red_cols += j;
                 number_red++;
             }
-
         }
     }
 
@@ -673,7 +720,7 @@ void MYCV::findredX(cv::Mat image)
 #endif
 #endif
 
-    if (number_red > 1000)
+    if(number_red>1000)
     {
         detect_redX = true;
         redX_location[1] = 1.0* sum_red_rows / number_red;
@@ -683,6 +730,7 @@ void MYCV::findredX(cv::Mat image)
         cv::circle(outimage, cv::Point2d(redX_location[0], redX_location[1]), 5, cv::Scalar(0,0,255), 3);
         cv::circle(outimage, cv::Point2d(redX_location[0], redX_location[1]), 20, cv::Scalar(0,0,255), 5);
 #endif
+
         resetpoint(redX_location, image);
     }
     else
@@ -756,8 +804,26 @@ cv::Point3d MYCV::color_thing(cv::Mat image, cv::Scalar min_color, cv::Scalar ma
 
     for(unsigned int i = 0; i < rect_array.size(); i++)
     {
-        if(1.0*rect_array[i].area()/(image.cols*image.rows) > 0.05)
+        if(1.0*rect_array[i].area()/(image.cols*image.rows) > 0.3)
         {
+            int number = 0;
+            for(int j = rect_array[i].y; j < rect_array[i].y+rect_array[i].height; j++)
+            {
+                for(int k = rect_array[i].x; k < rect_array[i].x+rect_array[i].width; k++)
+                {
+                    if(thresholdimage.at<uchar>(j,k) == 255)
+                    {
+                        number++;
+                    }
+                }
+            }
+
+            if(!(number>0.15*rect_array[i].height*rect_array[i].width &&
+                 number<0.3*rect_array[i].height*rect_array[i].width))
+            {
+                continue;
+            }
+
 #ifdef TEST
             if(name == "yellow")
             {
@@ -771,32 +837,73 @@ cv::Point3d MYCV::color_thing(cv::Mat image, cv::Scalar min_color, cv::Scalar ma
 
             if(zed.isOpened())
             {
-                float depth[8];
-                int depth_x[8] = {rect_array[i].x+rect_array[i].width/9*1, rect_array[i].x+rect_array[i].width/9*2,
-                                  rect_array[i].x+rect_array[i].width/9*3, rect_array[i].x+rect_array[i].width/9*4,
-                                  rect_array[i].x+rect_array[i].width/9*5, rect_array[i].x+rect_array[i].width/9*6,
-                                  rect_array[i].x+rect_array[i].width/9*7, rect_array[i].x+rect_array[i].width/9*8};
-                int depth_y[8] = {rect_array[i].y+rect_array[i].height/10*1, rect_array[i].y+rect_array[i].height/10*1,
-                                  rect_array[i].y+rect_array[i].height/10*1, rect_array[i].y+rect_array[i].height/10*1,
-                                  rect_array[i].y+rect_array[i].height/10*1, rect_array[i].y+rect_array[i].height/10*1,
-                                  rect_array[i].y+rect_array[i].height/10*1, rect_array[i].y+rect_array[i].height/10*1};
-                for(int j=0; j<8; j++)
-                {
-                    zed_depth.getValue<float>(static_cast<unsigned int>(depth_x[j]),
-                                              static_cast<unsigned int>(depth_y[j]), &depth[j], sl::MEM_CPU);
-                }
+                /* float depth[8];
+                 int depth_x[8] = {rect_array[i].x+rect_array[i].width/9*1, rect_array[i].x+rect_array[i].width/9*2,
+                                   rect_array[i].x+rect_array[i].width/9*3, rect_array[i].x+rect_array[i].width/9*4,
+                                   rect_array[i].x+rect_array[i].width/9*5, rect_array[i].x+rect_array[i].width/9*6,
+                                   rect_array[i].x+rect_array[i].width/9*7, rect_array[i].x+rect_array[i].width/9*8};
+                 int depth_y[8] = {rect_array[i].y+rect_array[i].height/10*1, rect_array[i].y+rect_array[i].height/10*1,
+                                   rect_array[i].y+rect_array[i].height/10*1, rect_array[i].y+rect_array[i].height/10*1,
+                                   rect_array[i].y+rect_array[i].height/10*1, rect_array[i].y+rect_array[i].height/10*1,
+                                   rect_array[i].y+rect_array[i].height/10*1, rect_array[i].y+rect_array[i].height/10*1};
+
+                 for(int j=0; j<8; j++)
+                 {
+                     zed_depth.getValue<float>(static_cast<unsigned int>(depth_x[j]),
+                                               static_cast<unsigned int>(depth_y[j]), &depth[j], sl::MEM_CPU);
+ #ifdef TEST
+                     if(name == "yellow")
+                     {
+                         cv::circle(outimage, cv::Point(depth_x[j],depth_y[j]), 1, cv::Scalar(0,255,255), 2);
+                     }
+                     else if(name == "red")
+                     {
+                         cv::circle(outimage, cv::Point(depth_x[j],depth_y[j]), 1, cv::Scalar(0,0,255), 2);
+                     }
+ #endif
+                 }
+                 int depth_num = 0;
+                 float depth_ans = 0.0;
+                 for(int j=0; j<8; j++)
+                 {
+                     if(std::isnormal(depth[j]) && depth[j]<3.0)
+                     {
+                         depth_ans += depth[j];
+                         depth_num++;
+                     }
+                 }
+                 depth_ans /= depth_num;
+
+                 if(depth_num<4)
+                 {
+                     depth_ans = 20.0;
+                 }
+                 */
 
                 int depth_num = 0;
                 float depth_ans = 0.0;
-                for(int j=0; j<8; j++)
+                for(unsigned int j = rect_array[i].y; j < rect_array[i].y+rect_array[i].height; j++)
                 {
-                    if (std::isnormal(depth[j]))
+                    for(unsigned int k = rect_array[i].x; k < rect_array[i].x+rect_array[i].width; k++)
                     {
-                        depth_ans += depth[j];
-                        depth_num++;
+                        if(thresholdimage.at<uchar>(j,k) == 255)
+                        {
+                            float depth;
+                            zed_depth.getValue<float>(k, j, &depth, sl::MEM_CPU);
+                            if(std::isnormal(depth) && depth<5.0)
+                            {
+                                depth_ans += depth;
+                                depth_num++;
+                            }
+                        }
                     }
                 }
+
                 depth_ans /= depth_num;
+                if(depth_num < 100)
+                {
+                    depth_ans = 20.0;
+                }
 
                 return cv::Point3d(rect_array[i].x+rect_array[i].width/2.0, rect_array[i].y+rect_array[i].height/2.0,
                                    depth_ans);
@@ -826,7 +933,7 @@ cv::Point3d MYCV::color_thing(cv::Mat image, cv::Scalar min_color, cv::Scalar ma
 void MYCV::Proc_image(cv::Mat &thresholdimage)
 {
     cv::Mat erodeElement = cv::getStructuringElement(cv::MORPH_RECT,cv::Size(3,3));
-    cv::Mat dilateElement = cv::getStructuringElement(cv::MORPH_RECT,cv::Size(3,3));
+    cv::Mat dilateElement = cv::getStructuringElement(cv::MORPH_RECT,cv::Size(5,5));
 
     int erodenumber = 1;
     int dilatenumber = 1;
