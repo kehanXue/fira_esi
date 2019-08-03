@@ -543,6 +543,7 @@ int8_t vwpp::TaskDelivering::run()
 
         std_msgs::Bool open_claw_msg;
         open_claw_msg.data = true;
+        ROS_WARN("Sending open claw message");
         ClawInterface::getInstance()->publishOpenClawMsg(open_claw_msg);
 
         if (runtime >= DynamicRecfgInterface::getInstance()->getOpenClawMsgSendFrequency())
@@ -553,6 +554,13 @@ int8_t vwpp::TaskDelivering::run()
             ROS_WARN("Action switch to ROTATION");
             back_toward_yaw = (PX4Interface::getInstance()->getCurYaw() + M_PI);
         }
+
+
+        TargetVelXYPosZYaw target_vel_xy_pos_z_yaw =
+                p_action_hovering->calculateVelocity(VisionInterface::getInstance()->getRedXx(),
+                                                     VisionInterface::getInstance()->getRedXy());
+
+        PX4Interface::getInstance()->publishTarget(target_vel_xy_pos_z_yaw);
 
     }
     else if (cur_action_id == ROTATION)
