@@ -370,5 +370,55 @@ int8_t ActionAdjustAltitude::setAdjustAltitudeXYYaw(double_t _on_x, double_t _on
 }
 
 
+ActionCycleMoving::ActionCycleMoving()
+{
+
+}
+
+
+ActionCycleMoving::~ActionCycleMoving()
+{
+
+}
+
+
+ActionID ActionCycleMoving::getAction() const
+{
+    return TRACKINGLINE;
+}
+
+
+TargetVelXYYawPosZ ActionCycleMoving::calculateVelocity(double_t _target_altitude, double_t _cycle_radius)
+{
+    geometry_msgs::Vector3Stamped linear_body_vel{};
+    linear_body_vel.header.stamp = ros::Time(0);
+    linear_body_vel.header.frame_id = "camera_link";
+    // TODO param
+    linear_body_vel.vector.x = 0.;
+    linear_body_vel.vector.y = 0.10;
+    linear_body_vel.vector.z = 0.;
+
+    geometry_msgs::Vector3Stamped linear_local_vel{};
+    try
+    {
+        odom_base_tf_listener.transformVector("camera_odom_frame", linear_body_vel, linear_local_vel);
+    }
+    catch (tf::TransformException &tf_ex)
+    {
+        ROS_ERROR("%s", tf_ex.what());
+        ros::Duration(vwpp::DynamicRecfgInterface::getInstance()->getTfBreakDuration()).sleep();
+    }
+
+    TargetVelXYYawPosZ target_vel_xy_yaw_pos_z{};
+    target_vel_xy_yaw_pos_z.vx = linear_local_vel.vector.x;
+    target_vel_xy_yaw_pos_z.vy = linear_local_vel.vector.y;
+    target_vel_xy_yaw_pos_z.pz = _target_altitude;
+    // TODO param
+    target_vel_xy_yaw_pos_z.yaw_rate = 0.10 / _cycle_radius;
+
+
+    return target_vel_xy_yaw_pos_z;
+}
+
 
 

@@ -24,7 +24,7 @@ namespace vwpp
         HOVERING,
         ROTATION,
         OPENCLAW,
-        CIRCULARMOTION  //TODO
+        CYCLEMOVING
     };
 
     struct DroneVelocity
@@ -150,6 +150,26 @@ namespace vwpp
         double_t on_p_y;
 
         ActionID action_id;
+    };
+
+    class ActionCycleMoving
+    {
+    public:
+
+        ActionCycleMoving();
+
+        virtual ~ActionCycleMoving();
+
+        ActionID getAction() const;
+
+        TargetVelXYYawPosZ calculateVelocity(double_t _target_altitude, double_t _cycle_radius);
+
+    private:
+
+        ActionID action_id;
+
+        tf::TransformListener odom_base_tf_listener;
+
     };
 }
 

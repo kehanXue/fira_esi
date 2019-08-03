@@ -236,6 +236,27 @@ namespace vwpp
         ActionAdjustAltitude* p_action_adjust_altitude;
     };
 
+    class TaskScanTower
+    {
+    public:
+
+        TaskScanTower();
+
+        virtual ~TaskScanTower();
+
+        TaskID getTaskID();
+
+        TaskState getTaskState();
+
+        int8_t run();
+
+    private:
+
+        TaskBase* p_task_base;
+        ActionID cur_action_id;
+
+        ActionCycleMoving* p_action_cycle_moving;
+    };
 }
 
 

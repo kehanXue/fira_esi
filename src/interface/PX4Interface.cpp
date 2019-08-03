@@ -281,3 +281,26 @@ int8_t PX4Interface::publishTarget(const TargetVelXYPosZYaw _target_vel_xy_pos_z
 }
 
 
+int8_t PX4Interface::publishTarget(const TargetVelXYYawPosZ _target_pos_xyz_vel_yaw)
+{
+    mavros_msgs::PositionTarget position_target;
+    position_target.coordinate_frame = position_target.FRAME_LOCAL_NED;
+    position_target.type_mask =
+            position_target.IGNORE_AFX | position_target.IGNORE_AFY | position_target.IGNORE_AFZ |
+            position_target.IGNORE_PX | position_target.IGNORE_PY | // position_target.IGNORE_PZ |
+            // position_target.IGNORE_VZ | position_target.IGNORE_VY | position_target.IGNORE_VZ |
+            position_target.IGNORE_YAW;
+
+    position_target.velocity.x = _target_pos_xyz_vel_yaw.vx;
+    position_target.velocity.y = _target_pos_xyz_vel_yaw.vy;
+    position_target.position.z = _target_pos_xyz_vel_yaw.pz;
+    position_target.yaw_rate = _target_pos_xyz_vel_yaw.yaw_rate;
+
+    boost::unique_lock<boost::mutex> uq_lock_raw(mutex_cmd_pub);
+    this->px4_setpoint_raw_pub.publish(position_target);
+    return 0;
+
+    return 0;
+}
+
+
