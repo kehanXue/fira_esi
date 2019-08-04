@@ -9,4 +9,6 @@
 
 double_t convertCurYaw2FabsYawThetaBetweenPI(double_t _target_yaw, double_t _cur_yaw);
 
+double_t judgeTrackingLineVVelYScaleSigmoidFunction(double_t _cur_altitude);
+
 #endif //PX4_MODULES_TEST_UTILS_H_

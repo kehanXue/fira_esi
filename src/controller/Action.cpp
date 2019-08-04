@@ -56,7 +56,8 @@ ActionTrackingLine::calculateVelocity(double_t _cur_line_v_y, double_t _cur_v_ya
     linear_body_vel.header.frame_id = "camera_link";
     ROS_WARN("forward velocity: %lf", _forward_vel);
     linear_body_vel.vector.x = _forward_vel;
-    linear_body_vel.vector.y = pid_controller_v_body_y.output() * PX4Interface::getInstance()->getCurZ();
+    linear_body_vel.vector.y = pid_controller_v_body_y.output() *
+                               judgeTrackingLineVVelYScaleSigmoidFunction(PX4Interface::getInstance()->getCurZ());
     linear_body_vel.vector.z = 0;
 
     geometry_msgs::Vector3Stamped linear_local_vel{};

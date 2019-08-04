@@ -3,19 +3,19 @@ dictitems:
   altitude_tolerance: 0.13
   altitude_when_red_gate: 1.6199999999999999
   altitude_when_yellow_gate: 0.38999999999999996
-  avoidance_forward_time: 10.0
+  avoidance_forward_time: 13.0
   blue_h_offset_x_tolerance: 90.0
   blue_h_offset_y_tolerance: 90.0
-  forward_vel: 0.2
+  forward_vel: 0.22
   groups: !!python/object/new:dynamic_reconfigure.encoding.Config
     dictitems:
       altitude_tolerance: 0.13
       altitude_when_red_gate: 1.6199999999999999
       altitude_when_yellow_gate: 0.38999999999999996
-      avoidance_forward_time: 10.0
+      avoidance_forward_time: 13.0
       blue_h_offset_x_tolerance: 90.0
       blue_h_offset_y_tolerance: 90.0
-      forward_vel: 0.2
+      forward_vel: 0.22
       groups: !!python/object/new:dynamic_reconfigure.encoding.Config
         state: []
       id: 0
@@ -48,15 +48,15 @@ dictitems:
       pid_p_v2p_z_ki: 0.0
       pid_p_v2p_z_kp: 3.9
       pid_p_v2p_z_threshold: 0.84
-      pid_v_v2p_x_has_threshold: true
-      pid_v_v2p_x_kd: 0.0
+      pid_v_v2p_x_has_threshold: false
+      pid_v_v2p_x_kd: 0.006
       pid_v_v2p_x_ki: 0.0
-      pid_v_v2p_x_kp: 0.009
+      pid_v_v2p_x_kp: 0.001
       pid_v_v2p_x_threshold: 0.3
-      pid_v_v2p_y_has_threshold: true
-      pid_v_v2p_y_kd: 0.0
+      pid_v_v2p_y_has_threshold: false
+      pid_v_v2p_y_kd: 0.006
       pid_v_v2p_y_ki: 0.0
-      pid_v_v2p_y_kp: 0.009
+      pid_v_v2p_y_kp: 0.001
       pid_v_v2p_y_threshold: 0.3
       pid_v_v2p_yaw_has_threshold: true
       pid_v_v2p_yaw_kd: 0.0
@@ -72,7 +72,7 @@ dictitems:
       qr_offset_y_tolerance: 20.0
       red_x_offset_x_tolerance: 90.0
       red_x_offset_y_tolerance: 90.0
-      rotate_yaw_tolerance: 15.299999999999999
+      rotate_yaw_tolerance: 13.799999999999999
       state: true
       tf_break_duration: 0.2
       type: ''
@@ -102,15 +102,15 @@ dictitems:
   pid_p_v2p_z_ki: 0.0
   pid_p_v2p_z_kp: 3.9
   pid_p_v2p_z_threshold: 0.84
-  pid_v_v2p_x_has_threshold: true
-  pid_v_v2p_x_kd: 0.0
+  pid_v_v2p_x_has_threshold: false
+  pid_v_v2p_x_kd: 0.006
   pid_v_v2p_x_ki: 0.0
-  pid_v_v2p_x_kp: 0.009
+  pid_v_v2p_x_kp: 0.001
   pid_v_v2p_x_threshold: 0.3
-  pid_v_v2p_y_has_threshold: true
-  pid_v_v2p_y_kd: 0.0
+  pid_v_v2p_y_has_threshold: false
+  pid_v_v2p_y_kd: 0.006
   pid_v_v2p_y_ki: 0.0
-  pid_v_v2p_y_kp: 0.009
+  pid_v_v2p_y_kp: 0.001
   pid_v_v2p_y_threshold: 0.3
   pid_v_v2p_yaw_has_threshold: true
   pid_v_v2p_yaw_kd: 0.0
@@ -126,6 +126,6 @@ dictitems:
   qr_offset_y_tolerance: 20.0
   red_x_offset_x_tolerance: 90.0
   red_x_offset_y_tolerance: 90.0
-  rotate_yaw_tolerance: 15.299999999999999
+  rotate_yaw_tolerance: 13.799999999999999
   tf_break_duration: 0.2
 state: []
