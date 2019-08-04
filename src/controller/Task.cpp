@@ -736,4 +736,46 @@ int8_t vwpp::TaskLanding::run()
 }
 
 
+vwpp::TaskScanTower::TaskScanTower() :
+        cur_action_id(CYCLEMOVING)
+{
+    p_task_base = new TaskBase(SCANTOWER);
+    p_task_base->task_state = TASK_START;
 
+    target_altitude = DynamicRecfgInterface::getInstance()->getNormalFlightAltitude();
+    p_action_cycle_moving = new ActionCycleMoving();
+}
+
+
+vwpp::TaskScanTower::~TaskScanTower()
+{
+    delete p_task_base;
+    delete p_action_cycle_moving;
+}
+
+
+vwpp::TaskID vwpp::TaskScanTower::getTaskID()
+{
+    return p_task_base->task_id;
+}
+
+
+vwpp::TaskState vwpp::TaskScanTower::getTaskState()
+{
+    return p_task_base->task_state;
+}
+
+
+// TODO
+int8_t vwpp::TaskScanTower::run(double_t _cycle_radius)
+{
+    if (cur_action_id == CYCLEMOVING)
+    {
+        TargetVelXYYawPosZ target_vel_xy_yaw_pos_z =
+                p_action_cycle_moving->calculateVelocity(target_altitude, _cycle_radius);
+        PX4Interface::getInstance()->publishTarget(target_vel_xy_yaw_pos_z);
+    }
+
+    p_task_base->task_state = TASK_PROCESSING;
+    return 0;
+}

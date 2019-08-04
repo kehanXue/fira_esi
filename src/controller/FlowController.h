@@ -42,6 +42,7 @@ namespace vwpp
         TaskHoverOnQR* p_task_hover_on_qr;
         TaskDelivering* p_task_delivering;
         TaskLanding* p_task_landing;
+        TaskScanTower* p_task_scan_tower;
 
         GateType gate_type;
         char task_type_id;

@@ -371,16 +371,15 @@ int8_t ActionAdjustAltitude::setAdjustAltitudeXYYaw(double_t _on_x, double_t _on
 }
 
 
-ActionCycleMoving::ActionCycleMoving()
+ActionCycleMoving::ActionCycleMoving() :
+        action_id(CYCLEMOVING)
 {
 
 }
 
 
 ActionCycleMoving::~ActionCycleMoving()
-{
-
-}
+= default;
 
 
 ActionID ActionCycleMoving::getAction() const

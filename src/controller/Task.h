@@ -248,13 +248,14 @@ namespace vwpp
 
         TaskState getTaskState();
 
-        int8_t run();
+        int8_t run(double_t _cycle_radius);
 
     private:
 
         TaskBase* p_task_base;
         ActionID cur_action_id;
 
+        double_t target_altitude;
         ActionCycleMoving* p_action_cycle_moving;
     };
 }

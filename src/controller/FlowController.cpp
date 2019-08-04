@@ -22,6 +22,7 @@ vwpp::FlowController::FlowController() :
     p_task_hover_on_qr = new TaskHoverOnQR();
     p_task_delivering = new TaskDelivering();
     p_task_landing = new TaskLanding();
+    p_task_scan_tower = new TaskScanTower();
 }
 
 
@@ -33,6 +34,7 @@ vwpp::FlowController::~FlowController()
     delete p_task_hover_on_qr;
     delete p_task_delivering;
     delete p_task_landing;
+    delete p_task_scan_tower;
 }
 
 
@@ -44,10 +46,16 @@ int8_t vwpp::FlowController::run()
         p_task_takeoff->run();
         if (p_task_takeoff->getTaskState() == TASK_FINISH)
         {
-            cur_task_id = NAVIGATION;
+            // cur_task_id = NAVIGATION;
+            cur_task_id = SCANTOWER;
             ROS_INFO("Task switch to NAVIGATION!");
             // cur_task_id = LANDING;
         }
+    }
+    else if (cur_task_id == SCANTOWER)
+    {
+        // TODO
+        p_task_scan_tower->run(1.5);
     }
     else if (cur_task_id == NAVIGATION)
     {
