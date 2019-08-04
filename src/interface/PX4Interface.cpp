@@ -295,10 +295,11 @@ int8_t PX4Interface::publishTarget(const TargetVelXYYawPosZ _target_pos_xyz_vel_
     position_target.velocity.y = _target_pos_xyz_vel_yaw.vy;
     position_target.position.z = _target_pos_xyz_vel_yaw.pz;
     position_target.yaw_rate = _target_pos_xyz_vel_yaw.yaw_rate;
+    ROS_WARN("vel x: %lf, vel y: %lf, yaw_rate: %lf", position_target.velocity.x,
+             position_target.velocity.y, position_target.yaw_rate);
 
     boost::unique_lock<boost::mutex> uq_lock_raw(mutex_cmd_pub);
     this->px4_setpoint_raw_pub.publish(position_target);
-    return 0;
 
     return 0;
 }

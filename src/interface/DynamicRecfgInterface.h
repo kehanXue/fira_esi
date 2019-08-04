@@ -140,12 +140,16 @@ namespace vwpp
         double_t qr_offset_y_tolerance{};
 
         /* NAVIGATION Task per sustain time */
-        int64_t navigation_per_sustain_time;
+        int64_t navigation_per_sustain_time{};
 
         /* Open claw message send frequency */
-        int64_t open_claw_msg_send_frequency;
+        int64_t open_claw_msg_send_frequency{};
 
-    private:
+        /* Radius when cycle moving */
+        double_t cycle_moving_radius{};
+
+        /* Linear velocity when cycle moving */
+        double_t cycle_moving_linear_vel{};
 
         /* Judge whether achieve counter, Unit beat */
         int64_t judge_achieve_counter_threshold{};
@@ -264,6 +268,10 @@ namespace vwpp
         int64_t getJudgeAchieveCounterThreshold() const;
 
         int64_t getNavigationPerSustainTime() const;
+
+        double_t getCycleMovingRadius() const;
+
+        double_t getCycleMovingLinearVel() const;
 
         int64_t getOpenClawMsgSendFrequency() const;
     };

@@ -151,6 +151,9 @@ void vwpp::DynamicRecfgInterface::reconfig_cb(fira_esi::fira_esi_dynamic_cfgConf
     this->navigation_per_sustain_time = _config.navigation_per_sustain_time;
     this->judge_achieve_counter_threshold = _config.judge_achieve_counter_threshold;
     this->open_claw_msg_send_frequency = _config.open_claw_msg_send_frequency;
+
+    this->cycle_moving_radius = _config.cycle_moving_radius;
+    this->cycle_moving_linear_vel = _config.cycle_moving_linear_vel;
 }
 
 
@@ -499,6 +502,18 @@ int64_t vwpp::DynamicRecfgInterface::getNavigationPerSustainTime() const
 int64_t vwpp::DynamicRecfgInterface::getOpenClawMsgSendFrequency() const
 {
     return open_claw_msg_send_frequency;
+}
+
+
+double_t vwpp::DynamicRecfgInterface::getCycleMovingRadius() const
+{
+    return cycle_moving_radius;
+}
+
+
+double_t vwpp::DynamicRecfgInterface::getCycleMovingLinearVel() const
+{
+    return cycle_moving_linear_vel;
 }
 
 

@@ -382,7 +382,7 @@ ActionCycleMoving::~ActionCycleMoving()
 = default;
 
 
-ActionID ActionCycleMoving::getAction() const
+ActionID ActionCycleMoving::getActionId() const
 {
     return TRACKINGLINE;
 }
@@ -393,9 +393,8 @@ TargetVelXYYawPosZ ActionCycleMoving::calculateVelocity(double_t _target_altitud
     geometry_msgs::Vector3Stamped linear_body_vel{};
     linear_body_vel.header.stamp = ros::Time(0);
     linear_body_vel.header.frame_id = "camera_link";
-    // TODO param
     linear_body_vel.vector.x = 0.;
-    linear_body_vel.vector.y = 0.10;
+    linear_body_vel.vector.y = DynamicRecfgInterface::getInstance()->getCycleMovingLinearVel();
     linear_body_vel.vector.z = 0.;
 
     geometry_msgs::Vector3Stamped linear_local_vel{};
@@ -413,12 +412,14 @@ TargetVelXYYawPosZ ActionCycleMoving::calculateVelocity(double_t _target_altitud
     target_vel_xy_yaw_pos_z.vx = linear_local_vel.vector.x;
     target_vel_xy_yaw_pos_z.vy = linear_local_vel.vector.y;
     target_vel_xy_yaw_pos_z.pz = _target_altitude;
-    // TODO param
-    target_vel_xy_yaw_pos_z.yaw_rate = 0.10 / _cycle_radius;
+    target_vel_xy_yaw_pos_z.yaw_rate = linear_body_vel.vector.y / _cycle_radius;
 
 
     return target_vel_xy_yaw_pos_z;
 }
 
 
+ActionGoToPositionHoldYaw::ActionGoToPositionHoldYaw()
+{
 
+}

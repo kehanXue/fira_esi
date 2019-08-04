@@ -24,7 +24,8 @@ namespace vwpp
         HOVERING,
         ROTATION,
         OPENCLAW,
-        CYCLEMOVING
+        CYCLEMOVING,
+        GOTOPOSITION            // Go to position hold yaw
     };
 
     struct DroneVelocity
@@ -160,7 +161,7 @@ namespace vwpp
 
         virtual ~ActionCycleMoving();
 
-        ActionID getAction() const;
+        ActionID getActionId() const;
 
         TargetVelXYYawPosZ calculateVelocity(double_t _target_altitude, double_t _cycle_radius);
 
@@ -170,6 +171,19 @@ namespace vwpp
 
         tf::TransformListener odom_base_tf_listener;
 
+    };
+
+    class ActionGoToPositionHoldYaw
+    {
+    public:
+
+        ActionGoToPositionHoldYaw();
+
+        virtual ~ActionGoToPositionHoldYaw();
+
+        ActionID getActionId() const;
+
+    private:
     };
 }
 

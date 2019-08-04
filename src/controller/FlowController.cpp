@@ -48,14 +48,13 @@ int8_t vwpp::FlowController::run()
         {
             // cur_task_id = NAVIGATION;
             cur_task_id = SCANTOWER;
-            ROS_INFO("Task switch to NAVIGATION!");
+            ROS_INFO("Task switch to SCANTOWER!");
             // cur_task_id = LANDING;
         }
     }
     else if (cur_task_id == SCANTOWER)
     {
-        // TODO
-        p_task_scan_tower->run(1.5);
+        p_task_scan_tower->run(DynamicRecfgInterface::getInstance()->getCycleMovingRadius());
     }
     else if (cur_task_id == NAVIGATION)
     {
