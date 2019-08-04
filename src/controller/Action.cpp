@@ -412,7 +412,7 @@ TargetVelXYYawPosZ ActionCycleMoving::calculateVelocity(double_t _target_altitud
     target_vel_xy_yaw_pos_z.vx = linear_local_vel.vector.x;
     target_vel_xy_yaw_pos_z.vy = linear_local_vel.vector.y;
     target_vel_xy_yaw_pos_z.pz = _target_altitude;
-    target_vel_xy_yaw_pos_z.yaw_rate = linear_body_vel.vector.y / _cycle_radius;
+    target_vel_xy_yaw_pos_z.yaw_rate = -(linear_body_vel.vector.y / _cycle_radius);
 
 
     return target_vel_xy_yaw_pos_z;
