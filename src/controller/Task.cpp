@@ -213,6 +213,7 @@ int8_t vwpp::TaskAvoidance::run(GateType _gate_type)
 {
     if (cur_action_id == ADJUSTALTITUDE)
     {
+        ROS_ERROR("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
         if (inter_adjust_altitude_time == FIRST_IN)
         {
 
@@ -285,14 +286,19 @@ int8_t vwpp::TaskAvoidance::run(GateType _gate_type)
             this->altitude_target =
                     vwpp::DynamicRecfgInterface::getInstance()->getNormalFlightAltitude();
             inter_adjust_altitude_time = SECOND_IN;
+            forward_counter = 0;
         }
 
         // static ActionTrackingLine action_tracking_line(this->altitude_target);
+        // TargetVelXYPosZYaw target_vel_xy_pos_z_yaw =
+        //         p_action_tracking_line->calculateVelocity(
+        //                 vwpp::VisionInterface::getInstance()->getLineOffset(),
+        //                 vwpp::VisionInterface::getInstance()->getLineRotation());
+
         TargetVelXYPosZYaw target_vel_xy_pos_z_yaw =
                 p_action_tracking_line->calculateVelocity(
-                        vwpp::VisionInterface::getInstance()->getLineOffset(),
+                        0.,
                         vwpp::VisionInterface::getInstance()->getLineRotation());
-
 
         PX4Interface::getInstance()->publishTarget(target_vel_xy_pos_z_yaw);
     }
@@ -780,7 +786,6 @@ vwpp::TaskState vwpp::TaskScanTower::getTaskState()
 }
 
 
-// TODO
 int8_t vwpp::TaskScanTower::run(double_t _cycle_radius)
 {
     if (cur_action_id == ADJUSTALTITUDE)
@@ -837,16 +842,21 @@ int8_t vwpp::TaskScanTower::run(double_t _cycle_radius)
 
         // 10: Controller Hz
         if (cycle_time_counter >=
-            10 * vwpp::DynamicRecfgInterface::getInstance()->getAvoidanceForwardTime())
+            10 * vwpp::DynamicRecfgInterface::getInstance()->getScanTowerRuntime())
         {
             cur_action_id = ADJUSTALTITUDE;
+
+            // TODO Initial
             this->resetAdjustAltitudeOnXYYaw(PX4Interface::getInstance()->getCurX(),
                                              PX4Interface::getInstance()->getCurY(),
                                              PX4Interface::getInstance()->getCurYaw());
 
             inter_adjust_altitude_time = SECOND_IN;
+            cycle_time_counter = 0;
         }
 
+        ROS_WARN("####################Tower###################");
+        ROS_WARN("Current tower depth: %lf", VisionInterface::getInstance()->getTownDepth());
         TargetVelXYYawPosZ target_vel_xy_yaw_pos_z =
                 p_action_cycle_moving->calculateVelocity(target_altitude, _cycle_radius,
                                                          VisionInterface::getInstance()->getTownDepth());
@@ -866,12 +876,16 @@ int8_t vwpp::TaskScanTower::resetAdjustAltitudeOnXYYaw(double_t _hover_x, double
 
 
 vwpp::TaskScanBuilding::TaskScanBuilding() :
-        target_yaw(0.),
-        cur_action_id(GOTOPOSITION)
+        initial_yaw(0.),
+        cur_action_id(GOTOPOSITION),
+        cur_target_point_index(0),
+        initial_x(0.),
+        initial_y(0.),
+        initial_z(0.)
 {
     p_task_base = new TaskBase(SCANBUILDING);
     p_task_base->task_state = TASK_START;
-    p_action_go_to_position_hold_yaw = new ActionGoToPositionHoldYaw();
+    p_action_go_to_position_hold_yaw = new ActionGoToLocalPositionHoldYaw();
 }
 
 
@@ -896,12 +910,89 @@ vwpp::TaskState vwpp::TaskScanBuilding::getTaskState()
 
 int8_t vwpp::TaskScanBuilding::run()
 {
+    if (cur_target_point_index > vec_target_points.size() - 1)
+    {
+        p_task_base->task_state = TASK_FINISH;
+        cur_target_point_index = 0;
+    }
+    else
+    {
+        cur_target_point = vec_target_points.at(cur_target_point_index);
+
+        // TODO param
+        if (fabs(PX4Interface::getInstance()->getCurX() - cur_target_point.x) <= 0.05 &&
+            fabs(PX4Interface::getInstance()->getCurY() - cur_target_point.y) <= 0.05 &&
+            fabs(PX4Interface::getInstance()->getCurZ() - cur_target_point.z) <= 0.05)
+        {
+            cur_target_point_index++;
+        }
+    }
+
+
+    TargetPosXYZYaw target_pos_xyz_yaw =
+            p_action_go_to_position_hold_yaw->calculateVelocity(cur_target_point);
+    PX4Interface::getInstance()->publishTarget(target_pos_xyz_yaw);
+
     return 0;
 }
 
 
 int8_t vwpp::TaskScanBuilding::resetTargetYaw(double_t _target_yaw)
 {
-    target_yaw = _target_yaw;
+    initial_yaw = _target_yaw;
+    initial_x = PX4Interface::getInstance()->getCurX();
+    initial_y = PX4Interface::getInstance()->getCurY();
+    initial_z = PX4Interface::getInstance()->getCurZ();
+
+    p_action_go_to_position_hold_yaw->resetTargetYaw(_target_yaw);
+
+
+    geometry_msgs::Point target_point_1;
+    target_point_1.x = initial_x;
+    target_point_1.y = initial_y;
+    target_point_1.z = initial_z;
+    this->convertPointLocal2Body(target_point_1, set_target_point);
+    vec_target_points.push_back(set_target_point);
+
+    geometry_msgs::Point target_point_2;
+    target_point_2.x = -0.1;
+    target_point_2.y = 0.2;
+    target_point_2.z = 0.4;
+    this->convertPointLocal2Body(target_point_2, set_target_point);
+    vec_target_points.push_back(set_target_point);
+
+    geometry_msgs::Point target_point_3;
+    target_point_3.x = initial_x;
+    target_point_3.y = initial_y;
+    target_point_3.z = initial_z;
+    this->convertPointLocal2Body(target_point_3, set_target_point);
+    vec_target_points.push_back(set_target_point);
+
     return 0;
 }
+
+
+
+int8_t vwpp::TaskScanBuilding::convertPointLocal2Body(geometry_msgs::Point &_point_in, geometry_msgs::Point &_point_out)
+{
+    geometry_msgs::PointStamped target_body_point{};
+
+    target_body_point.header.stamp = ros::Time(0);
+    target_body_point.header.frame_id = "camera_link";
+    target_body_point.point = _point_in;
+
+    geometry_msgs::PointStamped target_local_point{};
+    try
+    {
+        odom_base_tf_listener.transformPoint("camera_odom_frame", target_body_point, target_local_point);
+    }
+    catch (tf::TransformException &tf_ex)
+    {
+        ROS_ERROR("%s", tf_ex.what());
+        ros::Duration(vwpp::DynamicRecfgInterface::getInstance()->getTfBreakDuration()).sleep();
+    }
+
+    _point_out = target_local_point.point;
+    return 0;
+}
+

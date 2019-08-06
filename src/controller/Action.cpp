@@ -421,8 +421,9 @@ ActionCycleMoving::calculateVelocity(double_t _target_altitude, double_t _target
     double_t radius_offset = _target_radius - _truth_radius;
     pid_controller_yaw_rate.update(radius_offset);
     double_t yaw_rate_raw = -(linear_body_vel.vector.y / _target_radius);
-    double_t yaw_rate = yaw_rate_raw + pid_controller_yaw_rate.output();
+    double_t yaw_rate = yaw_rate_raw - pid_controller_yaw_rate.output();
 
+    ROS_ERROR("Output yaw rate: %lf", yaw_rate);
 
     TargetVelXYYawPosZ target_vel_xy_yaw_pos_z{};
     target_vel_xy_yaw_pos_z.vx = linear_local_vel.vector.x;
@@ -435,58 +436,39 @@ ActionCycleMoving::calculateVelocity(double_t _target_altitude, double_t _target
 }
 
 
-ActionGoToPositionHoldYaw::ActionGoToPositionHoldYaw() :
+ActionGoToLocalPositionHoldYaw::ActionGoToLocalPositionHoldYaw() :
         action_id(GOTOPOSITION)
 {
-    initial_yaw = PX4Interface::getInstance()->getCurYaw();
+    target_yaw = PX4Interface::getInstance()->getCurYaw();
 }
 
 
-ActionGoToPositionHoldYaw::~ActionGoToPositionHoldYaw()
+ActionGoToLocalPositionHoldYaw::~ActionGoToLocalPositionHoldYaw()
 = default;
 
 
-ActionID ActionGoToPositionHoldYaw::getActionId() const
+ActionID ActionGoToLocalPositionHoldYaw::getActionId() const
 {
     return action_id;
 }
 
 
 TargetPosXYZYaw
-ActionGoToPositionHoldYaw::calculateVelocity(double_t _target_body_x, double_t _target_body_y, double_t _target_body_z)
+ActionGoToLocalPositionHoldYaw::calculateVelocity(geometry_msgs::Point _target_local_point)
 {
 
-    geometry_msgs::PointStamped target_body_point{};
-
-    target_body_point.header.stamp = ros::Time(0);
-    target_body_point.header.frame_id = "camera_link";
-    target_body_point.point.x = _target_body_x;
-    target_body_point.point.y = _target_body_y;
-    target_body_point.point.z = _target_body_z;
-
-    geometry_msgs::PointStamped target_local_point{};
-    try
-    {
-        odom_base_tf_listener.transformPoint("camera_odom_frame", target_body_point, target_local_point);
-    }
-    catch (tf::TransformException &tf_ex)
-    {
-        ROS_ERROR("%s", tf_ex.what());
-        ros::Duration(vwpp::DynamicRecfgInterface::getInstance()->getTfBreakDuration()).sleep();
-    }
-
     TargetPosXYZYaw target_pos_xyz_yaw{};
-    target_pos_xyz_yaw.px = target_local_point.point.x;
-    target_pos_xyz_yaw.py = target_local_point.point.y;
-    target_pos_xyz_yaw.pz = target_local_point.point.z;
-    target_pos_xyz_yaw.yaw = initial_yaw;
+    target_pos_xyz_yaw.px = _target_local_point.x;
+    target_pos_xyz_yaw.py = _target_local_point.y;
+    target_pos_xyz_yaw.pz = _target_local_point.z;
+    target_pos_xyz_yaw.yaw = target_yaw;
 
     return target_pos_xyz_yaw;
 }
 
 
-int8_t ActionGoToPositionHoldYaw::resetTargetYaw(double_t _new_target_yaw)
+int8_t ActionGoToLocalPositionHoldYaw::resetTargetYaw(double_t _new_target_yaw)
 {
-    initial_yaw = _new_target_yaw;
+    target_yaw = _new_target_yaw;
     return 0;
 }

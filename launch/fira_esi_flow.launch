@@ -8,6 +8,12 @@
         <rosparam command="load" file="$(find fira_esi)/param/vision.yaml"/>
     </node>
 
+    <node pkg="mg995_control"
+          name="mg995_control_node"
+          type="mg995_control_node"
+          output="screen">
+    </node>
+
     <node pkg="dynamic_reconfigure"
           name="dynparam"
           type="dynparam"

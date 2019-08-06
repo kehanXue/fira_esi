@@ -280,11 +280,23 @@ namespace vwpp
 
     private:
 
-        double_t target_yaw;
+        int8_t convertPointLocal2Body(geometry_msgs::Point& _point_in, geometry_msgs::Point& _point_out);
+
+        double_t initial_yaw;
+        double_t initial_x;
+        double_t initial_y;
+        double_t initial_z;
+
+        std::vector<geometry_msgs::Point> vec_target_points;
+        u_int64_t cur_target_point_index;
+        geometry_msgs::Point cur_target_point;
+        geometry_msgs::Point set_target_point;
 
         TaskBase* p_task_base;
         ActionID cur_action_id;
-        ActionGoToPositionHoldYaw* p_action_go_to_position_hold_yaw;
+        ActionGoToLocalPositionHoldYaw* p_action_go_to_position_hold_yaw;
+
+        tf::TransformListener odom_base_tf_listener;
     };
 }
 

@@ -3,67 +3,69 @@
 static int line_x = 0;
 static int x[24] = {0};
 
-// #ifdef TEST
-// #ifdef TEST_ROS
-// void callback(dynamic_reconfigure::vision_dynamic_reconfigureConfig &config)
-// {
-//     line_x = config.line_threshold;
-//
-// #ifdef USE_HSV
-//     x[0] = config.HSV_min_yellow1;
-//     x[1] = config.HSV_min_yellow2;
-//     x[2] = config.HSV_min_yellow3;
-//     x[3] = config.HSV_max_yellow1;
-//     x[4] = config.HSV_max_yellow2;
-//     x[5] = config.HSV_max_yellow3;
-//     x[6] = config.HSV_min_red1;
-//     x[7] = config.HSV_min_red2;
-//     x[8] = config.HSV_min_red3;
-//     x[9] = config.HSV_max_red1;
-//     x[10] = config.HSV_max_red2;
-//     x[11] = config.HSV_max_red3;
-//     x[12] = config.HSV_min_blueH1;
-//     x[13] = config.HSV_min_blueH2;
-//     x[14] = config.HSV_min_blueH3;
-//     x[15] = config.HSV_max_blueH1;
-//     x[16] = config.HSV_max_blueH2;
-//     x[17] = config.HSV_max_blueH3;
-//     x[18] = config.HSV_min_redX1;
-//     x[19] = config.HSV_min_redX2;
-//     x[20] = config.HSV_min_redX3;
-//     x[21] = config.HSV_max_redX1;
-//     x[22] = config.HSV_max_redX2;
-//     x[23] = config.HSV_max_redX3;
-// #endif
-// #ifdef USE_BGR
-//     x[0] = config.BGR_min_yellow1;
-//     x[1] = config.BGR_min_yellow2;
-//     x[2] = config.BGR_min_yellow3;
-//     x[3] = config.BGR_max_yellow1;
-//     x[4] = config.BGR_max_yellow2;
-//     x[5] = config.BGR_max_yellow3;
-//     x[6] = config.BGR_min_red1;
-//     x[7] = config.BGR_min_red2;
-//     x[8] = config.BGR_min_red3;
-//     x[9] = config.BGR_max_red1;
-//     x[10] = config.BGR_max_red2;
-//     x[11] = config.BGR_max_red3;
-//     x[12] = config.BGR_min_blueH1;
-//     x[13] = config.BGR_min_blueH2;
-//     x[14] = config.BGR_min_blueH3;
-//     x[15] = config.BGR_max_blueH1;
-//     x[16] = config.BGR_max_blueH2;
-//     x[17] = config.BGR_max_blueH3;
-//     x[18] = config.BGR_min_redX1;
-//     x[19] = config.BGR_min_redX2;
-//     x[20] = config.BGR_min_redX3;
-//     x[21] = config.BGR_max_redX1;
-//     x[22] = config.BGR_max_redX2;
-//     x[23] = config.BGR_max_redX3;
-// #endif
-// }
-// #endif
-// #endif
+#ifdef TEST
+#ifdef TEST_ROS
+#ifdef TEST_ROS_DY
+void callback(dynamic_reconfigure::vision_dynamic_reconfigureConfig &config)
+{
+    line_x = config.line_threshold;
+
+#ifdef USE_HSV
+    x[0] = config.HSV_min_yellow1;
+    x[1] = config.HSV_min_yellow2;
+    x[2] = config.HSV_min_yellow3;
+    x[3] = config.HSV_max_yellow1;
+    x[4] = config.HSV_max_yellow2;
+    x[5] = config.HSV_max_yellow3;
+    x[6] = config.HSV_min_red1;
+    x[7] = config.HSV_min_red2;
+    x[8] = config.HSV_min_red3;
+    x[9] = config.HSV_max_red1;
+    x[10] = config.HSV_max_red2;
+    x[11] = config.HSV_max_red3;
+    x[12] = config.HSV_min_blueH1;
+    x[13] = config.HSV_min_blueH2;
+    x[14] = config.HSV_min_blueH3;
+    x[15] = config.HSV_max_blueH1;
+    x[16] = config.HSV_max_blueH2;
+    x[17] = config.HSV_max_blueH3;
+    x[18] = config.HSV_min_redX1;
+    x[19] = config.HSV_min_redX2;
+    x[20] = config.HSV_min_redX3;
+    x[21] = config.HSV_max_redX1;
+    x[22] = config.HSV_max_redX2;
+    x[23] = config.HSV_max_redX3;
+#endif
+#ifdef USE_BGR
+    x[0] = config.BGR_min_yellow1;
+    x[1] = config.BGR_min_yellow2;
+    x[2] = config.BGR_min_yellow3;
+    x[3] = config.BGR_max_yellow1;
+    x[4] = config.BGR_max_yellow2;
+    x[5] = config.BGR_max_yellow3;
+    x[6] = config.BGR_min_red1;
+    x[7] = config.BGR_min_red2;
+    x[8] = config.BGR_min_red3;
+    x[9] = config.BGR_max_red1;
+    x[10] = config.BGR_max_red2;
+    x[11] = config.BGR_max_red3;
+    x[12] = config.BGR_min_blueH1;
+    x[13] = config.BGR_min_blueH2;
+    x[14] = config.BGR_min_blueH3;
+    x[15] = config.BGR_max_blueH1;
+    x[16] = config.BGR_max_blueH2;
+    x[17] = config.BGR_max_blueH3;
+    x[18] = config.BGR_min_redX1;
+    x[19] = config.BGR_min_redX2;
+    x[20] = config.BGR_min_redX3;
+    x[21] = config.BGR_max_redX1;
+    x[22] = config.BGR_max_redX2;
+    x[23] = config.BGR_max_redX3;
+#endif
+}
+#endif
+#endif
+#endif
 
 MYCV::MYCV(int flag, ros::NodeHandle *pnh)
 {
@@ -95,6 +97,7 @@ MYCV::MYCV(int flag, ros::NodeHandle *pnh)
         flag_findQR         =   true;
         flag_findblueH      =   true;
         flag_findredX       =   true;
+        flag_findtower      =   false;
     }
     else if(flag == Forward_Camera)
     {
@@ -119,6 +122,7 @@ MYCV::MYCV(int flag, ros::NodeHandle *pnh)
         flag_findQR         =   true;
         flag_findblueH      =   false;
         flag_findredX       =   false;
+        flag_findtower      =   true;
     }
     else if(flag == No_Camera)
     {
@@ -127,6 +131,7 @@ MYCV::MYCV(int flag, ros::NodeHandle *pnh)
         flag_findQR         =   false;
         flag_findblueH      =   false;
         flag_findredX       =   false;
+        flag_findtower      =   false;
     }
 
     flag_first              =   true;
@@ -155,6 +160,7 @@ MYCV::MYCV(int flag, ros::NodeHandle *pnh)
     blueH_location[1]       =   0.0;
     redX_location[0]        =   0.0;
     redX_location[1]        =   0.0;
+    tower_depth             =   0.0;
 
 #ifdef TEST
 #ifdef TEST_ROS
@@ -211,15 +217,18 @@ MYCV::MYCV(int flag, ros::NodeHandle *pnh)
     x[22] = getoneint("BGR_max_redX2");
     x[23] = getoneint("BGR_max_redX3");
 #endif
+
+#ifdef TEST_ROS_DY
     static bool test_ros_first = true;
     if(test_ros_first)
     {
         test_ros_first = false;
-        // server = new(dynamic_reconfigure::Server<dynamic_reconfigure::vision_dynamic_reconfigureConfig>);
-        // server_callback = new(dynamic_reconfigure::Server<dynamic_reconfigure::vision_dynamic_reconfigureConfig>::CallbackType);
-        // *server_callback = boost::bind(&callback, _1);
-        // server->setCallback(*server_callback);
+        server = new(dynamic_reconfigure::Server<dynamic_reconfigure::vision_dynamic_reconfigureConfig>);
+        server_callback = new(dynamic_reconfigure::Server<dynamic_reconfigure::vision_dynamic_reconfigureConfig>::CallbackType);
+        *server_callback = boost::bind(&callback, _1);
+        server->setCallback(*server_callback);
     }
+#endif
 #endif
 #endif
 }
@@ -275,6 +284,11 @@ void MYCV::cvmain()
     if(flag_findredX)
     {
         findredX(image);
+    }
+
+    if(flag_findtower)
+    {
+        findtower(image);
     }
 
 #ifdef TEST
@@ -364,7 +378,7 @@ void MYCV::findgate(cv::Mat image)
 
 #ifdef TEST
 #ifndef TEST_ROS
-        #ifdef FIND_GATE
+#ifdef FIND_GATE
         color_test();
 #endif
 #endif
@@ -469,7 +483,7 @@ void MYCV::findQR(cv::Mat image)
     int width = image.cols;
     int height = image.rows;
     zbar::Image zbarimage(static_cast<unsigned int>(width), static_cast<unsigned int>(height),
-                          "Y800", image.data, static_cast<unsigned int>(width * height));
+            "Y800", image.data, static_cast<unsigned int>(width * height));
 
     scanner.scan(zbarimage);
 
@@ -505,7 +519,7 @@ void MYCV::findQR(cv::Mat image)
         detect_QR = false;
         QR_inform = "";
     }
-    else if(fabs(QR_location[0])<QR_rect_size && fabs(QR_location[1])<QR_rect_size)
+    else if(camera_type == Down_Camera && fabs(QR_location[0])<QR_rect_size && fabs(QR_location[1])<QR_rect_size)
     {
         detect_QR = true;
         QR_inform = inform[0];
@@ -521,9 +535,19 @@ void MYCV::findQR(cv::Mat image)
 
 #ifdef TEST
         cv::rectangle(outimage, cv::Point(outimage.cols/2-QR_rect_size, outimage.rows/2-QR_rect_size),
-                      cv::Point(outimage.cols/2+QR_rect_size, outimage.rows/2+QR_rect_size), cv::Scalar(255,255,0));
-        //cv::circle(outimage, cv::Point2d(QR_location[0], QR_location[1]), 3, cv::Scalar(0,255,255), 3);
+                cv::Point(outimage.cols/2+QR_rect_size, outimage.rows/2+QR_rect_size), cv::Scalar(255,255,0));
 #endif
+    }
+    else if(camera_type == Forward_Camera && !inform.empty())
+    {
+        FILE* tower_inform = fopen("../tower_inform", "a+");
+        for(unsigned int i=0; i<inform.size(); i++)
+        {
+            ROS_INFO("!!!!!!!!!!!!!TOWER_INFORM: %s",inform[i].c_str());
+            fprintf(tower_inform, "%d.%d: %s\n", ros::Time::now().sec, ros::Time::now().nsec, inform[i].c_str());
+        }
+        fclose(tower_inform);
+        QR_inform = inform[0];
     }
     else
     {
@@ -550,7 +574,7 @@ void MYCV::findblueH(cv::Mat image)
 
 #ifdef TEST
 #ifndef TEST_ROS
-        #ifdef FIND_BLUEH
+#ifdef FIND_BLUEH
         color_test2();
         cv::namedWindow("blueH", 0);
 #endif
@@ -653,7 +677,7 @@ void MYCV::findredX(cv::Mat image)
 
 #ifdef TEST
 #ifndef TEST_ROS
-        #ifdef FIND_REDX
+#ifdef FIND_REDX
         color_test3();
         cv::namedWindow("redX", 0);
 #endif
@@ -726,6 +750,7 @@ void MYCV::findredX(cv::Mat image)
         redX_location[1] = 1.0* sum_red_rows / number_red;
         redX_location[0] = 1.0* sum_red_cols / number_red;
 
+        redX_location[1] -= 50;
 #ifdef TEST
         cv::circle(outimage, cv::Point2d(redX_location[0], redX_location[1]), 5, cv::Scalar(0,0,255), 3);
         cv::circle(outimage, cv::Point2d(redX_location[0], redX_location[1]), 20, cv::Scalar(0,0,255), 5);
@@ -736,6 +761,137 @@ void MYCV::findredX(cv::Mat image)
     else
     {
         detect_redX = false;
+    }
+}
+
+void MYCV::findtower(cv::Mat image)
+{
+    tower_depth = vwpp::DynamicRecfgInterface::getInstance()->getCycleMovingRadius();
+    cv::Mat thresholdimage(image.rows, image.cols, CV_8UC1, cv::Scalar(0));
+
+    const static int threshold = 13;
+    for(int i = 0; i < image.rows; i++)
+    {
+        for(int j = 0; j < image.cols; j++)
+        {
+            float depth = 0.0;
+            if(zed.isOpened())
+            {
+                zed_depth.getValue<float>(j, i, &depth, sl::MEM_CPU);
+            }
+
+
+            if(abs(image.at<cv::Vec3b>(i,j)[0] - image.at<cv::Vec3b>(i,j)[1])<threshold &&
+                abs(image.at<cv::Vec3b>(i,j)[2] - image.at<cv::Vec3b>(i,j)[1])<threshold &&
+                abs(image.at<cv::Vec3b>(i,j)[0] - image.at<cv::Vec3b>(i,j)[2])<threshold &&
+                std::isnormal(depth) && depth<2.0)
+            {
+                thresholdimage.at<uchar>(i,j) = 255;
+            }
+        }
+    }
+
+    Proc_image(thresholdimage);
+
+#ifdef TEST
+#ifdef FIND_TOWER
+#ifndef TEST_ROS
+    static bool flag_first = true;
+    if(flag_first)
+    {
+        flag_first = false;
+        cv::namedWindow("tower", 0);
+    }
+    cv::imshow("tower", thresholdimage);
+#endif
+
+#ifdef TEST_ROS
+    static image_transport::ImageTransport it(*nh);
+    static image_transport::Publisher pub = it.advertise("vision/out/tower", 1);
+    std_msgs::Header header;
+    header.seq = 0;
+    header.stamp = ros::Time::now();
+    header.frame_id = "tower";
+    sensor_msgs::ImagePtr msg = cv_bridge::CvImage(header, "mono8", thresholdimage).toImageMsg();
+    pub.publish(msg);
+#endif
+#endif
+#endif
+
+    std::vector<std::vector<cv::Point> > contours;
+    cv::findContours(thresholdimage, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+
+    std::vector<std::vector<cv::Point> > convexHulls(contours.size());
+    for(unsigned int i = 0; i < contours.size(); i++)
+    {
+        cv::convexHull(contours[i], convexHulls[i]);
+    }
+
+    std::vector<cv::Rect> rect_array;
+    for(unsigned int i = 0; i < convexHulls.size(); i++)
+    {
+        rect_array.push_back(cv::boundingRect(convexHulls[i]));
+    }
+
+    for(unsigned int i = 0; i < rect_array.size(); i++)
+    {
+        if(1.0*rect_array[i].area()/(image.cols*image.rows) > 0.15)
+        {
+            int number = 0;
+            for(int j = rect_array[i].y; j < rect_array[i].y+rect_array[i].height; j++)
+            {
+                for(int k = rect_array[i].x; k < rect_array[i].x+rect_array[i].width; k++)
+                {
+                    if(thresholdimage.at<uchar>(j,k) == 255)
+                    {
+                        number++;
+                    }
+                }
+            }
+
+            if(number<0.3*rect_array[i].height*rect_array[i].width)
+            {
+                continue;
+            }
+
+#ifdef TEST
+            cv::rectangle(outimage, rect_array[i], cv::Scalar(255,0,255), 3);
+#endif
+
+            if(zed.isOpened())
+            {
+                int depth_num = 0;
+                float depth_ans = 0.0;
+                for(unsigned int j = rect_array[i].y; j < rect_array[i].y+rect_array[i].height; j++)
+                {
+                    for(unsigned int k = rect_array[i].x; k < rect_array[i].x+rect_array[i].width; k++)
+                    {
+                        if(thresholdimage.at<uchar>(j,k) == 255)
+                        {
+                            float depth;
+                            zed_depth.getValue<float>(k, j, &depth, sl::MEM_CPU);
+                            if(std::isnormal(depth) && depth<2.0)
+                            {
+                                depth_ans += depth;
+                                depth_num++;
+                            }
+                        }
+                    }
+                }
+
+                depth_ans /= depth_num;
+                if(depth_num < 100)
+                {
+                    depth_ans = 5.0;
+                }
+
+                tower_depth = depth_ans;
+            }
+            else
+            {
+                tower_depth = 1.0*image.cols/rect_array[i].width*0.75*sqrt(3.0);
+            }
+        }
     }
 }
 
@@ -819,7 +975,7 @@ cv::Point3d MYCV::color_thing(cv::Mat image, cv::Scalar min_color, cv::Scalar ma
             }
 
             if(!(number>0.15*rect_array[i].height*rect_array[i].width &&
-                 number<0.3*rect_array[i].height*rect_array[i].width))
+                number<0.3*rect_array[i].height*rect_array[i].width))
             {
                 continue;
             }
@@ -837,49 +993,6 @@ cv::Point3d MYCV::color_thing(cv::Mat image, cv::Scalar min_color, cv::Scalar ma
 
             if(zed.isOpened())
             {
-                /* float depth[8];
-                 int depth_x[8] = {rect_array[i].x+rect_array[i].width/9*1, rect_array[i].x+rect_array[i].width/9*2,
-                                   rect_array[i].x+rect_array[i].width/9*3, rect_array[i].x+rect_array[i].width/9*4,
-                                   rect_array[i].x+rect_array[i].width/9*5, rect_array[i].x+rect_array[i].width/9*6,
-                                   rect_array[i].x+rect_array[i].width/9*7, rect_array[i].x+rect_array[i].width/9*8};
-                 int depth_y[8] = {rect_array[i].y+rect_array[i].height/10*1, rect_array[i].y+rect_array[i].height/10*1,
-                                   rect_array[i].y+rect_array[i].height/10*1, rect_array[i].y+rect_array[i].height/10*1,
-                                   rect_array[i].y+rect_array[i].height/10*1, rect_array[i].y+rect_array[i].height/10*1,
-                                   rect_array[i].y+rect_array[i].height/10*1, rect_array[i].y+rect_array[i].height/10*1};
-
-                 for(int j=0; j<8; j++)
-                 {
-                     zed_depth.getValue<float>(static_cast<unsigned int>(depth_x[j]),
-                                               static_cast<unsigned int>(depth_y[j]), &depth[j], sl::MEM_CPU);
- #ifdef TEST
-                     if(name == "yellow")
-                     {
-                         cv::circle(outimage, cv::Point(depth_x[j],depth_y[j]), 1, cv::Scalar(0,255,255), 2);
-                     }
-                     else if(name == "red")
-                     {
-                         cv::circle(outimage, cv::Point(depth_x[j],depth_y[j]), 1, cv::Scalar(0,0,255), 2);
-                     }
- #endif
-                 }
-                 int depth_num = 0;
-                 float depth_ans = 0.0;
-                 for(int j=0; j<8; j++)
-                 {
-                     if(std::isnormal(depth[j]) && depth[j]<3.0)
-                     {
-                         depth_ans += depth[j];
-                         depth_num++;
-                     }
-                 }
-                 depth_ans /= depth_num;
-
-                 if(depth_num<4)
-                 {
-                     depth_ans = 20.0;
-                 }
-                 */
-
                 int depth_num = 0;
                 float depth_ans = 0.0;
                 for(unsigned int j = rect_array[i].y; j < rect_array[i].y+rect_array[i].height; j++)
@@ -927,7 +1040,6 @@ cv::Point3d MYCV::color_thing(cv::Mat image, cv::Scalar min_color, cv::Scalar ma
      * 640 1.3m
      * 640/width*1.3
      */
-
 }
 
 void MYCV::Proc_image(cv::Mat &thresholdimage)
@@ -1246,6 +1358,28 @@ void MYCV::destory()
         zed.close();
     }
 
+    if(camera_type == Forward_Camera)
+    {
+        FILE* origin = fopen("../tower_inform", "r");
+        FILE* result = fopen("../tower_inform_result", "w");
+
+        int a,b;
+        char s[100] = "", ss[100] = "";
+        while(fscanf(origin, "%d.%d: %s", &a,&b,s) != EOF)
+        {
+            if(strcmp(s,ss) != 0)
+            {
+                ROS_INFO("!!!!!!!!!!!!!");
+                ROS_INFO("%d.%d: %s", a,b,s);
+                fprintf(result, "%d.%d: %s\n", a,b,s);
+            }
+            strcpy(ss,s);
+        }
+
+        fclose(origin);
+        fclose(result);
+    }
+
 #ifdef TEST
 #ifndef TEST_ROS
     cv::destroyAllWindows();
@@ -1302,4 +1436,14 @@ void MYCV::open_findredX()
 void MYCV::close_findredX()
 {
     flag_findredX = false;
+}
+
+void MYCV::open_findtower()
+{
+    flag_findtower = true;
+}
+
+void MYCV::close_findtower()
+{
+    flag_findtower = false;
 }

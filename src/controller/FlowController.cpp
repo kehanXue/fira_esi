@@ -23,6 +23,7 @@ vwpp::FlowController::FlowController() :
     p_task_delivering = new TaskDelivering();
     p_task_landing = new TaskLanding();
     p_task_scan_tower = new TaskScanTower();
+    p_task_scan_building = new TaskScanBuilding();
 }
 
 
@@ -35,26 +36,45 @@ vwpp::FlowController::~FlowController()
     delete p_task_delivering;
     delete p_task_landing;
     delete p_task_scan_tower;
+    delete p_task_scan_building;
 }
 
 
 int8_t vwpp::FlowController::run()
 {
-
     if (cur_task_id == TAKEOFF)
     {
         p_task_takeoff->run();
         if (p_task_takeoff->getTaskState() == TASK_FINISH)
         {
-            cur_task_id = NAVIGATION;
+            // cur_task_id = NAVIGATION;
             // cur_task_id = SCANTOWER;
-            ROS_INFO("Task switch to NAVIGATION!");
+            // p_task_scan_tower->resetAdjustAltitudeOnXYYaw(PX4Interface::getInstance()->getCurX(),
+            //                                               PX4Interface::getInstance()->getCurY(),
+            //                                               PX4Interface::getInstance()->getCurYaw());
+            // ROS_INFO("Task switch to NAVIGATION!");
             // cur_task_id = LANDING;
+            cur_task_id = SCANBUILDING;
+            p_task_scan_building->resetTargetYaw(PX4Interface::getInstance()->getCurYaw());
         }
     }
     else if (cur_task_id == SCANTOWER)
     {
         p_task_scan_tower->run(DynamicRecfgInterface::getInstance()->getCycleMovingRadius());
+        if (p_task_scan_tower->getTaskState() == TASK_FINISH)
+        {
+            cur_task_id = LANDING;
+            ROS_INFO("Scan tower task finished.");
+        }
+    }
+    else if (cur_task_id == SCANBUILDING)
+    {
+        p_task_scan_building->run();
+        if (p_task_scan_building->getTaskState() == TASK_FINISH)
+        {
+            cur_task_id = LANDING;
+            ROS_INFO("Scan building task finished.");
+        }
     }
     else if (cur_task_id == NAVIGATION)
     {

@@ -208,10 +208,9 @@ double_t vwpp::VisionInterface::getRedXy()
 }
 
 
-bool vwpp::VisionInterface::getTownDepth()
+double_t vwpp::VisionInterface::getTownDepth()
 {
-    // TODO
-    return false;
+    return forward_camera->tower_depth;
 }
 
 

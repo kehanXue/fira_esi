@@ -26,6 +26,7 @@ namespace vwpp
         ROTATION,
         OPENCLAW,
         CYCLEMOVING,
+        GOTOPOSE,
         GOTOPOSITION            // Go to position hold yaw
     };
 
@@ -174,24 +175,25 @@ namespace vwpp
 
     };
 
-    class ActionGoToPositionHoldYaw
+
+    class ActionGoToLocalPositionHoldYaw
     {
     public:
 
-        ActionGoToPositionHoldYaw();
+        ActionGoToLocalPositionHoldYaw();
 
-        virtual ~ActionGoToPositionHoldYaw();
+        virtual ~ActionGoToLocalPositionHoldYaw();
 
         ActionID getActionId() const;
 
-        TargetPosXYZYaw calculateVelocity(double_t _target_body_x, double_t _target_body_y, double_t _target_body_z);
+        TargetPosXYZYaw calculateVelocity(geometry_msgs::Point _target_local_point);
 
         int8_t resetTargetYaw(double_t _new_target_yaw);
 
     private:
 
         ActionID action_id;
-        double_t initial_yaw;
+        double_t target_yaw;
 
         tf::TransformListener odom_base_tf_listener;
 

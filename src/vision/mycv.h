@@ -14,7 +14,8 @@
 #include <cv_bridge/cv_bridge.h>
 #include <image_transport/image_transport.h>
 #include <dynamic_reconfigure/server.h>
-#include "fira_esi/vision_dynamic_reconfigureConfig.h"
+#include <interface/DynamicRecfgInterface.h>
+// #include "../../../devel/include/my_cv/vision_dynamic_reconfigureConfig.h"
 #endif
 
 #include <algorithm>
@@ -49,6 +50,8 @@ public:
     void close_findblueH();
     void open_findredX();
     void close_findredX();
+    void open_findtower();
+    void close_findtower();
 
 public:
     double line_dis;
@@ -64,6 +67,7 @@ public:
     bool detect_redX;
     double blueH_location[2];
     double redX_location[2];
+    double tower_depth;
 
 private:
     bool flag_findline;
@@ -71,6 +75,7 @@ private:
     bool flag_findQR;
     bool flag_findblueH;
     bool flag_findredX;
+    bool flag_findtower;
 
 private:
     bool flag_first;
@@ -100,6 +105,7 @@ private:
     void findQR(cv::Mat image);
     void findblueH(cv::Mat image);
     void findredX(cv::Mat image);
+    void findtower(cv::Mat image);
     cv::Point3d color_thing(cv::Mat image, cv::Scalar min_color, cv::Scalar max_color, std::string name);
     void Proc_image(cv::Mat &thresholdimage);
     void resetpoint(double point[], cv::Mat image);
@@ -119,9 +125,11 @@ private:
 
 #ifdef TEST
 #ifdef TEST_ROS
+#ifdef TEST_ROS_DY
 private:
-    // dynamic_reconfigure::Server<dynamic_reconfigure::vision_dynamic_reconfigureConfig> *server;
-    // dynamic_reconfigure::Server<dynamic_reconfigure::vision_dynamic_reconfigureConfig>::CallbackType *server_callback;
+    dynamic_reconfigure::Server<dynamic_reconfigure::vision_dynamic_reconfigureConfig> *server;
+    dynamic_reconfigure::Server<dynamic_reconfigure::vision_dynamic_reconfigureConfig>::CallbackType *server_callback;
+#endif
 #endif
 #endif
 };

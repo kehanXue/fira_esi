@@ -43,6 +43,7 @@ namespace vwpp
         TaskDelivering* p_task_delivering;
         TaskLanding* p_task_landing;
         TaskScanTower* p_task_scan_tower;
+        TaskScanBuilding* p_task_scan_building;
 
         GateType gate_type;
         char task_type_id;
