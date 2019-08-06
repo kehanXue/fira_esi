@@ -35,6 +35,8 @@ namespace vwpp
 
         bool getTownQRState();
 
+        bool getTownDepth();
+
         bool getGroundQRState();
 
         double_t getQRxOffset();

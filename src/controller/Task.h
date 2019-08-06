@@ -250,13 +250,19 @@ namespace vwpp
 
         int8_t run(double_t _cycle_radius);
 
+        int8_t resetAdjustAltitudeOnXYYaw(double_t _hover_x, double_t _hover_y, double_t _hold_yaw);
+
     private:
+
+        int64_t cycle_time_counter;
+        ActionRuntime inter_adjust_altitude_time;
 
         TaskBase* p_task_base;
         ActionID cur_action_id;
 
         double_t target_altitude;
         ActionCycleMoving* p_action_cycle_moving;
+        ActionAdjustAltitude* p_action_adjust_altitude;
     };
 }
 

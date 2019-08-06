@@ -498,7 +498,7 @@ void MYCV::findQR(cv::Mat image)
         resetpoint(QR_location, image);
     }
 
-    int QR_rect_size = 205;
+    int QR_rect_size = 400;
 
     if(inform.empty())
     {

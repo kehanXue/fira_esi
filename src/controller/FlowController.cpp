@@ -46,9 +46,9 @@ int8_t vwpp::FlowController::run()
         p_task_takeoff->run();
         if (p_task_takeoff->getTaskState() == TASK_FINISH)
         {
-            // cur_task_id = NAVIGATION;
-            cur_task_id = SCANTOWER;
-            ROS_INFO("Task switch to SCANTOWER!");
+            cur_task_id = NAVIGATION;
+            // cur_task_id = SCANTOWER;
+            ROS_INFO("Task switch to NAVIGATION!");
             // cur_task_id = LANDING;
         }
     }
@@ -89,6 +89,7 @@ int8_t vwpp::FlowController::run()
             {
                 p_task_navigation->restart();
                 cur_task_id = HOVERONQR;
+                last_qr_inform = VisionInterface::getInstance()->getGroundQRinform();
                 p_task_hover_on_qr->resetRotatingOnXY(PX4Interface::getInstance()->getCurX(),
                                                       PX4Interface::getInstance()->getCurY());
                 // cur_task_id = LANDING;
@@ -109,6 +110,7 @@ int8_t vwpp::FlowController::run()
     else if (cur_task_id == HOVERONQR)
     {
         std::string cur_qr_inform = VisionInterface::getInstance()->getGroundQRinform();
+        // TODO
         if (cur_qr_inform.empty() && last_qr_inform.empty())
         {
             cur_task_id = NAVIGATION;

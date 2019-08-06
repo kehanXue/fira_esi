@@ -77,6 +77,9 @@ void vwpp::DynamicRecfgInterface::reconfig_cb(fira_esi::fira_esi_dynamic_cfgConf
 
     this->normal_flight_altitude = _config.normal_flight_altitude;
     this->landing_altitude = _config.landing_altitude;
+    this->scan_tower_altitude = _config.scan_tower_altitude;
+
+    this->scan_tower_cycletime = _config.scan_tower_cycletime;
 
 
     this->pid_p_v2p_x_kp = _config.pid_p_v2p_x_kp;
@@ -127,6 +130,12 @@ void vwpp::DynamicRecfgInterface::reconfig_cb(fira_esi::fira_esi_dynamic_cfgConf
     this->pid_v_v2p_yaw_kd = _config.pid_v_v2p_yaw_kd;
     this->pid_v_v2p_yaw_has_threshold = _config.pid_v_v2p_yaw_has_threshold;
     this->pid_v_v2p_yaw_threshold = _config.pid_v_v2p_yaw_threshold;
+
+    this->pid_v_d2yr_yaw_rate_kp = _config.pid_v_d2yr_yaw_rate_kp;
+    this->pid_v_d2yr_yaw_rate_ki = _config.pid_v_d2yr_yaw_rate_ki;
+    this->pid_v_d2yr_yaw_rate_kd = _config.pid_v_d2yr_yaw_rate_kd;
+    this->pid_v_d2yr_yaw_rate_has_threshold = _config.pid_v_d2yr_yaw_rate_has_threshold;
+    this->pid_v_d2yr_yaw_rate_threshold = _config.pid_v_d2yr_yaw_rate_threshold;
 
 
     this->altitude_when_red_gate = _config.altitude_when_red_gate;
@@ -514,6 +523,48 @@ double_t vwpp::DynamicRecfgInterface::getCycleMovingRadius() const
 double_t vwpp::DynamicRecfgInterface::getCycleMovingLinearVel() const
 {
     return cycle_moving_linear_vel;
+}
+
+
+double_t vwpp::DynamicRecfgInterface::getPidVD2YrYawRateKp() const
+{
+    return pid_v_d2yr_yaw_rate_kp;
+}
+
+
+double_t vwpp::DynamicRecfgInterface::getPidVD2YrYawRateKi() const
+{
+    return pid_v_d2yr_yaw_rate_ki;
+}
+
+
+double_t vwpp::DynamicRecfgInterface::getPidVD2YrYawRateKd() const
+{
+    return pid_v_d2yr_yaw_rate_kd;
+}
+
+
+bool vwpp::DynamicRecfgInterface::isPidVD2YrYawRateHasThreshold() const
+{
+    return pid_v_d2yr_yaw_rate_has_threshold;
+}
+
+
+double_t vwpp::DynamicRecfgInterface::getPidVD2YrYawRateThreshold() const
+{
+    return pid_v_d2yr_yaw_rate_threshold;
+}
+
+
+double_t vwpp::DynamicRecfgInterface::getScanTowerAltitude() const
+{
+    return scan_tower_altitude;
+}
+
+
+double_t vwpp::DynamicRecfgInterface::getScanTowerRuntime() const
+{
+    return scan_tower_cycletime;
 }
 
 

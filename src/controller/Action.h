@@ -8,6 +8,7 @@
 
 #include <cmath>
 #include <tf/transform_listener.h>
+#include <geometry_msgs/PointStamped.h>
 #include "interface/DynamicRecfgInterface.h"
 #include "interface/PX4Interface.h"
 #include "controller/PIDController.h"
@@ -163,7 +164,7 @@ namespace vwpp
 
         ActionID getActionId() const;
 
-        TargetVelXYYawPosZ calculateVelocity(double_t _target_altitude, double_t _cycle_radius);
+        TargetVelXYYawPosZ calculateVelocity(double_t _target_altitude, double_t _target_radius, double_t _truth_radius);
 
     private:
 
@@ -183,7 +184,17 @@ namespace vwpp
 
         ActionID getActionId() const;
 
+        TargetPosXYZYaw calculateVelocity(double_t _target_body_x, double_t _target_body_y, double_t _target_body_z);
+
+        int8_t resetTargetYaw(double_t _new_target_yaw);
+
     private:
+
+        ActionID action_id;
+        double_t initial_yaw;
+
+        tf::TransformListener odom_base_tf_listener;
+
     };
 }
 

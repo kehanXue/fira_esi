@@ -56,6 +56,12 @@ namespace vwpp
         /* The altitude when UAV landing */
         double_t landing_altitude{};
 
+        /* The altitude when scan tower */
+        double_t scan_tower_altitude{};
+
+        /* The runtime when scan tower */
+        double_t scan_tower_cycletime{};
+
         /* Control x,y,z velocity to position use px4 data */
         double_t pid_p_v2p_x_kp{};
         double_t pid_p_v2p_x_ki{};
@@ -108,6 +114,13 @@ namespace vwpp
         bool pid_v_v2p_yaw_has_threshold{};
         double_t pid_v_v2p_yaw_threshold{};
 
+        /* PID controller while scaning tower. Depth to yaw rate */
+        double_t pid_v_d2yr_yaw_rate_kp{};
+        double_t pid_v_d2yr_yaw_rate_ki{};
+        double_t pid_v_d2yr_yaw_rate_kd{};
+        bool pid_v_d2yr_yaw_rate_has_threshold{};
+        double_t pid_v_d2yr_yaw_rate_threshold{};
+
         /* When tf query is time out, wait tf_break_duration time */
         double_t tf_break_duration{};
 
@@ -131,6 +144,8 @@ namespace vwpp
 
         /* When landing, the tolerance of red X offset y */
         double_t red_x_offset_y_tolerance{};
+
+    private:
 
         /* Tolerance when control yaw to rotate. Unit deg*/
         double_t rotate_yaw_tolerance{};
@@ -241,6 +256,16 @@ namespace vwpp
 
         double_t getPidVV2PYawThreshold() const;
 
+        double_t getPidVD2YrYawRateKp() const;
+
+        double_t getPidVD2YrYawRateKi() const;
+
+        double_t getPidVD2YrYawRateKd() const;
+
+        bool isPidVD2YrYawRateHasThreshold() const;
+
+        double_t getPidVD2YrYawRateThreshold() const;
+
         double_t getTfBreakDuration() const;
 
         double_t getAltitudeWhenRedGate() const;
@@ -274,6 +299,10 @@ namespace vwpp
         double_t getCycleMovingLinearVel() const;
 
         int64_t getOpenClawMsgSendFrequency() const;
+
+        double_t getScanTowerAltitude() const;
+
+        double_t getScanTowerRuntime() const;
     };
 
 

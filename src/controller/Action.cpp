@@ -51,6 +51,8 @@ ActionTrackingLine::calculateVelocity(double_t _cur_line_v_y, double_t _cur_v_ya
     pid_controller_v_body_y.setTarget(0.);
     pid_controller_v_body_y.update(_cur_line_v_y);
 
+    ROS_ERROR("_cur_line_v_y: %lf", _cur_line_v_y);
+
     geometry_msgs::Vector3Stamped linear_body_vel{};
     linear_body_vel.header.stamp = ros::Time(0);
     linear_body_vel.header.frame_id = "camera_link";
@@ -388,7 +390,8 @@ ActionID ActionCycleMoving::getActionId() const
 }
 
 
-TargetVelXYYawPosZ ActionCycleMoving::calculateVelocity(double_t _target_altitude, double_t _cycle_radius)
+TargetVelXYYawPosZ
+ActionCycleMoving::calculateVelocity(double_t _target_altitude, double_t _target_radius, double_t _truth_radius)
 {
     geometry_msgs::Vector3Stamped linear_body_vel{};
     linear_body_vel.header.stamp = ros::Time(0);
@@ -408,18 +411,82 @@ TargetVelXYYawPosZ ActionCycleMoving::calculateVelocity(double_t _target_altitud
         ros::Duration(vwpp::DynamicRecfgInterface::getInstance()->getTfBreakDuration()).sleep();
     }
 
+
+    static PIDController pid_controller_yaw_rate(DynamicRecfgInterface::getInstance()->getPidVD2YrYawRateKp(),
+                                                 DynamicRecfgInterface::getInstance()->getPidVD2YrYawRateKi(),
+                                                 DynamicRecfgInterface::getInstance()->getPidVD2YrYawRateKd(),
+                                                 DynamicRecfgInterface::getInstance()->isPidVD2YrYawRateHasThreshold(),
+                                                 DynamicRecfgInterface::getInstance()->getPidVD2YrYawRateThreshold());
+    pid_controller_yaw_rate.setTarget(0.);
+    double_t radius_offset = _target_radius - _truth_radius;
+    pid_controller_yaw_rate.update(radius_offset);
+    double_t yaw_rate_raw = -(linear_body_vel.vector.y / _target_radius);
+    double_t yaw_rate = yaw_rate_raw + pid_controller_yaw_rate.output();
+
+
     TargetVelXYYawPosZ target_vel_xy_yaw_pos_z{};
     target_vel_xy_yaw_pos_z.vx = linear_local_vel.vector.x;
     target_vel_xy_yaw_pos_z.vy = linear_local_vel.vector.y;
     target_vel_xy_yaw_pos_z.pz = _target_altitude;
-    target_vel_xy_yaw_pos_z.yaw_rate = -(linear_body_vel.vector.y / _cycle_radius);
+    target_vel_xy_yaw_pos_z.yaw_rate = yaw_rate;
 
 
     return target_vel_xy_yaw_pos_z;
 }
 
 
-ActionGoToPositionHoldYaw::ActionGoToPositionHoldYaw()
+ActionGoToPositionHoldYaw::ActionGoToPositionHoldYaw():
+action_id(GOTOPOSITION)
+{
+    initial_yaw = PX4Interface::getInstance()->getCurYaw();
+}
+
+
+ActionGoToPositionHoldYaw::~ActionGoToPositionHoldYaw()
+= default;
+
+
+ActionID ActionGoToPositionHoldYaw::getActionId() const
+{
+    return action_id;
+}
+
+
+TargetPosXYZYaw
+ActionGoToPositionHoldYaw::calculateVelocity(double_t _target_body_x, double_t _target_body_y, double_t _target_body_z)
 {
 
+    geometry_msgs::PointStamped target_body_point{};
+
+    target_body_point.header.stamp = ros::Time(0);
+    target_body_point.header.frame_id = "camera_link";
+    target_body_point.point.x = _target_body_x;
+    target_body_point.point.y = _target_body_y;
+    target_body_point.point.z = _target_body_z;
+
+    geometry_msgs::PointStamped target_local_point{};
+    try
+    {
+        odom_base_tf_listener.transformPoint("camera_odom_frame", target_body_point, target_local_point);
+    }
+    catch (tf::TransformException &tf_ex)
+    {
+        ROS_ERROR("%s", tf_ex.what());
+        ros::Duration(vwpp::DynamicRecfgInterface::getInstance()->getTfBreakDuration()).sleep();
+    }
+
+    TargetPosXYZYaw target_pos_xyz_yaw{};
+    target_pos_xyz_yaw.px = target_local_point.point.x;
+    target_pos_xyz_yaw.py = target_local_point.point.y;
+    target_pos_xyz_yaw.pz = target_local_point.point.z;
+    target_pos_xyz_yaw.yaw = initial_yaw;
+
+    return target_pos_xyz_yaw;
+}
+
+
+int8_t ActionGoToPositionHoldYaw::resetTargetYaw(double_t _new_target_yaw)
+{
+    initial_yaw = _new_target_yaw;
+    return 0;
 }
