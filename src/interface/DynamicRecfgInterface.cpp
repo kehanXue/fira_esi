@@ -145,6 +145,8 @@ void vwpp::DynamicRecfgInterface::reconfig_cb(fira_esi::fira_esi_dynamic_cfgConf
     this->altitude_tolerance = _config.altitude_tolerance;
     this->rotate_yaw_tolerance = _config.rotate_yaw_tolerance;
 
+    this->goto_point_x_tolerance = _config.goto_point_x_tolerance;
+    this->goto_point_y_tolerance = _config.goto_point_y_tolerance;
 
     this->blue_h_offset_x_tolerance = _config.blue_h_offset_x_tolerance;
     this->blue_h_offset_y_tolerance = _config.blue_h_offset_y_tolerance;
@@ -562,9 +564,21 @@ double_t vwpp::DynamicRecfgInterface::getScanTowerAltitude() const
 }
 
 
-double_t vwpp::DynamicRecfgInterface::getScanTowerRuntime() const
+double_t vwpp::DynamicRecfgInterface::getScanTowerCycletime() const
 {
     return scan_tower_cycletime;
+}
+
+
+double_t vwpp::DynamicRecfgInterface::getGotoPointXTolerance() const
+{
+    return goto_point_x_tolerance;
+}
+
+
+double_t vwpp::DynamicRecfgInterface::getGotoPointYTolerance() const
+{
+    return goto_point_y_tolerance;
 }
 
 

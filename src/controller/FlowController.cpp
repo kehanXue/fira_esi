@@ -48,14 +48,15 @@ int8_t vwpp::FlowController::run()
         if (p_task_takeoff->getTaskState() == TASK_FINISH)
         {
             // cur_task_id = NAVIGATION;
-            // cur_task_id = SCANTOWER;
+            cur_task_id = SCANTOWER;
+            p_task_scan_tower->setTargetPoints();
             // p_task_scan_tower->resetAdjustAltitudeOnXYYaw(PX4Interface::getInstance()->getCurX(),
             //                                               PX4Interface::getInstance()->getCurY(),
             //                                               PX4Interface::getInstance()->getCurYaw());
             // ROS_INFO("Task switch to NAVIGATION!");
             // cur_task_id = LANDING;
-            cur_task_id = SCANBUILDING;
-            p_task_scan_building->resetTargetYaw(PX4Interface::getInstance()->getCurYaw());
+            // cur_task_id = SCANBUILDING;
+            // p_task_scan_building->resetTargetYaw(PX4Interface::getInstance()->getCurYaw());
         }
     }
     else if (cur_task_id == SCANTOWER)

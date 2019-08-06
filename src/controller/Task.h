@@ -252,7 +252,12 @@ namespace vwpp
 
         int8_t resetAdjustAltitudeOnXYYaw(double_t _hover_x, double_t _hover_y, double_t _hold_yaw);
 
+        int8_t setTargetPoints();
+
     private:
+
+        // TODO utils
+        int8_t convertPointLocal2Body(geometry_msgs::Point& _point_in, geometry_msgs::Point& _point_out);
 
         int64_t cycle_time_counter;
         ActionRuntime inter_adjust_altitude_time;
@@ -262,7 +267,17 @@ namespace vwpp
 
         double_t target_altitude;
         ActionCycleMoving* p_action_cycle_moving;
+        ActionRotating* p_action_rotating;
         ActionAdjustAltitude* p_action_adjust_altitude;
+        ActionGoToLocalPositionHoldYaw* p_action_go_to_local_position_hold_yaw;
+
+        std::vector<geometry_msgs::Point> vec_target_points;
+        geometry_msgs::Point cur_target_point;
+        u_int64_t cur_target_point_index;
+        double_t cur_target_yaw;
+
+        tf::TransformListener odom_base_tf_listener;
+
     };
 
     class TaskScanBuilding

@@ -47,6 +47,10 @@ namespace vwpp
         /* Determine if the altitude has been reached during the flight */
         double_t altitude_tolerance{};
 
+        /* Go to point x, y tolerance */
+        double_t goto_point_x_tolerance{};
+        double_t goto_point_y_tolerance{};
+
         /* UAV move forward's velocity */
         double_t forward_vel{};
 
@@ -145,8 +149,6 @@ namespace vwpp
         /* When landing, the tolerance of red X offset y */
         double_t red_x_offset_y_tolerance{};
 
-    private:
-
         /* Tolerance when control yaw to rotate. Unit deg*/
         double_t rotate_yaw_tolerance{};
 
@@ -171,6 +173,10 @@ namespace vwpp
 
     public:
         double_t getAltitudeTolerance() const;
+
+        double_t getGotoPointXTolerance() const;
+
+        double_t getGotoPointYTolerance() const;
 
         double_t getForwardVel() const;
 
@@ -302,7 +308,7 @@ namespace vwpp
 
         double_t getScanTowerAltitude() const;
 
-        double_t getScanTowerRuntime() const;
+        double_t getScanTowerCycletime() const;
     };
 
 
