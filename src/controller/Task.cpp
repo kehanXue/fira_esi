@@ -863,3 +863,45 @@ int8_t vwpp::TaskScanTower::resetAdjustAltitudeOnXYYaw(double_t _hover_x, double
     p_action_adjust_altitude->setAdjustAltitudeXYYaw(_hover_x, _hover_y, _hold_yaw);
     return 0;
 }
+
+
+vwpp::TaskScanBuilding::TaskScanBuilding() :
+        target_yaw(0.),
+        cur_action_id(GOTOPOSITION)
+{
+    p_task_base = new TaskBase(SCANBUILDING);
+    p_task_base->task_state = TASK_START;
+    p_action_go_to_position_hold_yaw = new ActionGoToPositionHoldYaw();
+}
+
+
+vwpp::TaskScanBuilding::~TaskScanBuilding()
+{
+    delete p_task_base;
+    delete p_action_go_to_position_hold_yaw;
+}
+
+
+vwpp::TaskID vwpp::TaskScanBuilding::getTaskID()
+{
+    return p_task_base->task_id;
+}
+
+
+vwpp::TaskState vwpp::TaskScanBuilding::getTaskState()
+{
+    return p_task_base->task_state;
+}
+
+
+int8_t vwpp::TaskScanBuilding::run()
+{
+    return 0;
+}
+
+
+int8_t vwpp::TaskScanBuilding::resetTargetYaw(double_t _target_yaw)
+{
+    target_yaw = _target_yaw;
+    return 0;
+}

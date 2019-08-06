@@ -264,6 +264,28 @@ namespace vwpp
         ActionCycleMoving* p_action_cycle_moving;
         ActionAdjustAltitude* p_action_adjust_altitude;
     };
+
+    class TaskScanBuilding
+    {
+    public:
+        TaskScanBuilding();
+        virtual ~TaskScanBuilding();
+
+        TaskID getTaskID();
+        TaskState getTaskState();
+
+        int8_t run();
+
+        int8_t resetTargetYaw(double_t _target_yaw);
+
+    private:
+
+        double_t target_yaw;
+
+        TaskBase* p_task_base;
+        ActionID cur_action_id;
+        ActionGoToPositionHoldYaw* p_action_go_to_position_hold_yaw;
+    };
 }
 
 

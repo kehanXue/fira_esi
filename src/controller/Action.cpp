@@ -435,8 +435,8 @@ ActionCycleMoving::calculateVelocity(double_t _target_altitude, double_t _target
 }
 
 
-ActionGoToPositionHoldYaw::ActionGoToPositionHoldYaw():
-action_id(GOTOPOSITION)
+ActionGoToPositionHoldYaw::ActionGoToPositionHoldYaw() :
+        action_id(GOTOPOSITION)
 {
     initial_yaw = PX4Interface::getInstance()->getCurYaw();
 }
