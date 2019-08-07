@@ -1024,13 +1024,14 @@ int8_t vwpp::TaskScanTower::convertPointLocal2Body(geometry_msgs::Point &_point_
     geometry_msgs::PointStamped target_body_point{};
 
     target_body_point.header.stamp = ros::Time(0);
-    target_body_point.header.frame_id = "camera_link";
+    target_body_point.header.frame_id = DynamicRecfgInterface::getInstance()->getBodyFrameId();
     target_body_point.point = _point_in;
 
     geometry_msgs::PointStamped target_local_point{};
     try
     {
-        odom_base_tf_listener.transformPoint("camera_odom_frame", target_body_point, target_local_point);
+        odom_base_tf_listener.transformPoint(DynamicRecfgInterface::getInstance()->getLocalFrameId(),
+                                             target_body_point, target_local_point);
     }
     catch (tf::TransformException &tf_ex)
     {
@@ -1145,13 +1146,14 @@ int8_t vwpp::TaskScanBuilding::convertPointLocal2Body(geometry_msgs::Point &_poi
     geometry_msgs::PointStamped target_body_point{};
 
     target_body_point.header.stamp = ros::Time(0);
-    target_body_point.header.frame_id = "camera_link";
+    target_body_point.header.frame_id = DynamicRecfgInterface::getInstance()->getBodyFrameId();
     target_body_point.point = _point_in;
 
     geometry_msgs::PointStamped target_local_point{};
     try
     {
-        odom_base_tf_listener.transformPoint("camera_odom_frame", target_body_point, target_local_point);
+        odom_base_tf_listener.transformPoint(DynamicRecfgInterface::getInstance()->getLocalFrameId(),
+                                             target_body_point, target_local_point);
     }
     catch (tf::TransformException &tf_ex)
     {

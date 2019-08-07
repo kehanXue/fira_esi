@@ -174,6 +174,12 @@ namespace vwpp
         /* Judge whether achieve counter, Unit beat */
         int64_t judge_achieve_counter_threshold{};
 
+        /* The parent frame id when tf listener listening */
+        std::string local_frame_id{};
+
+        /* The child frame id when tf listener listening */
+        std::string body_frame_id{};
+
     public:
         double_t getAltitudeTolerance() const;
 
@@ -314,6 +320,10 @@ namespace vwpp
         double_t getScanTowerCycletime() const;
 
         double_t getScanTowerSquareSize() const;
+
+        const std::string &getLocalFrameId() const;
+
+        const std::string &getBodyFrameId() const;
     };
 
 

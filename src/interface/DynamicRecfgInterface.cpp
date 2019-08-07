@@ -166,6 +166,9 @@ void vwpp::DynamicRecfgInterface::reconfig_cb(fira_esi::fira_esi_dynamic_cfgConf
 
     this->cycle_moving_radius = _config.cycle_moving_radius;
     this->cycle_moving_linear_vel = _config.cycle_moving_linear_vel;
+
+    this->local_frame_id = _config.local_frame_id;
+    this->body_frame_id = _config.body_frame_id;
 }
 
 
@@ -586,6 +589,18 @@ double_t vwpp::DynamicRecfgInterface::getGotoPointYTolerance() const
 double_t vwpp::DynamicRecfgInterface::getScanTowerSquareSize() const
 {
     return scan_tower_square_size;
+}
+
+
+const std::string &vwpp::DynamicRecfgInterface::getLocalFrameId() const
+{
+    return local_frame_id;
+}
+
+
+const std::string &vwpp::DynamicRecfgInterface::getBodyFrameId() const
+{
+    return body_frame_id;
 }
 
 

@@ -55,7 +55,7 @@ ActionTrackingLine::calculateVelocity(double_t _cur_line_v_y, double_t _cur_v_ya
 
     geometry_msgs::Vector3Stamped linear_body_vel{};
     linear_body_vel.header.stamp = ros::Time(0);
-    linear_body_vel.header.frame_id = "camera_link";
+    linear_body_vel.header.frame_id = DynamicRecfgInterface::getInstance()->getBodyFrameId();
     ROS_WARN("forward velocity: %lf", _forward_vel);
     linear_body_vel.vector.x = _forward_vel;
     linear_body_vel.vector.y = pid_controller_v_body_y.output() *
@@ -65,7 +65,8 @@ ActionTrackingLine::calculateVelocity(double_t _cur_line_v_y, double_t _cur_v_ya
     geometry_msgs::Vector3Stamped linear_local_vel{};
     try
     {
-        odom_base_tf_listener.transformVector("camera_odom_frame", linear_body_vel, linear_local_vel);
+        odom_base_tf_listener.transformVector(DynamicRecfgInterface::getInstance()->getLocalFrameId(),
+                                              linear_body_vel, linear_local_vel);
     }
     catch (tf::TransformException &tf_ex)
     {
@@ -148,7 +149,7 @@ TargetVelXYPosZYaw ActionHovering::calculateVelocity(double_t _cur_v_x, double_t
     geometry_msgs::Vector3Stamped linear_body_vel{};
     // linear_body_vel.header.stamp = ros::Time::now();
     linear_body_vel.header.stamp = ros::Time(0);
-    linear_body_vel.header.frame_id = "camera_link";
+    linear_body_vel.header.frame_id = DynamicRecfgInterface::getInstance()->getBodyFrameId();
     linear_body_vel.vector.x = pid_controller_v_body_x.output();
     linear_body_vel.vector.y = pid_controller_v_body_y.output();
     linear_body_vel.vector.z = 0;
@@ -156,7 +157,8 @@ TargetVelXYPosZYaw ActionHovering::calculateVelocity(double_t _cur_v_x, double_t
     geometry_msgs::Vector3Stamped linear_local_vel{};
     try
     {
-        odom_base_tf_listener.transformVector("camera_odom_frame", linear_body_vel, linear_local_vel);
+        odom_base_tf_listener.transformVector(DynamicRecfgInterface::getInstance()->getLocalFrameId(),
+                                              linear_body_vel, linear_local_vel);
     }
     catch (tf::TransformException &tf_ex)
     {
@@ -395,7 +397,7 @@ ActionCycleMoving::calculateVelocity(double_t _target_altitude, double_t _target
 {
     geometry_msgs::Vector3Stamped linear_body_vel{};
     linear_body_vel.header.stamp = ros::Time(0);
-    linear_body_vel.header.frame_id = "camera_link";
+    linear_body_vel.header.frame_id = DynamicRecfgInterface::getInstance()->getBodyFrameId();
     linear_body_vel.vector.x = 0.;
     linear_body_vel.vector.y = DynamicRecfgInterface::getInstance()->getCycleMovingLinearVel();
     linear_body_vel.vector.z = 0.;
@@ -403,7 +405,8 @@ ActionCycleMoving::calculateVelocity(double_t _target_altitude, double_t _target
     geometry_msgs::Vector3Stamped linear_local_vel{};
     try
     {
-        odom_base_tf_listener.transformVector("camera_odom_frame", linear_body_vel, linear_local_vel);
+        odom_base_tf_listener.transformVector(DynamicRecfgInterface::getInstance()->getLocalFrameId(),
+                                              linear_body_vel, linear_local_vel);
     }
     catch (tf::TransformException &tf_ex)
     {
@@ -472,3 +475,4 @@ int8_t ActionGoToLocalPositionHoldYaw::resetTargetYaw(double_t _new_target_yaw)
     target_yaw = _new_target_yaw;
     return 0;
 }
+
