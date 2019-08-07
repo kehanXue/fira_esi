@@ -49,11 +49,11 @@ int8_t vwpp::FlowController::run()
         {
             // cur_task_id = NAVIGATION;
             cur_task_id = SCANTOWER;
-            p_task_scan_tower->setTargetPoints();
-            // p_task_scan_tower->resetAdjustAltitudeOnXYYaw(PX4Interface::getInstance()->getCurX(),
-            //                                               PX4Interface::getInstance()->getCurY(),
-            //                                               PX4Interface::getInstance()->getCurYaw());
-            // ROS_INFO("Task switch to NAVIGATION!");
+            // p_task_scan_tower->setTargetPoints();
+            p_task_scan_tower->resetAdjustAltitudeOnXYYaw(PX4Interface::getInstance()->getCurX(),
+                                                          PX4Interface::getInstance()->getCurY(),
+                                                          PX4Interface::getInstance()->getCurYaw());
+            ROS_INFO("Task switch to SCANTOWER!");
             // cur_task_id = LANDING;
             // cur_task_id = SCANBUILDING;
             // p_task_scan_building->resetTargetYaw(PX4Interface::getInstance()->getCurYaw());
@@ -61,10 +61,11 @@ int8_t vwpp::FlowController::run()
     }
     else if (cur_task_id == SCANTOWER)
     {
+        ROS_INFO("Get in task SCANTOWER");
         p_task_scan_tower->run(DynamicRecfgInterface::getInstance()->getCycleMovingRadius());
         if (p_task_scan_tower->getTaskState() == TASK_FINISH)
         {
-            cur_task_id = LANDING;
+            cur_task_id = NAVIGATION;
             ROS_INFO("Scan tower task finished.");
         }
     }
@@ -160,6 +161,20 @@ int8_t vwpp::FlowController::run()
                         ROS_INFO("Task switch to DELIVERING!");
                         target_task_type_id = LANDING;
                     }
+                    // else if (target_task_type_id == SCANTOWER)
+                    // {
+                    //     cur_task_id = SCANTOWER;
+                    //     last_qr_inform = "";
+                    //     ROS_INFO("Task switch to SCANTOWER!");
+                    //     target_task_type_id = SCANBUILDING;
+                    // }
+                    // else if (target_task_type_id == SCANBUILDING)
+                    // {
+                    //     cur_task_id = SCANBUILDING;
+                    //     last_qr_inform = "";
+                    //     ROS_INFO("Task switch to SCANBUILDING!");
+                    //     target_task_type_id = LANDING;
+                    // }
                     else if (target_task_type_id == LANDING)
                     {
                         cur_task_id = LANDING;

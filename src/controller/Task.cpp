@@ -753,6 +753,7 @@ int8_t vwpp::TaskLanding::run()
 
 vwpp::TaskScanTower::TaskScanTower() :
         cur_action_id(ADJUSTALTITUDE),
+        // cur_action_id(GOTOPOSITION),
         cycle_time_counter(0),
         inter_adjust_altitude_time(FIRST_IN),
         target_altitude(0.),
@@ -770,6 +771,8 @@ vwpp::TaskScanTower::TaskScanTower() :
             new ActionRotating(DynamicRecfgInterface::getInstance()->getScanTowerAltitude());
     p_action_go_to_local_position_hold_yaw =
             new ActionGoToLocalPositionHoldYaw();
+
+    // this->setTargetPoints();
 }
 
 
@@ -797,6 +800,7 @@ vwpp::TaskState vwpp::TaskScanTower::getTaskState()
 
 int8_t vwpp::TaskScanTower::run(double_t _cycle_radius)
 {
+    ROS_WARN("Current target_point_index: %ld", cur_target_point_index);
     if (cur_action_id == ADJUSTALTITUDE)
     {
         if (inter_adjust_altitude_time == FIRST_IN)
@@ -818,6 +822,7 @@ int8_t vwpp::TaskScanTower::run(double_t _cycle_radius)
                 {
                     // cur_action_id = CYCLEMOVING;
                     cur_action_id = GOTOPOSITION;
+                    this->setTargetPoints();
                     cur_target_point = vec_target_points.at(cur_target_point_index);
                     cur_target_point_index++;
                     p_action_go_to_local_position_hold_yaw->resetTargetYaw(cur_target_yaw);
@@ -850,6 +855,8 @@ int8_t vwpp::TaskScanTower::run(double_t _cycle_radius)
     else if (cur_action_id == GOTOPOSITION)
     {
 
+        ROS_WARN("Current cur_target_point x: %lf, y: %lf, z: %lf", cur_target_point.x, cur_target_point.y,
+                 cur_target_point.z);
         if ((fabs(PX4Interface::getInstance()->getCurX() - cur_target_point.x) <
              DynamicRecfgInterface::getInstance()->getGotoPointXTolerance()) &&
             (fabs(PX4Interface::getInstance()->getCurY() - cur_target_point.y) <
@@ -859,17 +866,25 @@ int8_t vwpp::TaskScanTower::run(double_t _cycle_radius)
                     DynamicRecfgInterface::getInstance()->getJudgeAchieveCounterThreshold());
             if (judge_achieve_counter.isAchieve())
             {
+                std::cout << "vec_target_points size:" << vec_target_points.size() << std::endl;
                 if (cur_target_point_index >= vec_target_points.size())
                 {
                     cur_action_id = ADJUSTALTITUDE;
+                    ROS_WARN("Change to action adjustaltitude");
                     inter_adjust_altitude_time = SECOND_IN;
+                    this->resetAdjustAltitudeOnXYYaw(PX4Interface::getInstance()->getCurX(),
+                                                     PX4Interface::getInstance()->getCurY(),
+                                                     PX4Interface::getInstance()->getCurYaw());
                 }
                 else
                 {
                     cur_action_id = ROTATION;
+                    p_action_rotating->resetRotatingOnXY(PX4Interface::getInstance()->getCurX(),
+                                                         PX4Interface::getInstance()->getCurY());
                     cur_target_yaw -= M_PI / 2.;
                 }
             }
+            ROS_ERROR("Get in +1!!!!!!!!!!!!!!!!!!!!!!!");
         }
 
         TargetPosXYZYaw target_pos_xyz_yaw =
@@ -878,6 +893,7 @@ int8_t vwpp::TaskScanTower::run(double_t _cycle_radius)
     }
     else if (cur_action_id == ROTATION)
     {
+        ROS_ERROR("#############Get in ROTATION############");
         if (fmod(fabs(cur_target_yaw - PX4Interface::getInstance()->getCurYaw()), 2 * M_PI) <=
             vwpp::DynamicRecfgInterface::getInstance()->getRotateYawTolerance() * M_PI / 180.)
         {
@@ -892,15 +908,18 @@ int8_t vwpp::TaskScanTower::run(double_t _cycle_radius)
             }
         }
 
-        DroneVelocity drone_velocity =
-                p_action_rotating->calculateVelocity(cur_target_yaw, PX4Interface::getInstance()->getCurYaw());
-        geometry_msgs::Twist cmd_vel;
-        cmd_vel.linear.x = drone_velocity.x;
-        cmd_vel.linear.y = drone_velocity.y;
-        cmd_vel.linear.z = drone_velocity.z;
-        cmd_vel.angular.z = drone_velocity.yaw;
-
-        PX4Interface::getInstance()->publishSetpointVel(cmd_vel);
+        TargetPosXYZYaw target_pos_xyz_yaw =
+                p_action_rotating->calculateVelocity(cur_target_yaw);
+        PX4Interface::getInstance()->publishTarget(target_pos_xyz_yaw);
+        // DroneVelocity drone_velocity =
+        //         p_action_rotating->calculateVelocity(cur_target_yaw, PX4Interface::getInstance()->getCurYaw());
+        // geometry_msgs::Twist cmd_vel;
+        // cmd_vel.linear.x = drone_velocity.x;
+        // cmd_vel.linear.y = drone_velocity.y;
+        // cmd_vel.linear.z = drone_velocity.z;
+        // cmd_vel.angular.z = drone_velocity.yaw;
+        //
+        // PX4Interface::getInstance()->publishSetpointVel(cmd_vel);
     }
     // else if (cur_action_id == CYCLEMOVING)
     // {
@@ -951,34 +970,50 @@ int8_t vwpp::TaskScanTower::setTargetPoints()
     geometry_msgs::Point tmp_target_local_points;
 
     tmp_target_body_points.x = 0;
-    tmp_target_body_points.y = 1.;
+    tmp_target_body_points.y =
+            DynamicRecfgInterface::getInstance()->getScanTowerSquareSize() / 2.;
     tmp_target_body_points.z = 0.;
     this->convertPointLocal2Body(tmp_target_body_points, tmp_target_local_points);
     vec_target_points.emplace_back(tmp_target_local_points);
+    ROS_INFO("Emplace back point1: x:%lf, y:%lf, z:%lf", tmp_target_local_points.x,
+             tmp_target_local_points.y, tmp_target_local_points.z);
 
-    tmp_target_body_points.x = 2.;
-    tmp_target_body_points.y = 1.;
+    tmp_target_body_points.x =
+            DynamicRecfgInterface::getInstance()->getScanTowerSquareSize();
+    tmp_target_body_points.y =
+            DynamicRecfgInterface::getInstance()->getScanTowerSquareSize() / 2.;
     tmp_target_body_points.z = 0.;
     this->convertPointLocal2Body(tmp_target_body_points, tmp_target_local_points);
     vec_target_points.emplace_back(tmp_target_local_points);
+    ROS_INFO("Emplace back point2: x:%lf, y:%lf, z:%lf", tmp_target_local_points.x,
+             tmp_target_local_points.y, tmp_target_local_points.z);
 
-    tmp_target_body_points.x = 2;
-    tmp_target_body_points.y = -1.;
+    tmp_target_body_points.x =
+            DynamicRecfgInterface::getInstance()->getScanTowerSquareSize();
+    tmp_target_body_points.y =
+            -(DynamicRecfgInterface::getInstance()->getScanTowerSquareSize() / 2.);
     tmp_target_body_points.z = 0.;
     this->convertPointLocal2Body(tmp_target_body_points, tmp_target_local_points);
     vec_target_points.emplace_back(tmp_target_local_points);
+    ROS_INFO("Emplace back point3: x:%lf, y:%lf, z:%lf", tmp_target_local_points.x,
+             tmp_target_local_points.y, tmp_target_local_points.z);
 
     tmp_target_body_points.x = 0;
-    tmp_target_body_points.y = -1.;
+    tmp_target_body_points.y =
+            -(DynamicRecfgInterface::getInstance()->getScanTowerSquareSize() / 2.);
     tmp_target_body_points.z = 0.;
     this->convertPointLocal2Body(tmp_target_body_points, tmp_target_local_points);
     vec_target_points.emplace_back(tmp_target_local_points);
+    ROS_INFO("Emplace back point4: x:%lf, y:%lf, z:%lf", tmp_target_local_points.x,
+             tmp_target_local_points.y, tmp_target_local_points.z);
 
-    tmp_target_body_points.x = 0;
-    tmp_target_body_points.y = 0;
-    tmp_target_body_points.z = 0.;
-    this->convertPointLocal2Body(tmp_target_body_points, tmp_target_local_points);
-    vec_target_points.emplace_back(tmp_target_local_points);
+    // tmp_target_body_points.x = 0;
+    // tmp_target_body_points.y = 0;
+    // tmp_target_body_points.z = 0.;
+    // this->convertPointLocal2Body(tmp_target_body_points, tmp_target_local_points);
+    // vec_target_points.emplace_back(tmp_target_local_points);
+    // ROS_INFO("Emplace back point5: x:%lf, y:%lf, z:%lf", tmp_target_local_points.x,
+    //          tmp_target_local_points.y, tmp_target_local_points.z);
 
     return 0;
 }

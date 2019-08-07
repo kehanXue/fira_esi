@@ -63,6 +63,9 @@ namespace vwpp
         /* The altitude when scan tower */
         double_t scan_tower_altitude{};
 
+        /* The length of each side of the square when scan tower */
+        double_t scan_tower_square_size{};
+
         /* The runtime when scan tower */
         double_t scan_tower_cycletime{};
 
@@ -309,6 +312,8 @@ namespace vwpp
         double_t getScanTowerAltitude() const;
 
         double_t getScanTowerCycletime() const;
+
+        double_t getScanTowerSquareSize() const;
     };
 
 

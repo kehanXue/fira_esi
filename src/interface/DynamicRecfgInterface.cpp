@@ -80,6 +80,7 @@ void vwpp::DynamicRecfgInterface::reconfig_cb(fira_esi::fira_esi_dynamic_cfgConf
     this->scan_tower_altitude = _config.scan_tower_altitude;
 
     this->scan_tower_cycletime = _config.scan_tower_cycletime;
+    this->scan_tower_square_size = _config.scan_tower_square_size;
 
 
     this->pid_p_v2p_x_kp = _config.pid_p_v2p_x_kp;
@@ -579,6 +580,12 @@ double_t vwpp::DynamicRecfgInterface::getGotoPointXTolerance() const
 double_t vwpp::DynamicRecfgInterface::getGotoPointYTolerance() const
 {
     return goto_point_y_tolerance;
+}
+
+
+double_t vwpp::DynamicRecfgInterface::getScanTowerSquareSize() const
+{
+    return scan_tower_square_size;
 }
 
 
