@@ -233,6 +233,11 @@ MYCV::MYCV(int flag, ros::NodeHandle *pnh)
 #endif
 }
 
+MYCV::~MYCV()
+{
+    destory();
+}
+
 void MYCV::cvmain()
 {
     cv::Mat image;

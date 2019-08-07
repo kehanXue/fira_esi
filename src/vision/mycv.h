@@ -35,6 +35,7 @@ class MYCV
 {
 public:
     MYCV(int flag, ros::NodeHandle* pnh);
+    virtual ~MYCV();
     void cvmain();
     void destory();
     ros::NodeHandle *nh;

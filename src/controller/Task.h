@@ -258,7 +258,7 @@ namespace vwpp
     private:
 
         // TODO utils
-        int8_t convertPointLocal2Body(geometry_msgs::Point& _point_in, geometry_msgs::Point& _point_out);
+        int8_t convertPointLocal2Body(geometry_msgs::Point &_point_in, geometry_msgs::Point &_point_out);
 
         int64_t cycle_time_counter;
         ActionRuntime inter_adjust_altitude_time;
@@ -285,32 +285,28 @@ namespace vwpp
     {
     public:
         TaskScanBuilding();
+
         virtual ~TaskScanBuilding();
 
         TaskID getTaskID();
+
         TaskState getTaskState();
 
         int8_t run();
 
-        int8_t resetTargetYaw(double_t _target_yaw);
+        int8_t setTargetPoints();
 
     private:
 
-        int8_t convertPointLocal2Body(geometry_msgs::Point& _point_in, geometry_msgs::Point& _point_out);
+        int8_t convertPointLocal2Body(geometry_msgs::Point &_point_in, geometry_msgs::Point &_point_out);
 
-        double_t initial_yaw;
-        double_t initial_x;
-        double_t initial_y;
-        double_t initial_z;
+        std::vector<vwpp::TargetPosXYZYaw> vec_target_poses;
+        vwpp::TargetPosXYZYaw cur_pose_target{};
+        u_int64_t cur_pose_target_index;
 
-        std::vector<geometry_msgs::Point> vec_target_points;
-        u_int64_t cur_target_point_index;
-        geometry_msgs::Point cur_target_point;
-        geometry_msgs::Point set_target_point;
 
         TaskBase* p_task_base;
         ActionID cur_action_id;
-        ActionGoToLocalPositionHoldYaw* p_action_go_to_position_hold_yaw;
 
         tf::TransformListener odom_base_tf_listener;
     };
