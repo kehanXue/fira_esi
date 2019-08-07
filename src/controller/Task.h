@@ -185,6 +185,7 @@ namespace vwpp
 
         // TODO
         ActionRotating action_rotating;
+        ActionTrackingLine* p_action_tracking_line;
     };
 
     class TaskDelivering

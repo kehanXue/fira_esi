@@ -22,6 +22,21 @@ double_t convertCurYaw2FabsYawThetaBetweenPI(double_t _target_yaw, double_t _cur
 }
 
 
+double_t convertYaw2BetweenFabsPI(double_t _yaw)
+{
+    while (_yaw > M_PI)
+    {
+        _yaw -= 2 * M_PI;
+    }
+    while (_yaw < -M_PI)
+    {
+        _yaw += 2 * M_PI;
+    }
+
+    return fabs(_yaw);
+}
+
+
 double_t judgeTrackingLineVVelYScaleSigmoidFunction(double_t _cur_altitude)
 {
     return ((1 / (1 + exp(-(_cur_altitude * _cur_altitude) * 5.3))) - 0.5) * 2;

@@ -259,7 +259,7 @@ int8_t vwpp::TaskAvoidance::run(GateType _gate_type)
                         DynamicRecfgInterface::getInstance()->getJudgeAchieveCounterThreshold());
                 if (judge_achieve_counter.isAchieve())
                 {
-
+                    cur_action_id = ADJUSTALTITUDE;
                     p_task_base->task_state = TASK_FINISH;
                     inter_adjust_altitude_time = FIRST_IN;
                     return 1;
@@ -326,6 +326,8 @@ vwpp::TaskHoverOnQR::TaskHoverOnQR() :
 {
     p_task_base = new TaskBase(HOVERONQR);
     p_task_base->task_state = TASK_START;
+    p_action_tracking_line =
+            new ActionTrackingLine(DynamicRecfgInterface::getInstance()->getNormalFlightAltitude());
 }
 
 
@@ -392,9 +394,12 @@ char vwpp::TaskHoverOnQR::run(TaskID _cur_task_id, std::string _qr_inform)
 
         ROS_ERROR("On QR rotating to %lf", yaw_target);
         ROS_ERROR("Current yaw: %lf", PX4Interface::getInstance()->getCurYaw());
-        ROS_ERROR("Yaw theta: %lf", (fmod(fabs(yaw_target - PX4Interface::getInstance()->getCurYaw()), 2 * M_PI)));
+        // ROS_ERROR("Yaw theta: %lf", (fmod(fabs(yaw_target - PX4Interface::getInstance()->getCurYaw()), 2 * M_PI)));
+        ROS_ERROR("Yaw theta: %lf", convertYaw2BetweenFabsPI(yaw_target - PX4Interface::getInstance()->getCurYaw()));
 
-        if (fmod(fabs(yaw_target - PX4Interface::getInstance()->getCurYaw()), 2 * M_PI) <=
+        // if (fmod(fabs(yaw_target - PX4Interface::getInstance()->getCurYaw()), 2 * M_PI) <=
+        //     vwpp::DynamicRecfgInterface::getInstance()->getRotateYawTolerance() * M_PI / 180.)
+        if (convertYaw2BetweenFabsPI(yaw_target - PX4Interface::getInstance()->getCurYaw()) <=
             vwpp::DynamicRecfgInterface::getInstance()->getRotateYawTolerance() * M_PI / 180.)
         {
             ROS_INFO("Get in +1!");
@@ -402,9 +407,10 @@ char vwpp::TaskHoverOnQR::run(TaskID _cur_task_id, std::string _qr_inform)
                     DynamicRecfgInterface::getInstance()->getJudgeAchieveCounterThreshold());
             if (judge_achieve_counter.isAchieve())
             {
-                p_task_base->task_state = TASK_FINISH;
-                ROS_WARN("Rotation task finished!");
-                return _qr_inform.at(_qr_inform.size() - 1);
+                // p_task_base->task_state = TASK_FINISH;
+                cur_action_id = TRACKINGLINE;
+                ROS_WARN("Rotation action finished, action switch to trackingline to adjust UAV's pose");
+                // return _qr_inform.at(_qr_inform.size() - 1);
             }
         }
 
@@ -432,6 +438,31 @@ char vwpp::TaskHoverOnQR::run(TaskID _cur_task_id, std::string _qr_inform)
         // cmd_vel.angular.z = drone_velocity.yaw;
 
         // PX4Interface::getInstance()->publishSetpointVel(cmd_vel);
+
+    }
+    else if (cur_action_id == TRACKINGLINE)
+    {
+        double_t cur_line_y_offset = VisionInterface::getInstance()->getLineOffset();
+        double_t cur_line_yaw_offset = VisionInterface::getInstance()->getLineRotation();
+
+        if (fabs(cur_line_y_offset) <= DynamicRecfgInterface::getInstance()->getQrLineYTolerance() &&
+            fabs(cur_line_yaw_offset) <= DynamicRecfgInterface::getInstance()->getQrLineYawTolerance())
+        {
+            static JudgeAchieveCounter judge_achieve_counter(
+                    DynamicRecfgInterface::getInstance()->getJudgeAchieveCounterThreshold());
+            if (judge_achieve_counter.isAchieve())
+            {
+                cur_action_id = ROTATION;
+                p_task_base->task_state = TASK_FINISH;
+                ROS_WARN("Rotation task finished!");
+                return _qr_inform.at(_qr_inform.size() - 1);
+            }
+        }
+
+        TargetVelXYPosZYaw target_vel_xy_pos_z_yaw =
+                p_action_tracking_line->calculateVelocity(
+                        cur_line_y_offset, cur_line_yaw_offset, 0.);
+        PX4Interface::getInstance()->publishTarget(target_vel_xy_pos_z_yaw);
 
     }
 
@@ -579,13 +610,19 @@ int8_t vwpp::TaskDelivering::run()
     }
     else if (cur_action_id == ROTATION)
     {
-        if (fmod(fabs(PX4Interface::getInstance()->getCurYaw() - back_toward_yaw), 2 * M_PI) <=
+        // if (fmod(fabs(PX4Interface::getInstance()->getCurYaw() - back_toward_yaw), 2 * M_PI) <=
+        //     vwpp::DynamicRecfgInterface::getInstance()->getRotateYawTolerance() * M_PI / 180.)
+        ROS_ERROR("Cur yaw: %lf, back_torward_yaw: %lf", PX4Interface::getInstance()->getCurYaw(), back_toward_yaw);
+        ROS_ERROR("Cur yaw error: %lf",
+                  convertYaw2BetweenFabsPI(PX4Interface::getInstance()->getCurYaw() - back_toward_yaw));
+        if (convertYaw2BetweenFabsPI(PX4Interface::getInstance()->getCurYaw() - back_toward_yaw) <=
             vwpp::DynamicRecfgInterface::getInstance()->getRotateYawTolerance() * M_PI / 180.)
         {
             static JudgeAchieveCounter judge_achieve_counter(
                     DynamicRecfgInterface::getInstance()->getJudgeAchieveCounterThreshold());
             if (judge_achieve_counter.isAchieve())
             {
+                cur_action_id = TRACKINGLINE;
                 p_task_base->task_state = TASK_FINISH;
                 return 1;
             }
@@ -727,6 +764,7 @@ int8_t vwpp::TaskLanding::run()
                     vwpp::DynamicRecfgInterface::getInstance()->getJudgeAchieveCounterThreshold());
             if (judge_achieve_counter.isAchieve())
             {
+                cur_action_id = TRACKINGLINE;
                 p_task_base->task_state = TASK_FINISH;
                 return 1;
             }
@@ -844,7 +882,7 @@ int8_t vwpp::TaskScanTower::run(double_t _cycle_radius)
                         DynamicRecfgInterface::getInstance()->getJudgeAchieveCounterThreshold());
                 if (judge_achieve_counter.isAchieve())
                 {
-
+                    cur_action_id = ADJUSTALTITUDE;
                     p_task_base->task_state = TASK_FINISH;
                     inter_adjust_altitude_time = FIRST_IN;
                     return 1;
@@ -894,7 +932,8 @@ int8_t vwpp::TaskScanTower::run(double_t _cycle_radius)
     else if (cur_action_id == ROTATION)
     {
         ROS_ERROR("#############Get in ROTATION############");
-        if (fmod(fabs(cur_target_yaw - PX4Interface::getInstance()->getCurYaw()), 2 * M_PI) <=
+
+        if (convertYaw2BetweenFabsPI(cur_target_yaw - PX4Interface::getInstance()->getCurYaw()) <=
             vwpp::DynamicRecfgInterface::getInstance()->getRotateYawTolerance() * M_PI / 180.)
         {
             static JudgeAchieveCounter judge_achieve_counter(

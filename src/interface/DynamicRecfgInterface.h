@@ -155,6 +155,12 @@ namespace vwpp
         /* Tolerance when control yaw to rotate. Unit deg*/
         double_t rotate_yaw_tolerance{};
 
+        /* The line_y_tolerance when adjust pose on QR. Unit pixel */
+        double_t qr_line_y_tolerance{};
+
+        /* The line_yaw_tolerance when adjust pose on QR. Unit rad */
+        double_t qr_line_yaw_tolerance{};
+
         /* Tolerance when hovering on QR */
         double_t qr_offset_x_tolerance{};
         double_t qr_offset_y_tolerance{};
@@ -324,6 +330,10 @@ namespace vwpp
         const std::string &getLocalFrameId() const;
 
         const std::string &getBodyFrameId() const;
+
+        double_t getQrLineYTolerance() const;
+
+        double_t getQrLineYawTolerance() const;
     };
 
 

@@ -155,6 +155,9 @@ void vwpp::DynamicRecfgInterface::reconfig_cb(fira_esi::fira_esi_dynamic_cfgConf
     this->red_x_offset_x_tolerance = _config.red_x_offset_x_tolerance;
     this->red_x_offset_y_tolerance = _config.red_x_offset_y_tolerance;
 
+    this->qr_line_y_tolerance = _config.qr_line_y_tolerance;
+    this->qr_line_yaw_tolerance = _config.qr_line_yaw_tolerance;
+
     this->qr_offset_x_tolerance = _config.qr_offset_x_tolerance;
     this->qr_offset_y_tolerance = _config.qr_offset_y_tolerance;
 
@@ -601,6 +604,18 @@ const std::string &vwpp::DynamicRecfgInterface::getLocalFrameId() const
 const std::string &vwpp::DynamicRecfgInterface::getBodyFrameId() const
 {
     return body_frame_id;
+}
+
+
+double_t vwpp::DynamicRecfgInterface::getQrLineYTolerance() const
+{
+    return qr_line_y_tolerance;
+}
+
+
+double_t vwpp::DynamicRecfgInterface::getQrLineYawTolerance() const
+{
+    return qr_line_yaw_tolerance;
 }
 
 

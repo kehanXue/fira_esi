@@ -6,9 +6,12 @@ dictitems:
   avoidance_forward_time: 10.0
   blue_h_offset_x_tolerance: 90.0
   blue_h_offset_y_tolerance: 90.0
+  body_frame_id: fcu
   cycle_moving_linear_vel: 0.44
   cycle_moving_radius: 1.2
-  forward_vel: 0.22
+  forward_vel: 0.27
+  goto_point_x_tolerance: 0.1
+  goto_point_y_tolerance: 0.1
   groups: !!python/object/new:dynamic_reconfigure.encoding.Config
     dictitems:
       altitude_tolerance: 0.13
@@ -17,14 +20,18 @@ dictitems:
       avoidance_forward_time: 10.0
       blue_h_offset_x_tolerance: 90.0
       blue_h_offset_y_tolerance: 90.0
+      body_frame_id: fcu
       cycle_moving_linear_vel: 0.44
       cycle_moving_radius: 1.2
-      forward_vel: 0.22
+      forward_vel: 0.27
+      goto_point_x_tolerance: 0.1
+      goto_point_y_tolerance: 0.1
       groups: !!python/object/new:dynamic_reconfigure.encoding.Config
         state: []
       id: 0
       judge_achieve_counter_threshold: 20
       landing_altitude: 0.0
+      local_frame_id: local_origin
       name: Default
       navigation_per_sustain_time: 25
       normal_flight_altitude: 0.44
@@ -77,19 +84,23 @@ dictitems:
       pid_v_v2p_z_ki: 0.0
       pid_v_v2p_z_kp: 1.0
       pid_v_v2p_z_threshold: 1.0
+      qr_line_y_tolerance: 80.0
+      qr_line_yaw_tolerance: 0.22
       qr_offset_x_tolerance: 20.0
       qr_offset_y_tolerance: 20.0
       red_x_offset_x_tolerance: 90.0
       red_x_offset_y_tolerance: 90.0
       rotate_yaw_tolerance: 13.799999999999999
-      scan_tower_altitude: 1.2
+      scan_tower_altitude: 1.85
       scan_tower_cycletime: 20.0
+      scan_tower_square_size: 1.8
       state: true
       tf_break_duration: 0.2
       type: ''
     state: []
   judge_achieve_counter_threshold: 20
   landing_altitude: 0.0
+  local_frame_id: local_origin
   navigation_per_sustain_time: 25
   normal_flight_altitude: 0.44
   open_claw_msg_send_frequency: 70
@@ -138,12 +149,15 @@ dictitems:
   pid_v_v2p_z_ki: 0.0
   pid_v_v2p_z_kp: 1.0
   pid_v_v2p_z_threshold: 1.0
+  qr_line_y_tolerance: 80.0
+  qr_line_yaw_tolerance: 0.22
   qr_offset_x_tolerance: 20.0
   qr_offset_y_tolerance: 20.0
   red_x_offset_x_tolerance: 90.0
   red_x_offset_y_tolerance: 90.0
   rotate_yaw_tolerance: 13.799999999999999
-  scan_tower_altitude: 1.2
+  scan_tower_altitude: 1.85
   scan_tower_cycletime: 20.0
+  scan_tower_square_size: 1.8
   tf_break_duration: 0.2
 state: []
