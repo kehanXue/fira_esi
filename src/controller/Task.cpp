@@ -1126,15 +1126,12 @@ int8_t vwpp::TaskScanBuilding::run()
                     DynamicRecfgInterface::getInstance()->getJudgeAchieveCounterThreshold());
             if (judge_achieve_counter.isAchieve())
             {
+                cur_pose_target_index++;
                 if (cur_pose_target_index >= vec_target_poses.size())
                 {
                     cur_action_id = GOTOPOSITION;
                     p_task_base->task_state = TASK_FINISH;
                     return 1;
-                }
-                else
-                {
-                    cur_pose_target_index++;
                 }
             }
         }
@@ -1158,7 +1155,7 @@ int8_t vwpp::TaskScanBuilding::setTargetPoints()
     // TODO param
     tmp_target_body_points.x = 0.;
     tmp_target_body_points.y = -1.;
-    tmp_target_body_points.z = 0.5;
+    tmp_target_body_points.z = 0.8;
     this->convertPointLocal2Body(tmp_target_body_points, tmp_target_local_points);
     tmp_target_local_pos_xyz_yaw.px = tmp_target_local_points.x;
     tmp_target_local_pos_xyz_yaw.py = tmp_target_local_points.y;
@@ -1169,7 +1166,7 @@ int8_t vwpp::TaskScanBuilding::setTargetPoints()
 
     tmp_target_body_points.x = 0.;
     tmp_target_body_points.y = 1.;
-    tmp_target_body_points.z = 0.5;
+    tmp_target_body_points.z = 0.8;
     this->convertPointLocal2Body(tmp_target_body_points, tmp_target_local_points);
     tmp_target_local_pos_xyz_yaw.px = tmp_target_local_points.x;
     tmp_target_local_pos_xyz_yaw.py = tmp_target_local_points.y;
@@ -1179,7 +1176,7 @@ int8_t vwpp::TaskScanBuilding::setTargetPoints()
 
     tmp_target_body_points.x = 0.;
     tmp_target_body_points.y = 1.;
-    tmp_target_body_points.z = 1.;
+    tmp_target_body_points.z = 1.5;
     this->convertPointLocal2Body(tmp_target_body_points, tmp_target_local_points);
     tmp_target_local_pos_xyz_yaw.px = tmp_target_local_points.x;
     tmp_target_local_pos_xyz_yaw.py = tmp_target_local_points.y;
@@ -1189,7 +1186,7 @@ int8_t vwpp::TaskScanBuilding::setTargetPoints()
 
     tmp_target_body_points.x = 0.;
     tmp_target_body_points.y = -1.;
-    tmp_target_body_points.z = 1.;
+    tmp_target_body_points.z = 1.5;
     this->convertPointLocal2Body(tmp_target_body_points, tmp_target_local_points);
     tmp_target_local_pos_xyz_yaw.px = tmp_target_local_points.x;
     tmp_target_local_pos_xyz_yaw.py = tmp_target_local_points.y;
@@ -1198,13 +1195,23 @@ int8_t vwpp::TaskScanBuilding::setTargetPoints()
     vec_target_poses.emplace_back(tmp_target_local_pos_xyz_yaw);
 
     tmp_target_body_points.x = 0.;
-    tmp_target_body_points.y = 0.;
+    tmp_target_body_points.y = -1.;
     tmp_target_body_points.z = 0.;
     this->convertPointLocal2Body(tmp_target_body_points, tmp_target_local_points);
     tmp_target_local_pos_xyz_yaw.px = tmp_target_local_points.x;
     tmp_target_local_pos_xyz_yaw.py = tmp_target_local_points.y;
     tmp_target_local_pos_xyz_yaw.pz = tmp_target_local_points.z;
     tmp_target_local_pos_xyz_yaw.yaw = PX4Interface::getInstance()->getCurYaw();
+    vec_target_poses.emplace_back(tmp_target_local_pos_xyz_yaw);
+
+    tmp_target_body_points.x = 0.;
+    tmp_target_body_points.y = -1.;
+    tmp_target_body_points.z = 0.;
+    this->convertPointLocal2Body(tmp_target_body_points, tmp_target_local_points);
+    tmp_target_local_pos_xyz_yaw.px = tmp_target_local_points.x;
+    tmp_target_local_pos_xyz_yaw.py = tmp_target_local_points.y;
+    tmp_target_local_pos_xyz_yaw.pz = tmp_target_local_points.z;
+    tmp_target_local_pos_xyz_yaw.yaw = PX4Interface::getInstance()->getCurYaw() - (M_PI / 2);
     vec_target_poses.emplace_back(tmp_target_local_pos_xyz_yaw);
 
     return 0;

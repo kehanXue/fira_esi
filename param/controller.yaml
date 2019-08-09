@@ -3,13 +3,13 @@ dictitems:
   altitude_tolerance: 0.13
   altitude_when_red_gate: 1.6199999999999999
   altitude_when_yellow_gate: 0.38999999999999996
-  avoidance_forward_time: 10.0
+  avoidance_forward_time: 8.8
   blue_h_offset_x_tolerance: 90.0
   blue_h_offset_y_tolerance: 90.0
   body_frame_id: fcu
   cycle_moving_linear_vel: 0.44
   cycle_moving_radius: 1.2
-  forward_vel: 0.27
+  forward_vel: 0.2
   goto_point_x_tolerance: 0.1
   goto_point_y_tolerance: 0.1
   groups: !!python/object/new:dynamic_reconfigure.encoding.Config
@@ -17,13 +17,13 @@ dictitems:
       altitude_tolerance: 0.13
       altitude_when_red_gate: 1.6199999999999999
       altitude_when_yellow_gate: 0.38999999999999996
-      avoidance_forward_time: 10.0
+      avoidance_forward_time: 8.8
       blue_h_offset_x_tolerance: 90.0
       blue_h_offset_y_tolerance: 90.0
       body_frame_id: fcu
       cycle_moving_linear_vel: 0.44
       cycle_moving_radius: 1.2
-      forward_vel: 0.27
+      forward_vel: 0.2
       goto_point_x_tolerance: 0.1
       goto_point_y_tolerance: 0.1
       groups: !!python/object/new:dynamic_reconfigure.encoding.Config
@@ -34,7 +34,7 @@ dictitems:
       local_frame_id: local_origin
       name: Default
       navigation_per_sustain_time: 25
-      normal_flight_altitude: 0.44
+      normal_flight_altitude: 0.48
       open_claw_msg_send_frequency: 70
       parameters: !!python/object/new:dynamic_reconfigure.encoding.Config
         state: []
@@ -55,9 +55,9 @@ dictitems:
       pid_p_v2p_yaw_kp: 1.0799999999999998
       pid_p_v2p_yaw_threshold: 0.8999999999999999
       pid_p_v2p_z_has_threshold: false
-      pid_p_v2p_z_kd: 4.02
+      pid_p_v2p_z_kd: 2.82
       pid_p_v2p_z_ki: 0.0
-      pid_p_v2p_z_kp: 3.2399999999999998
+      pid_p_v2p_z_kp: 2.52
       pid_p_v2p_z_threshold: 0.84
       pid_v_d2yr_yaw_rate_has_threshold: false
       pid_v_d2yr_yaw_rate_kd: 0.7799999999999999
@@ -88,12 +88,12 @@ dictitems:
       qr_line_yaw_tolerance: 0.22
       qr_offset_x_tolerance: 20.0
       qr_offset_y_tolerance: 20.0
-      red_x_offset_x_tolerance: 90.0
-      red_x_offset_y_tolerance: 90.0
+      red_x_offset_x_tolerance: 64.0
+      red_x_offset_y_tolerance: 64.0
       rotate_yaw_tolerance: 13.799999999999999
-      scan_tower_altitude: 1.85
+      scan_tower_altitude: 1.8299999999999998
       scan_tower_cycletime: 20.0
-      scan_tower_square_size: 1.8
+      scan_tower_square_size: 1.76
       state: true
       tf_break_duration: 0.2
       type: ''
@@ -102,7 +102,7 @@ dictitems:
   landing_altitude: 0.0
   local_frame_id: local_origin
   navigation_per_sustain_time: 25
-  normal_flight_altitude: 0.44
+  normal_flight_altitude: 0.48
   open_claw_msg_send_frequency: 70
   pid_p_v2p_x_has_threshold: true
   pid_p_v2p_x_kd: 0.0
@@ -120,9 +120,9 @@ dictitems:
   pid_p_v2p_yaw_kp: 1.0799999999999998
   pid_p_v2p_yaw_threshold: 0.8999999999999999
   pid_p_v2p_z_has_threshold: false
-  pid_p_v2p_z_kd: 4.02
+  pid_p_v2p_z_kd: 2.82
   pid_p_v2p_z_ki: 0.0
-  pid_p_v2p_z_kp: 3.2399999999999998
+  pid_p_v2p_z_kp: 2.52
   pid_p_v2p_z_threshold: 0.84
   pid_v_d2yr_yaw_rate_has_threshold: false
   pid_v_d2yr_yaw_rate_kd: 0.7799999999999999
@@ -153,11 +153,11 @@ dictitems:
   qr_line_yaw_tolerance: 0.22
   qr_offset_x_tolerance: 20.0
   qr_offset_y_tolerance: 20.0
-  red_x_offset_x_tolerance: 90.0
-  red_x_offset_y_tolerance: 90.0
+  red_x_offset_x_tolerance: 64.0
+  red_x_offset_y_tolerance: 64.0
   rotate_yaw_tolerance: 13.799999999999999
-  scan_tower_altitude: 1.85
+  scan_tower_altitude: 1.8299999999999998
   scan_tower_cycletime: 20.0
-  scan_tower_square_size: 1.8
+  scan_tower_square_size: 1.76
   tf_break_duration: 0.2
 state: []

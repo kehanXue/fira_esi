@@ -199,7 +199,9 @@ int8_t vwpp::FlowController::run()
         p_task_scan_building->run();
         if (p_task_scan_building->getTaskState() == TASK_FINISH)
         {
+            // TODO
             cur_task_id = NAVIGATION;
+            // cur_task_id = HOVERONQR;
             ROS_INFO("Scan building task finished.");
         }
     }
