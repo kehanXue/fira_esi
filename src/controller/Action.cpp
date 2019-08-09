@@ -476,3 +476,34 @@ int8_t ActionGoToLocalPositionHoldYaw::resetTargetYaw(double_t _new_target_yaw)
     return 0;
 }
 
+
+TargetVelXYPosZYaw ActionGoToLocalPositionHoldYaw::calculateVelocity(TargetPosXYZYaw _target_local_target_by_vel)
+{
+    static PIDController
+            pid_controller_p_local_x(DynamicRecfgInterface::getInstance()->getPidPV2PXKp(),
+                                     DynamicRecfgInterface::getInstance()->getPidPV2PXKi(),
+                                     DynamicRecfgInterface::getInstance()->getPidPV2PXKd(),
+                                     DynamicRecfgInterface::getInstance()->isPidPV2PXHasThreshold(),
+                                     DynamicRecfgInterface::getInstance()->getPidPV2PXThreshold());
+    static PIDController
+            pid_controller_p_local_y(DynamicRecfgInterface::getInstance()->getPidPV2PYKp(),
+                                     DynamicRecfgInterface::getInstance()->getPidPV2PYKi(),
+                                     DynamicRecfgInterface::getInstance()->getPidPV2PYKd(),
+                                     DynamicRecfgInterface::getInstance()->isPidPV2PYHasThreshold(),
+                                     DynamicRecfgInterface::getInstance()->getPidPV2PYThreshold());
+
+    pid_controller_p_local_x.setTarget(_target_local_target_by_vel.px);
+    pid_controller_p_local_y.setTarget(_target_local_target_by_vel.py);
+
+    pid_controller_p_local_x.update(PX4Interface::getInstance()->getCurX());
+    pid_controller_p_local_y.update(PX4Interface::getInstance()->getCurY());
+
+    TargetVelXYPosZYaw target_vel_xy_pos_z_yaw{};
+    target_vel_xy_pos_z_yaw.vx = pid_controller_p_local_x.output();
+    target_vel_xy_pos_z_yaw.vy = pid_controller_p_local_y.output();
+    target_vel_xy_pos_z_yaw.pz = _target_local_target_by_vel.pz;
+    target_vel_xy_pos_z_yaw.yaw = _target_local_target_by_vel.yaw;
+
+    return target_vel_xy_pos_z_yaw;
+}
+

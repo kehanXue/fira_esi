@@ -187,6 +187,7 @@ namespace vwpp
         ActionID getActionId() const;
 
         TargetPosXYZYaw calculateVelocity(geometry_msgs::Point _target_local_point);
+        TargetVelXYPosZYaw calculateVelocity(TargetPosXYZYaw _target_local_target_by_vel);      // TODO another action class
 
         int8_t resetTargetYaw(double_t _new_target_yaw);
 
@@ -194,8 +195,6 @@ namespace vwpp
 
         ActionID action_id;
         double_t target_yaw;
-
-        tf::TransformListener odom_base_tf_listener;
 
     };
 }

@@ -925,9 +925,15 @@ int8_t vwpp::TaskScanTower::run(double_t _cycle_radius)
             ROS_ERROR("Get in +1!!!!!!!!!!!!!!!!!!!!!!!");
         }
 
-        TargetPosXYZYaw target_pos_xyz_yaw =
+        TargetPosXYZYaw cur_target_pos_xyz_yaw =
                 p_action_go_to_local_position_hold_yaw->calculateVelocity(cur_target_point);
-        PX4Interface::getInstance()->publishTarget(target_pos_xyz_yaw);
+
+        PX4Interface::getInstance()->publishTarget(cur_target_pos_xyz_yaw);
+
+        // Could make speed lower. Maybe cause realsense broken.
+        // TargetVelXYPosZYaw target_vel_xy_pos_z_yaw =
+        //         p_action_go_to_local_position_hold_yaw->calculateVelocity(cur_target_pos_xyz_yaw);
+        // PX4Interface::getInstance()->publishTarget(target_vel_xy_pos_z_yaw);
     }
     else if (cur_action_id == ROTATION)
     {
@@ -1089,12 +1095,16 @@ vwpp::TaskScanBuilding::TaskScanBuilding() :
 {
     p_task_base = new TaskBase(SCANBUILDING);
     p_task_base->task_state = TASK_START;
+
+    p_action_go_to_local_position_hold_yaw =
+            new ActionGoToLocalPositionHoldYaw();
 }
 
 
 vwpp::TaskScanBuilding::~TaskScanBuilding()
 {
     delete p_task_base;
+    delete p_action_go_to_local_position_hold_yaw;
 }
 
 
@@ -1116,6 +1126,13 @@ int8_t vwpp::TaskScanBuilding::run()
     {
         cur_pose_target = vec_target_poses.at(cur_pose_target_index);
         PX4Interface::getInstance()->publishTarget(cur_pose_target);
+
+        // Could make the speed lower.
+        // TODO No science
+        //      p_action_go_to_local_position_hold_yaw->resetTargetYaw(cur_pose_target.yaw);
+        // TargetVelXYPosZYaw target_vel_xy_pos_z_yaw =
+        //         p_action_go_to_local_position_hold_yaw->calculateVelocity(cur_pose_target);
+        // PX4Interface::getInstance()->publishTarget(target_vel_xy_pos_z_yaw);
 
         if ((fabs(PX4Interface::getInstance()->getCurX() - cur_pose_target.px) <
              DynamicRecfgInterface::getInstance()->getGotoPointXTolerance()) &&

@@ -304,6 +304,7 @@ namespace vwpp
         vwpp::TargetPosXYZYaw cur_pose_target{};
         u_int64_t cur_pose_target_index;
 
+        ActionGoToLocalPositionHoldYaw* p_action_go_to_local_position_hold_yaw;
 
         TaskBase* p_task_base;
         ActionID cur_action_id;
