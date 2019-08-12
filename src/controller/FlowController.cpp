@@ -135,12 +135,13 @@ int8_t vwpp::FlowController::run()
                         cur_task_id = DELIVERING;
                         last_qr_inform = "";
                         ROS_INFO("Task switch to DELIVERING!");
-                        // target_task_type_id = SCANTOWER;
-                        target_task_type_id = LANDING;
+                        target_task_type_id = SCANTOWER;
+                        // target_task_type_id = LANDING;
                     }
                     else if (target_task_type_id == SCANTOWER)
                     {
-                        cur_task_id = SCANTOWER;
+                        // cur_task_id = SCANTOWER;
+                        cur_task_id = HOVERONQR;
                         p_task_scan_tower->resetAdjustAltitudeOnXYYaw(PX4Interface::getInstance()->getCurX(),
                                                                       PX4Interface::getInstance()->getCurY(),
                                                                       PX4Interface::getInstance()->getCurYaw());
@@ -150,7 +151,8 @@ int8_t vwpp::FlowController::run()
                     }
                     else if (target_task_type_id == SCANBUILDING)
                     {
-                        cur_task_id = SCANBUILDING;
+                        // cur_task_id = SCANBUILDING;
+                        cur_task_id = HOVERONQR;
                         p_task_scan_building->setTargetPoints();
                         last_qr_inform = "";
                         ROS_INFO("Task switch to SCANBUILDING!");
