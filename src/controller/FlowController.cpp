@@ -135,7 +135,8 @@ int8_t vwpp::FlowController::run()
                         cur_task_id = DELIVERING;
                         last_qr_inform = "";
                         ROS_INFO("Task switch to DELIVERING!");
-                        target_task_type_id = SCANTOWER;
+                        // target_task_type_id = SCANTOWER;
+                        target_task_type_id = LANDING;
                     }
                     else if (target_task_type_id == SCANTOWER)
                     {

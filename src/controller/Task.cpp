@@ -563,11 +563,17 @@ int8_t vwpp::TaskDelivering::run()
         ROS_ERROR("Current RedX: %lf, RedY: %lf",
                   VisionInterface::getInstance()->getRedXx(),
                   VisionInterface::getInstance()->getRedXy());
+        // VisionInterface::getInstance()->getBlueHx(),
+        // VisionInterface::getInstance()->getBlueHy());
 
         if (fabs(VisionInterface::getInstance()->getRedXx() - 0.) <=
             vwpp::DynamicRecfgInterface::getInstance()->getRedXOffsetXTolerance() &&
             fabs(VisionInterface::getInstance()->getRedXy() - 0.) <=
             vwpp::DynamicRecfgInterface::getInstance()->getRedXOffsetYTolerance())
+            // if (fabs(VisionInterface::getInstance()->getBlueHx() - 0.) <=
+            //     vwpp::DynamicRecfgInterface::getInstance()->getRedXOffsetXTolerance() &&
+            //     fabs(VisionInterface::getInstance()->getBlueHy() - 0.) <=
+            //     vwpp::DynamicRecfgInterface::getInstance()->getRedXOffsetYTolerance())
         {
             static JudgeAchieveCounter judge_achieve_counter(
                     DynamicRecfgInterface::getInstance()->getJudgeAchieveCounterThreshold());
@@ -581,6 +587,8 @@ int8_t vwpp::TaskDelivering::run()
         TargetVelXYPosZYaw target_vel_xy_pos_z_yaw =
                 p_action_hovering->calculateVelocity(VisionInterface::getInstance()->getRedXx(),
                                                      VisionInterface::getInstance()->getRedXy());
+        // p_action_hovering->calculateVelocity(VisionInterface::getInstance()->getBlueHx(),
+        //                                      VisionInterface::getInstance()->getBlueHy());
 
         PX4Interface::getInstance()->publishTarget(target_vel_xy_pos_z_yaw);
         // geometry_msgs::Twist cmd_vel;

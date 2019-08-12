@@ -65,14 +65,14 @@ dictitems:
       pid_v_d2yr_yaw_rate_kp: 0.5399999999999999
       pid_v_d2yr_yaw_rate_threshold: 1.0
       pid_v_v2p_x_has_threshold: false
-      pid_v_v2p_x_kd: 0.013
+      pid_v_v2p_x_kd: 0.01
       pid_v_v2p_x_ki: 0.0
-      pid_v_v2p_x_kp: 0.0025
+      pid_v_v2p_x_kp: 0.0015
       pid_v_v2p_x_threshold: 0.3
       pid_v_v2p_y_has_threshold: false
-      pid_v_v2p_y_kd: 0.013
+      pid_v_v2p_y_kd: 0.01
       pid_v_v2p_y_ki: 0.0
-      pid_v_v2p_y_kp: 0.0025
+      pid_v_v2p_y_kp: 0.0015
       pid_v_v2p_y_threshold: 0.3
       pid_v_v2p_yaw_has_threshold: true
       pid_v_v2p_yaw_kd: 0.0
@@ -130,14 +130,14 @@ dictitems:
   pid_v_d2yr_yaw_rate_kp: 0.5399999999999999
   pid_v_d2yr_yaw_rate_threshold: 1.0
   pid_v_v2p_x_has_threshold: false
-  pid_v_v2p_x_kd: 0.013
+  pid_v_v2p_x_kd: 0.01
   pid_v_v2p_x_ki: 0.0
-  pid_v_v2p_x_kp: 0.0025
+  pid_v_v2p_x_kp: 0.0015
   pid_v_v2p_x_threshold: 0.3
   pid_v_v2p_y_has_threshold: false
-  pid_v_v2p_y_kd: 0.013
+  pid_v_v2p_y_kd: 0.01
   pid_v_v2p_y_ki: 0.0
-  pid_v_v2p_y_kp: 0.0025
+  pid_v_v2p_y_kp: 0.0015
   pid_v_v2p_y_threshold: 0.3
   pid_v_v2p_yaw_has_threshold: true
   pid_v_v2p_yaw_kd: 0.0
