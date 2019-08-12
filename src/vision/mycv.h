@@ -9,13 +9,14 @@
 #include <sl/Camera.hpp>
 #include <yaml-cpp/yaml.h>
 #include <zbar.h>
+#include <image_transport/image_transport.h>
+#include <cv_bridge/cv_bridge.h>
+#include <sensor_msgs/Image.h>
 
 #ifdef TEST_ROS
 #include <cv_bridge/cv_bridge.h>
 #include <image_transport/image_transport.h>
 #include <dynamic_reconfigure/server.h>
-#include <interface/DynamicRecfgInterface.h>
-// #include "../../../devel/include/my_cv/vision_dynamic_reconfigureConfig.h"
 #endif
 
 #include <algorithm>
@@ -68,6 +69,7 @@ public:
     bool detect_redX;
     double blueH_location[2];
     double redX_location[2];
+    bool detect_tower;
     double tower_depth;
 
 private:
@@ -100,6 +102,13 @@ private:
     cv::Scalar blueH_min_color, blueH_max_color;
     cv::Scalar redX_min_color, redX_max_color;
 
+    std::string zed_left_topic;
+    std::string zed_depth_topic;
+    image_transport::ImageTransport* it;
+    image_transport::Subscriber sub_left;
+    ros::Subscriber sub_depth;
+    cv::Mat image_depth;
+
 private:
     void findline(cv::Mat image);
     void findgate(cv::Mat image);
@@ -127,7 +136,7 @@ private:
 #ifdef TEST
 #ifdef TEST_ROS
 #ifdef TEST_ROS_DY
-private:
+    private:
     dynamic_reconfigure::Server<dynamic_reconfigure::vision_dynamic_reconfigureConfig> *server;
     dynamic_reconfigure::Server<dynamic_reconfigure::vision_dynamic_reconfigureConfig>::CallbackType *server_callback;
 #endif

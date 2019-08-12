@@ -1,3 +1,5 @@
+zed_left_topic: /zed/zed_node/left/image_rect_color
+zed_depth_topic: /zed/zed_node/depth/depth_registered
 HSV_min_red3: 0
 BGR_max_yellow3: 255
 HSV_min_redX1: 0
