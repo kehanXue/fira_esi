@@ -72,6 +72,11 @@ bool flag_zed_left_image = false, flag_zed_depth_image=false;
 
 void imageCallback(const sensor_msgs::ImageConstPtr& msg)
 {
+    if(flag_zed_left_image)
+    {
+        return;
+    }
+
     try
     {
         zed_left_image=cv_bridge::toCvShare(msg, "bgr8")->image;
@@ -85,8 +90,11 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
 
 void depthCallback(const sensor_msgs::Image::ConstPtr& msg)
 {
-    try
+    if(flag_zed_depth_image)
     {
+        return;
+    }
+
         zed_depth_image = cv::Mat::zeros(720,1280,CV_32FC1);
         float* depths = (float*)(&msg->data[0]);
         for(int i=0; i<zed_depth_image.cols; i++)
@@ -95,12 +103,6 @@ void depthCallback(const sensor_msgs::Image::ConstPtr& msg)
                 zed_depth_image.at<float>(j,i) = depths[i+msg->width*j];
             }
         flag_zed_depth_image = true;
-
-    }
-    catch(cv_bridge::Exception& e)
-    {
-        ROS_ERROR("Could not convert from '%s' to '32FC1'.", msg->encoding.c_str());
-    }
 }
 
 MYCV::MYCV(int flag, ros::NodeHandle *pnh)

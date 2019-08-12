@@ -29,6 +29,8 @@ int main(int argc, char** argv)
     ros::Rate loop_rate(10);
     while (ros::ok())
     {
+        clock_t time_begin = clock();
+
         vwpp::DynamicRecfgInterface::getInstance()->update();
         vwpp::PX4Interface::getInstance()->update();
         vwpp::VisionInterface::getInstance()->update();
@@ -42,6 +44,9 @@ int main(int argc, char** argv)
         }
 
         loop_rate.sleep();
+
+        ROS_ERROR("!!!!!!!!!!!!!!!fps time!!!!!!!!!!!!!!!!");
+        ROS_ERROR("%lf\n\n", 1000.0*(clock() - time_begin)/CLOCKS_PER_SEC);
     }
 
     return 0;

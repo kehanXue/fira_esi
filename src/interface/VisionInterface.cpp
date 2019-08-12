@@ -38,7 +38,7 @@ int8_t vwpp::VisionInterface::update()
     try
     {
         down_camera->cvmain();
-        forward_camera->cvmain();
+        // forward_camera->cvmain();
         cv::waitKey(1);
 
         return 0;
@@ -150,6 +150,7 @@ double_t vwpp::VisionInterface::getYellowGateDepth()
 
 bool vwpp::VisionInterface::getRedGateState()
 {
+    return false;
     return forward_camera->detect_red_gate;
 }
 
@@ -168,6 +169,7 @@ double_t vwpp::VisionInterface::getRedGateY()
 
 double_t vwpp::VisionInterface::getRedGateDepth()
 {
+    return 20.0;
     return forward_camera->red_gate_location[2];
 }
 
