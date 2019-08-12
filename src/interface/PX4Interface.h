@@ -44,6 +44,14 @@ namespace vwpp
         double_t yaw_rate;
     };
 
+    struct TargetPosXYZVelYaw
+    {
+        double_t px;
+        double_t py;
+        double_t pz;
+        double_t yaw_rate;
+    };
+
     class PX4Interface
     {
     public:
@@ -74,7 +82,9 @@ namespace vwpp
 
         int8_t publishTarget(const TargetVelXYPosZYaw _target_vel_xy_pos_z_yaw);
 
-        int8_t publishTarget(const TargetVelXYYawPosZ _target_pos_xyz_vel_yaw);
+        int8_t publishTarget(const TargetVelXYYawPosZ _target_vel_xy_yaw_pos_z);
+
+        int8_t publishTarget(const TargetPosXYZVelYaw _target_pos_xyz_vel_yaw);
 
     private:
 

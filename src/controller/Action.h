@@ -145,8 +145,13 @@ namespace vwpp
 
         int8_t resetRotatingOnXY(double_t _hover_x, double_t _hover_y);
 
-    private:
+        double_t getOnPX() const;
 
+        double_t getOnPY() const;
+
+        double_t getTargetAltitude() const;
+
+    private:
         double_t target_altitude;
 
         double_t on_p_x;

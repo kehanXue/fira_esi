@@ -419,13 +419,23 @@ char vwpp::TaskHoverOnQR::run(TaskID _cur_task_id, std::string _qr_inform)
 
         DroneVelocity drone_velocity =
                 action_rotating.calculateVelocity(yaw_target, PX4Interface::getInstance()->getCurYaw());
-        geometry_msgs::Twist cmd_vel;
-        cmd_vel.linear.x = drone_velocity.x;
-        cmd_vel.linear.y = drone_velocity.y;
-        cmd_vel.linear.z = drone_velocity.z;
-        cmd_vel.angular.z = drone_velocity.yaw;
+        // geometry_msgs::Twist cmd_vel;
+        // cmd_vel.linear.x = drone_velocity.x;
+        // cmd_vel.linear.y = drone_velocity.y;
+        // cmd_vel.linear.z = drone_velocity.z;
+        // cmd_vel.angular.z = drone_velocity.yaw;
 
-        PX4Interface::getInstance()->publishSetpointVel(cmd_vel);
+        // PX4Interface::getInstance()->publishSetpointVel(cmd_vel);
+
+        // TODO
+        TargetPosXYZVelYaw target_pos_xyz_vel_yaw{};
+        target_pos_xyz_vel_yaw.px = action_rotating.getOnPX();
+        target_pos_xyz_vel_yaw.py = action_rotating.getOnPY();
+        target_pos_xyz_vel_yaw.pz = action_rotating.getTargetAltitude();
+        target_pos_xyz_vel_yaw.yaw_rate = drone_velocity.yaw;
+        PX4Interface::getInstance()->publishTarget(target_pos_xyz_vel_yaw);
+
+
         // DroneVelocity drone_velocity = action_rotating.calculateVelocity(yaw_target,
         //                                                                  PX4Interface::getInstance()->getCurYaw());
 

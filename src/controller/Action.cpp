@@ -282,6 +282,24 @@ int8_t ActionRotating::resetRotatingOnXY(double_t _hover_x, double_t _hover_y)
 }
 
 
+double_t ActionRotating::getOnPX() const
+{
+    return on_p_x;
+}
+
+
+double_t ActionRotating::getOnPY() const
+{
+    return on_p_y;
+}
+
+
+double_t ActionRotating::getTargetAltitude() const
+{
+    return target_altitude;
+}
+
+
 ActionAdjustAltitude::ActionAdjustAltitude() :
         action_id(ADJUSTALTITUDE)
 {

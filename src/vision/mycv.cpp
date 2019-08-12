@@ -67,6 +67,42 @@ void callback(dynamic_reconfigure::vision_dynamic_reconfigureConfig &config)
 #endif
 #endif
 
+cv::Mat zed_left_image, zed_depth_image;
+bool flag_zed_left_image = false, flag_zed_depth_image=false;
+
+void imageCallback(const sensor_msgs::ImageConstPtr& msg)
+{
+    try
+    {
+        zed_left_image=cv_bridge::toCvShare(msg, "bgr8")->image;
+        flag_zed_left_image = true;
+    }
+    catch(cv_bridge::Exception& e)
+    {
+        ROS_ERROR("Could not convert from '%s' to 'bgr8'.", msg->encoding.c_str());
+    }
+}
+
+void depthCallback(const sensor_msgs::Image::ConstPtr& msg)
+{
+    try
+    {
+        zed_depth_image = cv::Mat::zeros(720,1280,CV_32FC1);
+        float* depths = (float*)(&msg->data[0]);
+        for(int i=0; i<zed_depth_image.cols; i++)
+            for(int j=0; j<zed_depth_image.rows; j++)
+            {
+                zed_depth_image.at<float>(j,i) = depths[i+msg->width*j];
+            }
+        flag_zed_depth_image = true;
+
+    }
+    catch(cv_bridge::Exception& e)
+    {
+        ROS_ERROR("Could not convert from '%s' to '32FC1'.", msg->encoding.c_str());
+    }
+}
+
 MYCV::MYCV(int flag, ros::NodeHandle *pnh)
 {
     param_topic = ros::this_node::getName()+"/";
@@ -110,11 +146,27 @@ MYCV::MYCV(int flag, ros::NodeHandle *pnh)
         if(sl::SUCCESS != zed.open(zed_param))
         {
 #ifdef TEST
-            printf("can't open zed\n");
+            printf("can't open zed directly\n");
 #endif
 
-            camera_number = getoneint("forward_camera");
-            vc.open(camera_number);
+            nh->getParam(ros::this_node::getName()+"/zed_left_topic", zed_left_topic);
+            nh->getParam(ros::this_node::getName()+"/zed_depth_topic", zed_depth_topic);
+
+            if(zed_left_topic.empty() || zed_depth_topic.empty())
+            {
+#ifdef TEST
+                printf("can't open zed\n");
+#endif
+                camera_number = getoneint("forward_camera");
+                vc.open(camera_number);
+            }
+            else
+            {
+                static image_transport::ImageTransport _it(*nh);
+                it = &_it;
+                sub_left = it->subscribe(zed_left_topic, 1, imageCallback);
+                sub_depth = nh->subscribe(zed_depth_topic, 1, depthCallback);
+            }
         }
 
         flag_findline       =   false;
@@ -160,10 +212,11 @@ MYCV::MYCV(int flag, ros::NodeHandle *pnh)
     blueH_location[1]       =   0.0;
     redX_location[0]        =   0.0;
     redX_location[1]        =   0.0;
+    detect_tower            =   false;
     tower_depth             =   0.0;
 
 #ifdef TEST
-#ifdef TEST_ROS
+    #ifdef TEST_ROS
     line_x = getoneint("line_threshold");
 #ifdef USE_HSV
     x[0] = getoneint("HSV_min_yellow1");
@@ -258,10 +311,29 @@ void MYCV::cvmain()
             cv::cvtColor(image, image, CV_BGRA2BGR);
             zed.retrieveMeasure(zed_depth, sl::MEASURE_DEPTH);
         }
-        else
+        else if(vc.isOpened())
         {
             vc >> image;
         }
+        else
+        {
+            if(flag_zed_left_image)
+            {
+                image = zed_left_image.clone();
+                flag_zed_left_image = false;
+            }
+
+            if(flag_zed_depth_image)
+            {
+                image_depth = zed_depth_image.clone();
+                flag_zed_depth_image = false;
+            }
+        }
+    }
+
+    if(image.empty() || (camera_type==Forward_Camera && !zed.isOpened() && !vc.isOpened() && image_depth.empty()))
+    {
+        return;
     }
 
     outimage = image.clone();
@@ -293,11 +365,11 @@ void MYCV::cvmain()
 
     if(flag_findtower)
     {
-        findtower(image);
+        //findtower(image);
     }
 
 #ifdef TEST
-#ifndef TEST_ROS
+    #ifndef TEST_ROS
     if(flag_first)
     {
         flag_first = false;
@@ -337,7 +409,7 @@ void MYCV::findline(cv::Mat image)
     }
 
 #ifdef TEST
-#ifdef FIND_LINE
+    #ifdef FIND_LINE
 #ifndef TEST_ROS
     if(line_x != line_threshold)
     {
@@ -382,7 +454,7 @@ void MYCV::findgate(cv::Mat image)
 #endif
 
 #ifdef TEST
-#ifndef TEST_ROS
+        #ifndef TEST_ROS
 #ifdef FIND_GATE
         color_test();
 #endif
@@ -391,7 +463,7 @@ void MYCV::findgate(cv::Mat image)
     }
 
 #ifdef TEST
-#ifdef FIND_GATE
+    #ifdef FIND_GATE
     check();
 #endif
 #endif
@@ -488,7 +560,7 @@ void MYCV::findQR(cv::Mat image)
     int width = image.cols;
     int height = image.rows;
     zbar::Image zbarimage(static_cast<unsigned int>(width), static_cast<unsigned int>(height),
-            "Y800", image.data, static_cast<unsigned int>(width * height));
+                          "Y800", image.data, static_cast<unsigned int>(width * height));
 
     scanner.scan(zbarimage);
 
@@ -578,7 +650,7 @@ void MYCV::findblueH(cv::Mat image)
 #endif
 
 #ifdef TEST
-#ifndef TEST_ROS
+        #ifndef TEST_ROS
 #ifdef FIND_BLUEH
         color_test2();
         cv::namedWindow("blueH", 0);
@@ -588,7 +660,7 @@ void MYCV::findblueH(cv::Mat image)
     }
 
 #ifdef TEST
-#ifdef FIND_BLUEH
+    #ifdef FIND_BLUEH
     check2();
 #endif
 #endif
@@ -614,7 +686,7 @@ void MYCV::findblueH(cv::Mat image)
             if(image.at<uchar>(i,j) == 255)
             {
 #ifdef TEST
-#ifdef FIND_BLUEH
+                #ifdef FIND_BLUEH
                 outimage_blueH.at<uchar>(i,j) = 255;
 #endif
 #endif
@@ -627,7 +699,7 @@ void MYCV::findblueH(cv::Mat image)
     }
 
 #ifdef TEST
-#ifdef FIND_BLUEH
+    #ifdef FIND_BLUEH
 #ifndef TEST_ROS
     cv::imshow("blueH", outimage_blueH);
 #endif
@@ -681,7 +753,7 @@ void MYCV::findredX(cv::Mat image)
 #endif
 
 #ifdef TEST
-#ifndef TEST_ROS
+        #ifndef TEST_ROS
 #ifdef FIND_REDX
         color_test3();
         cv::namedWindow("redX", 0);
@@ -691,7 +763,7 @@ void MYCV::findredX(cv::Mat image)
     }
 
 #ifdef TEST
-#ifdef FIND_REDX
+    #ifdef FIND_REDX
     check3();
 #endif
 #endif
@@ -718,7 +790,7 @@ void MYCV::findredX(cv::Mat image)
             if(image.at<uchar>(i,j) == 255)
             {
 #ifdef TEST
-#ifdef FIND_REDX
+                #ifdef FIND_REDX
                 outimage_redX.at<uchar>(i,j) = 255;
 #endif
 #endif
@@ -731,7 +803,7 @@ void MYCV::findredX(cv::Mat image)
     }
 
 #ifdef TEST
-#ifdef FIND_REDX
+    #ifdef FIND_REDX
 #ifndef TEST_ROS
     cv::imshow("redX", outimage_redX);
 #endif
@@ -771,7 +843,6 @@ void MYCV::findredX(cv::Mat image)
 
 void MYCV::findtower(cv::Mat image)
 {
-    tower_depth = vwpp::DynamicRecfgInterface::getInstance()->getCycleMovingRadius();
     cv::Mat thresholdimage(image.rows, image.cols, CV_8UC1, cv::Scalar(0));
 
     const static int threshold = 13;
@@ -787,9 +858,9 @@ void MYCV::findtower(cv::Mat image)
 
 
             if(abs(image.at<cv::Vec3b>(i,j)[0] - image.at<cv::Vec3b>(i,j)[1])<threshold &&
-                abs(image.at<cv::Vec3b>(i,j)[2] - image.at<cv::Vec3b>(i,j)[1])<threshold &&
-                abs(image.at<cv::Vec3b>(i,j)[0] - image.at<cv::Vec3b>(i,j)[2])<threshold &&
-                std::isnormal(depth) && depth<2.0)
+               abs(image.at<cv::Vec3b>(i,j)[2] - image.at<cv::Vec3b>(i,j)[1])<threshold &&
+               abs(image.at<cv::Vec3b>(i,j)[0] - image.at<cv::Vec3b>(i,j)[2])<threshold &&
+               std::isnormal(depth) && depth<2.0)
             {
                 thresholdimage.at<uchar>(i,j) = 255;
             }
@@ -799,7 +870,7 @@ void MYCV::findtower(cv::Mat image)
     Proc_image(thresholdimage);
 
 #ifdef TEST
-#ifdef FIND_TOWER
+    #ifdef FIND_TOWER
 #ifndef TEST_ROS
     static bool flag_first = true;
     if(flag_first)
@@ -862,6 +933,7 @@ void MYCV::findtower(cv::Mat image)
 #ifdef TEST
             cv::rectangle(outimage, rect_array[i], cv::Scalar(255,0,255), 3);
 #endif
+            detect_tower = true;
 
             if(zed.isOpened())
             {
@@ -887,6 +959,7 @@ void MYCV::findtower(cv::Mat image)
                 depth_ans /= depth_num;
                 if(depth_num < 100)
                 {
+                    detect_tower = false;
                     depth_ans = 5.0;
                 }
 
@@ -908,7 +981,7 @@ cv::Point3d MYCV::color_thing(cv::Mat image, cv::Scalar min_color, cv::Scalar ma
     Proc_image(thresholdimage);
 
 #ifdef TEST
-#ifdef FIND_GATE
+    #ifdef FIND_GATE
 #ifndef TEST_ROS
     static bool flag_first = true;
     static bool flag_second = true;
@@ -980,7 +1053,7 @@ cv::Point3d MYCV::color_thing(cv::Mat image, cv::Scalar min_color, cv::Scalar ma
             }
 
             if(!(number>0.15*rect_array[i].height*rect_array[i].width &&
-                number<0.3*rect_array[i].height*rect_array[i].width))
+                 number<0.3*rect_array[i].height*rect_array[i].width))
             {
                 continue;
             }
@@ -1008,7 +1081,7 @@ cv::Point3d MYCV::color_thing(cv::Mat image, cv::Scalar min_color, cv::Scalar ma
                         {
                             float depth;
                             zed_depth.getValue<float>(k, j, &depth, sl::MEM_CPU);
-                            if(std::isnormal(depth) && depth<5.0)
+                            if(std::isnormal(depth) && depth>0.0 && depth<5.0)
                             {
                                 depth_ans += depth;
                                 depth_num++;
@@ -1026,10 +1099,39 @@ cv::Point3d MYCV::color_thing(cv::Mat image, cv::Scalar min_color, cv::Scalar ma
                 return cv::Point3d(rect_array[i].x+rect_array[i].width/2.0, rect_array[i].y+rect_array[i].height/2.0,
                                    depth_ans);
             }
-            else
+            else if(vc.isOpened())
             {
                 return cv::Point3d(rect_array[i].x+rect_array[i].width/2.0, rect_array[i].y+rect_array[i].height/2.0,
                                    1.0*image.cols/rect_array[i].width*0.75*sqrt(3.0));
+            }
+            else
+            {
+                int depth_num = 0;
+                float depth_ans = 0.0;
+                for(unsigned int j = rect_array[i].y; j < rect_array[i].y+rect_array[i].height; j++)
+                {
+                    for(unsigned int k = rect_array[i].x; k < rect_array[i].x+rect_array[i].width; k++)
+                    {
+                        if(thresholdimage.at<uchar>(j,k) == 255)
+                        {
+                            float depth = image_depth.at<float>(j,k);
+                            if(std::isnormal(depth) && depth>0.0 && depth<5.0)
+                            {
+                                depth_ans += depth;
+                                depth_num++;
+                            }
+                        }
+                    }
+                }
+
+                depth_ans /= depth_num;
+                if(depth_num < 100)
+                {
+                    depth_ans = 20.0;
+                }
+
+                return cv::Point3d(rect_array[i].x+rect_array[i].width/2.0, rect_array[i].y+rect_array[i].height/2.0,
+                                   depth_ans);
             }
         }
     }
@@ -1386,7 +1488,7 @@ void MYCV::destory()
     }
 
 #ifdef TEST
-#ifndef TEST_ROS
+    #ifndef TEST_ROS
     cv::destroyAllWindows();
 #endif
 #endif
