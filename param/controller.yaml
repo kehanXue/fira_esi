@@ -4,8 +4,8 @@ dictitems:
   altitude_when_red_gate: 1.6199999999999999
   altitude_when_yellow_gate: 0.38999999999999996
   avoidance_forward_time: 8.8
-  blue_h_offset_x_tolerance: 90.0
-  blue_h_offset_y_tolerance: 90.0
+  blue_h_offset_x_tolerance: 37.0
+  blue_h_offset_y_tolerance: 37.0
   body_frame_id: fcu
   cycle_moving_linear_vel: 0.44
   cycle_moving_radius: 1.2
@@ -18,8 +18,8 @@ dictitems:
       altitude_when_red_gate: 1.6199999999999999
       altitude_when_yellow_gate: 0.38999999999999996
       avoidance_forward_time: 8.8
-      blue_h_offset_x_tolerance: 90.0
-      blue_h_offset_y_tolerance: 90.0
+      blue_h_offset_x_tolerance: 37.0
+      blue_h_offset_y_tolerance: 37.0
       body_frame_id: fcu
       cycle_moving_linear_vel: 0.44
       cycle_moving_radius: 1.2

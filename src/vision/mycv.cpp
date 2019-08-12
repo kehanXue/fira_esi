@@ -95,14 +95,14 @@ void depthCallback(const sensor_msgs::Image::ConstPtr& msg)
         return;
     }
 
-        zed_depth_image = cv::Mat::zeros(720,1280,CV_32FC1);
-        float* depths = (float*)(&msg->data[0]);
-        for(int i=0; i<zed_depth_image.cols; i++)
-            for(int j=0; j<zed_depth_image.rows; j++)
-            {
-                zed_depth_image.at<float>(j,i) = depths[i+msg->width*j];
-            }
-        flag_zed_depth_image = true;
+    zed_depth_image = cv::Mat::zeros(720,1280,CV_32FC1);
+    float* depths = (float*)(&msg->data[0]);
+    for(int i=0; i<zed_depth_image.cols; i++)
+        for(int j=0; j<zed_depth_image.rows; j++)
+        {
+            zed_depth_image.at<float>(j,i) = depths[i+msg->width*j];
+        }
+    flag_zed_depth_image = true;
 }
 
 MYCV::MYCV(int flag, ros::NodeHandle *pnh)
@@ -173,10 +173,10 @@ MYCV::MYCV(int flag, ros::NodeHandle *pnh)
 
         flag_findline       =   false;
         flag_findgate       =   true;
-        flag_findQR         =   true;
+        flag_findQR         =   false;
         flag_findblueH      =   false;
         flag_findredX       =   false;
-        flag_findtower      =   true;
+        flag_findtower      =   false;
     }
     else if(flag == No_Camera)
     {
@@ -333,6 +333,7 @@ void MYCV::cvmain()
         }
     }
 
+
     if(image.empty() || (camera_type==Forward_Camera && !zed.isOpened() && !vc.isOpened() && image_depth.empty()))
     {
         return;
@@ -367,7 +368,7 @@ void MYCV::cvmain()
 
     if(flag_findtower)
     {
-        //findtower(image);
+        findtower(image);
     }
 
 #ifdef TEST
@@ -555,6 +556,11 @@ void MYCV::findgate(cv::Mat image)
 void MYCV::findQR(cv::Mat image)
 {
     cv::cvtColor(image, image, CV_BGR2GRAY);
+
+    if(camera_type == Forward_Camera && (image.cols!=672 || image.rows!=376))
+    {
+        cv::resize(image,image,cv::Size(672,376));
+    }
 
     zbar::ImageScanner scanner;
     scanner.set_config(zbar::ZBAR_NONE, zbar::ZBAR_CFG_ENABLE, 1);
@@ -848,9 +854,9 @@ void MYCV::findtower(cv::Mat image)
     cv::Mat thresholdimage(image.rows, image.cols, CV_8UC1, cv::Scalar(0));
 
     const static int threshold = 13;
-    for(int i = 0; i < image.rows; i++)
+    for(unsigned int i = 0; i < image.rows; i++)
     {
-        for(int j = 0; j < image.cols; j++)
+        for(unsigned int j = 0; j < image.cols; j++)
         {
             float depth = 0.0;
             if(zed.isOpened())
@@ -967,9 +973,37 @@ void MYCV::findtower(cv::Mat image)
 
                 tower_depth = depth_ans;
             }
-            else
+            else if(vc.isOpened())
             {
                 tower_depth = 1.0*image.cols/rect_array[i].width*0.75*sqrt(3.0);
+            }
+            else
+            {
+                int depth_num = 0;
+                float depth_ans = 0.0;
+                for(unsigned int j = rect_array[i].y; j < rect_array[i].y+rect_array[i].height; j++)
+                {
+                    for(unsigned int k = rect_array[i].x; k < rect_array[i].x+rect_array[i].width; k++)
+                    {
+                        if(thresholdimage.at<uchar>(j,k) == 255)
+                        {
+                            float depth = image_depth.at<float>(j,k);
+                            if(std::isnormal(depth) && depth>0.0 && depth<2.0)
+                            {
+                                depth_ans += depth;
+                                depth_num++;
+                            }
+                        }
+                    }
+                }
+
+                depth_ans /= depth_num;
+                if(depth_num < 100)
+                {
+                    depth_ans = 20.0;
+                }
+
+                tower_depth = depth_ans;
             }
         }
     }

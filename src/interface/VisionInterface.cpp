@@ -150,7 +150,6 @@ double_t vwpp::VisionInterface::getYellowGateDepth()
 
 bool vwpp::VisionInterface::getRedGateState()
 {
-    return false;
     return forward_camera->detect_red_gate;
 }
 
@@ -169,7 +168,6 @@ double_t vwpp::VisionInterface::getRedGateY()
 
 double_t vwpp::VisionInterface::getRedGateDepth()
 {
-    return 20.0;
     return forward_camera->red_gate_location[2];
 }
 

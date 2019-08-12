@@ -779,7 +779,7 @@ int8_t vwpp::TaskLanding::run()
         {
             static vwpp::JudgeAchieveCounter
                     judge_achieve_counter(
-                    vwpp::DynamicRecfgInterface::getInstance()->getJudgeAchieveCounterThreshold());
+                    vwpp::DynamicRecfgInterface::getInstance()->getJudgeAchieveCounterThreshold() - 10);
             if (judge_achieve_counter.isAchieve())
             {
                 cur_action_id = TRACKINGLINE;

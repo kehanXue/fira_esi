@@ -13,10 +13,13 @@
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/Image.h>
 
-#ifdef TEST_ROS
 #include <cv_bridge/cv_bridge.h>
 #include <image_transport/image_transport.h>
+#ifdef TEST
+#ifdef TEST_ROS_DY
 #include <dynamic_reconfigure/server.h>
+#include "../../../devel/include/my_cv/vision_dynamic_reconfigureConfig.h"
+#endif
 #endif
 
 #include <algorithm>
@@ -134,9 +137,9 @@ private:
     void setScalar(cv::Scalar color, std::string name);
 
 #ifdef TEST
-#ifdef TEST_ROS
+    #ifdef TEST_ROS
 #ifdef TEST_ROS_DY
-    private:
+private:
     dynamic_reconfigure::Server<dynamic_reconfigure::vision_dynamic_reconfigureConfig> *server;
     dynamic_reconfigure::Server<dynamic_reconfigure::vision_dynamic_reconfigureConfig>::CallbackType *server_callback;
 #endif
