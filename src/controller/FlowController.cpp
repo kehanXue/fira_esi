@@ -140,21 +140,33 @@ int8_t vwpp::FlowController::run()
                     }
                     else if (target_task_type_id == SCANTOWER)
                     {
+                        last_qr_inform = "";
+
                         // cur_task_id = SCANTOWER;
                         cur_task_id = HOVERONQR;
+                        last_qr_inform = VisionInterface::getInstance()->getGroundQRinform();
+                        p_task_hover_on_qr->resetRotatingOnXY(PX4Interface::getInstance()->getCurX(),
+                                                              PX4Interface::getInstance()->getCurY());
+                        ROS_INFO("Task switch to HOVERONQR!");
+
                         p_task_scan_tower->resetAdjustAltitudeOnXYYaw(PX4Interface::getInstance()->getCurX(),
                                                                       PX4Interface::getInstance()->getCurY(),
                                                                       PX4Interface::getInstance()->getCurYaw());
-                        last_qr_inform = "";
                         ROS_INFO("Task switch to SCANTOWER!");
                         target_task_type_id = SCANBUILDING;
                     }
                     else if (target_task_type_id == SCANBUILDING)
                     {
+                        last_qr_inform = "";
+
                         // cur_task_id = SCANBUILDING;
                         cur_task_id = HOVERONQR;
+                        last_qr_inform = VisionInterface::getInstance()->getGroundQRinform();
+                        p_task_hover_on_qr->resetRotatingOnXY(PX4Interface::getInstance()->getCurX(),
+                                                              PX4Interface::getInstance()->getCurY());
+                        ROS_INFO("Task switch to HOVERONQR!");
+
                         p_task_scan_building->setTargetPoints();
-                        last_qr_inform = "";
                         ROS_INFO("Task switch to SCANBUILDING!");
                         target_task_type_id = LANDING;
                     }
