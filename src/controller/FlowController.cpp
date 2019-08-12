@@ -132,9 +132,15 @@ int8_t vwpp::FlowController::run()
                 {
                     if (target_task_type_id == DELIVERING)
                     {
-                        cur_task_id = DELIVERING;
                         last_qr_inform = "";
-                        ROS_INFO("Task switch to DELIVERING!");
+                        // cur_task_id = DELIVERING;
+                        cur_task_id = HOVERONQR;
+                        last_qr_inform = VisionInterface::getInstance()->getGroundQRinform();
+                        p_task_hover_on_qr->resetRotatingOnXY(PX4Interface::getInstance()->getCurX(),
+                                                              PX4Interface::getInstance()->getCurY());
+                        ROS_INFO("Task switch to HOVERONQR!");
+
+                        // ROS_INFO("Task switch to DELIVERING!");
                         target_task_type_id = SCANTOWER;
                         // target_task_type_id = LANDING;
                     }
