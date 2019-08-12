@@ -91,9 +91,9 @@ dictitems:
       red_x_offset_x_tolerance: 49.0
       red_x_offset_y_tolerance: 49.0
       rotate_yaw_tolerance: 13.799999999999999
-      scan_tower_altitude: 1.8299999999999998
+      scan_tower_altitude: 1.65
       scan_tower_cycletime: 20.0
-      scan_tower_square_size: 1.76
+      scan_tower_square_size: 1.72
       state: true
       tf_break_duration: 0.2
       type: ''
@@ -156,8 +156,8 @@ dictitems:
   red_x_offset_x_tolerance: 49.0
   red_x_offset_y_tolerance: 49.0
   rotate_yaw_tolerance: 13.799999999999999
-  scan_tower_altitude: 1.8299999999999998
+  scan_tower_altitude: 1.65
   scan_tower_cycletime: 20.0
-  scan_tower_square_size: 1.76
+  scan_tower_square_size: 1.72
   tf_break_duration: 0.2
 state: []

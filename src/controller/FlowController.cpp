@@ -140,8 +140,7 @@ int8_t vwpp::FlowController::run()
                     }
                     else if (target_task_type_id == SCANTOWER)
                     {
-                        // cur_task_id = SCANTOWER;
-                        cur_task_id = HOVERONQR;
+                        cur_task_id = SCANTOWER;
                         p_task_scan_tower->resetAdjustAltitudeOnXYYaw(PX4Interface::getInstance()->getCurX(),
                                                                       PX4Interface::getInstance()->getCurY(),
                                                                       PX4Interface::getInstance()->getCurYaw());

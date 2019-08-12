@@ -1035,9 +1035,11 @@ int8_t vwpp::TaskScanTower::setTargetPoints()
     geometry_msgs::Point tmp_target_body_points;
     geometry_msgs::Point tmp_target_local_points;
 
+    // TODO
     tmp_target_body_points.x = 0;
     tmp_target_body_points.y =
-            DynamicRecfgInterface::getInstance()->getScanTowerSquareSize() / 2.;
+            DynamicRecfgInterface::getInstance()->getScanTowerSquareSize();
+    // DynamicRecfgInterface::getInstance()->getScanTowerSquareSize() / 2.;
     tmp_target_body_points.z = 0.;
     this->convertPointLocal2Body(tmp_target_body_points, tmp_target_local_points);
     vec_target_points.emplace_back(tmp_target_local_points);
@@ -1047,7 +1049,8 @@ int8_t vwpp::TaskScanTower::setTargetPoints()
     tmp_target_body_points.x =
             DynamicRecfgInterface::getInstance()->getScanTowerSquareSize();
     tmp_target_body_points.y =
-            DynamicRecfgInterface::getInstance()->getScanTowerSquareSize() / 2.;
+            DynamicRecfgInterface::getInstance()->getScanTowerSquareSize();
+    // DynamicRecfgInterface::getInstance()->getScanTowerSquareSize() / 2.;
     tmp_target_body_points.z = 0.;
     this->convertPointLocal2Body(tmp_target_body_points, tmp_target_local_points);
     vec_target_points.emplace_back(tmp_target_local_points);
@@ -1057,7 +1060,8 @@ int8_t vwpp::TaskScanTower::setTargetPoints()
     tmp_target_body_points.x =
             DynamicRecfgInterface::getInstance()->getScanTowerSquareSize();
     tmp_target_body_points.y =
-            -(DynamicRecfgInterface::getInstance()->getScanTowerSquareSize() / 2.);
+            -(DynamicRecfgInterface::getInstance()->getScanTowerSquareSize());
+    // -(DynamicRecfgInterface::getInstance()->getScanTowerSquareSize() / 2.);
     tmp_target_body_points.z = 0.;
     this->convertPointLocal2Body(tmp_target_body_points, tmp_target_local_points);
     vec_target_points.emplace_back(tmp_target_local_points);
@@ -1066,7 +1070,8 @@ int8_t vwpp::TaskScanTower::setTargetPoints()
 
     tmp_target_body_points.x = 0;
     tmp_target_body_points.y =
-            -(DynamicRecfgInterface::getInstance()->getScanTowerSquareSize() / 2.);
+            -(DynamicRecfgInterface::getInstance()->getScanTowerSquareSize());
+    // -(DynamicRecfgInterface::getInstance()->getScanTowerSquareSize() / 2.);
     tmp_target_body_points.z = 0.;
     this->convertPointLocal2Body(tmp_target_body_points, tmp_target_local_points);
     vec_target_points.emplace_back(tmp_target_local_points);
