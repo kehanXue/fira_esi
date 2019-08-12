@@ -576,7 +576,7 @@ int8_t vwpp::TaskDelivering::run()
             //     vwpp::DynamicRecfgInterface::getInstance()->getRedXOffsetYTolerance())
         {
             static JudgeAchieveCounter judge_achieve_counter(
-                    DynamicRecfgInterface::getInstance()->getJudgeAchieveCounterThreshold());
+                    DynamicRecfgInterface::getInstance()->getJudgeAchieveCounterThreshold() + 10);
             if (judge_achieve_counter.isAchieve())
             {
                 ROS_WARN("Action switch to OPENCLAW");
@@ -747,10 +747,13 @@ int8_t vwpp::TaskLanding::run()
                     DynamicRecfgInterface::getInstance()->getJudgeAchieveCounterThreshold());
             if (judge_achieve_counter.isAchieve())
             {
-                cur_action_id = ADJUSTALTITUDE;
-                p_action_adjust_altitude->setAdjustAltitudeXYYaw(PX4Interface::getInstance()->getCurX(),
-                                                                 PX4Interface::getInstance()->getCurY(),
-                                                                 PX4Interface::getInstance()->getCurYaw());
+                // cur_action_id = ADJUSTALTITUDE;
+                cur_action_id = TRACKINGLINE;
+                p_task_base->task_state = TASK_FINISH;
+                // p_action_adjust_altitude->setAdjustAltitudeXYYaw(PX4Interface::getInstance()->getCurX(),
+                //                                                  PX4Interface::getInstance()->getCurY(),
+                //                                                  PX4Interface::getInstance()->getCurYaw());
+                return 1;
             }
         }
 

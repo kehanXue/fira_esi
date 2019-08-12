@@ -88,8 +88,8 @@ dictitems:
       qr_line_yaw_tolerance: 0.22
       qr_offset_x_tolerance: 20.0
       qr_offset_y_tolerance: 20.0
-      red_x_offset_x_tolerance: 64.0
-      red_x_offset_y_tolerance: 64.0
+      red_x_offset_x_tolerance: 49.0
+      red_x_offset_y_tolerance: 49.0
       rotate_yaw_tolerance: 13.799999999999999
       scan_tower_altitude: 1.8299999999999998
       scan_tower_cycletime: 20.0
@@ -153,8 +153,8 @@ dictitems:
   qr_line_yaw_tolerance: 0.22
   qr_offset_x_tolerance: 20.0
   qr_offset_y_tolerance: 20.0
-  red_x_offset_x_tolerance: 64.0
-  red_x_offset_y_tolerance: 64.0
+  red_x_offset_x_tolerance: 49.0
+  red_x_offset_y_tolerance: 49.0
   rotate_yaw_tolerance: 13.799999999999999
   scan_tower_altitude: 1.8299999999999998
   scan_tower_cycletime: 20.0
