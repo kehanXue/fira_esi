@@ -653,13 +653,19 @@ int8_t vwpp::TaskDelivering::run()
 
         DroneVelocity drone_velocity =
                 p_action_rotating->calculateVelocity(back_toward_yaw, PX4Interface::getInstance()->getCurYaw());
-        geometry_msgs::Twist cmd_vel;
-        cmd_vel.linear.x = drone_velocity.x;
-        cmd_vel.linear.y = drone_velocity.y;
-        cmd_vel.linear.z = drone_velocity.z;
-        cmd_vel.angular.z = drone_velocity.yaw;
-
-        PX4Interface::getInstance()->publishSetpointVel(cmd_vel);
+        // geometry_msgs::Twist cmd_vel;
+        // cmd_vel.linear.x = drone_velocity.x;
+        // cmd_vel.linear.y = drone_velocity.y;
+        // cmd_vel.linear.z = drone_velocity.z;
+        // cmd_vel.angular.z = drone_velocity.yaw;
+        //
+        // PX4Interface::getInstance()->publishSetpointVel(cmd_vel);
+        TargetPosXYZVelYaw target_pos_xyz_vel_yaw{};
+        target_pos_xyz_vel_yaw.px = p_action_rotating->getOnPX();
+        target_pos_xyz_vel_yaw.py = p_action_rotating->getOnPY();
+        target_pos_xyz_vel_yaw.pz = p_action_rotating->getTargetAltitude();
+        target_pos_xyz_vel_yaw.yaw_rate = drone_velocity.yaw;
+        PX4Interface::getInstance()->publishTarget(target_pos_xyz_vel_yaw);
     }
 
     p_task_base->task_state = TASK_PROCESSING;
