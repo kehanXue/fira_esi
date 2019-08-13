@@ -17,7 +17,7 @@ find_package(catkin REQUIRED COMPONENTS
         image_transport
         message_generation
         tf
-)
+        )
 
 ## System dependencies are found with CMake's conventions
 find_package(Boost REQUIRED COMPONENTS system)
@@ -57,7 +57,6 @@ link_directories(${ZED_LIBRARY_DIR})
 link_directories(${CUDA_LIBRARY_DIRS})
 
 SET(ZED_LIBS ${ZED_LIBRARIES} ${CUDA_CUDA_LIBRARY} ${CUDA_CUDART_LIBRARY} ${CUDA_NPP_LIBRARIES_ZED})
-
 
 
 ## Declare a C++ executable
@@ -108,7 +107,15 @@ target_link_libraries(fira_esi_node
         yaml-cpp
         ${ZBAR_LIBS}
         zbar
-        ${ZED_LIBS}
-)
+        ${ZED_LIBS})
 
+
+add_executable(zed_qr_node
+        src/vision/zed_qr_node.cpp)
+
+target_link_libraries(zed_qr_node
+        ${catkin_LIBRARIES}
+        ${OpenCV_LIBRARIES}
+        ${ZBAR_LIBS}
+        zbar)
 
