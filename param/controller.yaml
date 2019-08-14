@@ -50,7 +50,7 @@ dictitems:
       pid_p_v2p_y_kp: 1.14
       pid_p_v2p_y_threshold: 1.02
       pid_p_v2p_yaw_has_threshold: true
-      pid_p_v2p_yaw_kd: 0.18
+      pid_p_v2p_yaw_kd: 0.0
       pid_p_v2p_yaw_ki: 0.0
       pid_p_v2p_yaw_kp: 1.38
       pid_p_v2p_yaw_threshold: 1.0799999999999998
@@ -115,7 +115,7 @@ dictitems:
   pid_p_v2p_y_kp: 1.14
   pid_p_v2p_y_threshold: 1.02
   pid_p_v2p_yaw_has_threshold: true
-  pid_p_v2p_yaw_kd: 0.18
+  pid_p_v2p_yaw_kd: 0.0
   pid_p_v2p_yaw_ki: 0.0
   pid_p_v2p_yaw_kp: 1.38
   pid_p_v2p_yaw_threshold: 1.0799999999999998

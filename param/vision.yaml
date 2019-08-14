@@ -10,7 +10,7 @@ BGR_max_red2: 40
 BGR_max_yellow1: 255
 HSV_min_red2: 0
 yamlpath: ../fira_ws/src/fira_esi/param/vision.yaml
-down_camera: 1
+down_camera: 0
 HSV_min_blueH1: 70
 HSV_max_redX1: 75
 BGR_min_blueH3: 0

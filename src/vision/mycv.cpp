@@ -842,6 +842,15 @@ void MYCV::findredX(cv::Mat image)
 #endif
 
         resetpoint(redX_location, image);
+
+	    // if(detect_redX)
+	    // {
+		//     static int count = 0;
+		//     if(count++ < 8)
+		//     {
+		// 	    detect_redX = false;
+		//     }
+	    // }
     }
     else
     {
