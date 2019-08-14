@@ -33,13 +33,23 @@ vwpp::VisionInterface::~VisionInterface()
 }
 
 
+void vwpp::VisionInterface::destory()
+{
+    down_camera->destory();
+    forward_camera->destory();
+}
+
+
 int8_t vwpp::VisionInterface::update()
 {
     try
     {
         down_camera->cvmain();
-        // forward_camera->cvmain();
+        forward_camera->cvmain();
+
+#ifdef TEST
         cv::waitKey(1);
+#endif
 
         return 0;
     }
@@ -214,5 +224,20 @@ double_t vwpp::VisionInterface::getTownDepth()
 }
 
 
+void vwpp::VisionInterface::openSaveImage()
+{
+    forward_camera->flag_open_write = true;
+}
 
+
+void vwpp::VisionInterface::closeSaveImage()
+{
+    forward_camera->flag_open_write = false;
+}
+
+
+void vwpp::VisionInterface::calculateQRCode()
+{
+    forward_camera->QR_code();
+}
 

@@ -116,7 +116,8 @@ int8_t vwpp::FlowController::run()
         }
         else
         {
-            static TaskID target_task_type_id = DELIVERING;
+            // static TaskID target_task_type_id = DELIVERING;
+            static TaskID target_task_type_id = SCANTOWER;
 
             if (cur_qr_inform.empty() && !last_qr_inform.empty())
             {
@@ -136,7 +137,6 @@ int8_t vwpp::FlowController::run()
             {
                 task_type_id = p_task_hover_on_qr->run(target_task_type_id, cur_qr_inform);
             }
-
 
 
             if (p_task_hover_on_qr->getTaskState() == TASK_FINISH)
@@ -164,33 +164,33 @@ int8_t vwpp::FlowController::run()
                     {
                         last_qr_inform = "";
 
-                        // cur_task_id = SCANTOWER;
-                        cur_task_id = HOVERONQR;
-                        last_qr_inform = VisionInterface::getInstance()->getGroundQRinform();
-                        p_task_hover_on_qr->resetRotatingOnXY(PX4Interface::getInstance()->getCurX(),
-                                                              PX4Interface::getInstance()->getCurY());
-                        ROS_INFO("Task switch to HOVERONQR!");
-
-                        p_task_scan_tower->resetAdjustAltitudeOnXYYaw(PX4Interface::getInstance()->getCurX(),
-                                                                      PX4Interface::getInstance()->getCurY(),
-                                                                      PX4Interface::getInstance()->getCurYaw());
+                        cur_task_id = SCANTOWER;
+                        p_task_scan_tower->setTargetPoints();
+                        VisionInterface::getInstance()->openSaveImage();
                         ROS_INFO("Task switch to SCANTOWER!");
                         target_task_type_id = SCANBUILDING;
+
+                        // cur_task_id = HOVERONQR;
+                        // last_qr_inform = VisionInterface::getInstance()->getGroundQRinform();
+                        // p_task_hover_on_qr->resetRotatingOnXY(PX4Interface::getInstance()->getCurX(),
+                        //                                       PX4Interface::getInstance()->getCurY());
+                        // ROS_INFO("Task switch to HOVERONQR!");
                     }
                     else if (target_task_type_id == SCANBUILDING)
                     {
                         last_qr_inform = "";
 
                         // cur_task_id = SCANBUILDING;
+                        // p_task_scan_building->setTargetPoints();
+                        // VisionInterface::getInstance()->openSaveImage();
+                        // ROS_INFO("Task switch to SCANBUILDING!");
+                        target_task_type_id = LANDING;
+
                         cur_task_id = HOVERONQR;
                         last_qr_inform = VisionInterface::getInstance()->getGroundQRinform();
                         p_task_hover_on_qr->resetRotatingOnXY(PX4Interface::getInstance()->getCurX(),
                                                               PX4Interface::getInstance()->getCurY());
                         ROS_INFO("Task switch to HOVERONQR!");
-
-                        p_task_scan_building->setTargetPoints();
-                        ROS_INFO("Task switch to SCANBUILDING!");
-                        target_task_type_id = LANDING;
                     }
                     else if (target_task_type_id == LANDING)
                     {
@@ -224,10 +224,11 @@ int8_t vwpp::FlowController::run()
     else if (cur_task_id == SCANTOWER)
     {
         ROS_INFO("Get in task SCANTOWER");
-        p_task_scan_tower->run(DynamicRecfgInterface::getInstance()->getCycleMovingRadius());
+        p_task_scan_tower->run();
         if (p_task_scan_tower->getTaskState() == TASK_FINISH)
         {
             cur_task_id = NAVIGATION;
+            VisionInterface::getInstance()->closeSaveImage();
             ROS_INFO("Scan tower task finished.");
         }
     }
@@ -238,6 +239,7 @@ int8_t vwpp::FlowController::run()
         {
             // TODO
             cur_task_id = NAVIGATION;
+            VisionInterface::getInstance()->closeSaveImage();
             // cur_task_id = HOVERONQR;
             ROS_INFO("Scan building task finished.");
         }

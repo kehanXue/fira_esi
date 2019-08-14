@@ -71,6 +71,12 @@ namespace vwpp
 
         double_t getRedXy();
 
+        void openSaveImage();
+
+        void closeSaveImage();
+
+        void calculateQRCode();
+
 
 
     private:
@@ -85,8 +91,8 @@ namespace vwpp
         static boost::mutex mutex_instance;
 
         ros::NodeHandle nh;
-        MYCV *down_camera;
-        MYCV *forward_camera;
+        MYCV *down_camera{};
+        MYCV *forward_camera{};
     };
 
 }

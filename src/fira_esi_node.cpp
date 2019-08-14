@@ -49,6 +49,8 @@ int main(int argc, char** argv)
         ROS_ERROR("%lf\n\n", 1000.0*(clock() - time_begin)/CLOCKS_PER_SEC);
     }
 
+    vwpp::VisionInterface::getInstance()->calculateQRCode();
+
     return 0;
 }
 

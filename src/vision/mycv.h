@@ -44,6 +44,8 @@ public:
     void destory();
     ros::NodeHandle *nh;
 
+    void QR_code();
+
 public:
     void open_findline();
     void close_findline();
@@ -57,6 +59,8 @@ public:
     void close_findredX();
     void open_findtower();
     void close_findtower();
+
+    bool flag_open_write;
 
 public:
     double line_dis;
@@ -109,7 +113,6 @@ private:
     std::string zed_depth_topic;
     image_transport::ImageTransport* it;
     image_transport::Subscriber sub_left;
-    ros::Subscriber sub_depth;
     cv::Mat image_depth;
 
 private:

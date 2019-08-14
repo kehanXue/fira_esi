@@ -67,8 +67,8 @@ void callback(dynamic_reconfigure::vision_dynamic_reconfigureConfig &config)
 #endif
 #endif
 
-cv::Mat zed_left_image, zed_depth_image;
-bool flag_zed_left_image = false, flag_zed_depth_image=false;
+cv::Mat zed_left_image;
+bool flag_zed_left_image = false;
 
 void imageCallback(const sensor_msgs::ImageConstPtr& msg)
 {
@@ -86,23 +86,6 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
     {
         ROS_ERROR("Could not convert from '%s' to 'bgr8'.", msg->encoding.c_str());
     }
-}
-
-void depthCallback(const sensor_msgs::Image::ConstPtr& msg)
-{
-    if(flag_zed_depth_image)
-    {
-        return;
-    }
-
-    zed_depth_image = cv::Mat::zeros(720,1280,CV_32FC1);
-    float* depths = (float*)(&msg->data[0]);
-    for(int i=0; i<zed_depth_image.cols; i++)
-        for(int j=0; j<zed_depth_image.rows; j++)
-        {
-            zed_depth_image.at<float>(j,i) = depths[i+msg->width*j];
-        }
-    flag_zed_depth_image = true;
 }
 
 MYCV::MYCV(int flag, ros::NodeHandle *pnh)
@@ -167,12 +150,13 @@ MYCV::MYCV(int flag, ros::NodeHandle *pnh)
                 static image_transport::ImageTransport _it(*nh);
                 it = &_it;
                 sub_left = it->subscribe(zed_left_topic, 1, imageCallback);
-                sub_depth = nh->subscribe(zed_depth_topic, 1, depthCallback);
+                FILE* tower_inform = fopen("../QR_code/tower_inform", "w+");
+                fclose(tower_inform);
             }
         }
 
         flag_findline       =   false;
-        flag_findgate       =   true;
+        flag_findgate       =   false;
         flag_findQR         =   false;
         flag_findblueH      =   false;
         flag_findredX       =   false;
@@ -187,6 +171,8 @@ MYCV::MYCV(int flag, ros::NodeHandle *pnh)
         flag_findredX       =   false;
         flag_findtower      =   false;
     }
+
+    flag_open_write         =   false;
 
     flag_first              =   true;
     flag_first_findlline    =   true;
@@ -319,24 +305,53 @@ void MYCV::cvmain()
         }
         else
         {
-            if(flag_zed_left_image)
+            if(flag_zed_left_image && flag_open_write)
             {
                 image = zed_left_image.clone();
                 flag_zed_left_image = false;
             }
-
-            if(flag_zed_depth_image)
-            {
-                image_depth = zed_depth_image.clone();
-                flag_zed_depth_image = false;
-            }
         }
     }
 
-
-    if(image.empty() || (camera_type==Forward_Camera && !zed.isOpened() && !vc.isOpened() && image_depth.empty()))
+    if(image.empty())
     {
         return;
+    }
+
+    if(camera_type == Forward_Camera)
+    {
+        static int count = 0;
+        if(count++ % 3 !=0)
+        {
+            return;
+        }
+
+        static std::string ss = "000001";
+        if(ss[0] > '9')
+        {
+            ROS_ERROR("File QR_code is full");
+            return;
+        }
+
+#ifdef TEST
+        printf("save image %s.bmp\n\n", ss.c_str());
+#endif
+        cv::resize(image,image,cv::Size(640,360));
+        cv::imwrite("../QR_code/"+ss+".jpg", image);
+
+        FILE* tower_inform = fopen("../QR_code/tower_inform", "a+");
+        fprintf(tower_inform, "%d.%d: %s\n", ros::Time::now().sec, ros::Time::now().nsec, ss.c_str());
+        fclose(tower_inform);
+
+        ss[ss.size()-1]++;
+        for(int i=ss.size()-1; i>=0; i--)
+        {
+            if(ss[i]>'9')
+            {
+                ss[i]-=10;
+                ss[i-1]++;
+            }
+        }
     }
 
     outimage = image.clone();
@@ -372,7 +387,7 @@ void MYCV::cvmain()
     }
 
 #ifdef TEST
-    #ifndef TEST_ROS
+#ifndef TEST_ROS
     if(flag_first)
     {
         flag_first = false;
@@ -842,15 +857,6 @@ void MYCV::findredX(cv::Mat image)
 #endif
 
         resetpoint(redX_location, image);
-
-	    // if(detect_redX)
-	    // {
-		//     static int count = 0;
-		//     if(count++ < 8)
-		//     {
-		// 	    detect_redX = false;
-		//     }
-	    // }
     }
     else
     {
@@ -1598,4 +1604,77 @@ void MYCV::open_findtower()
 void MYCV::close_findtower()
 {
     flag_findtower = false;
+}
+
+void MYCV::QR_code()
+{
+    static bool first_flag = true;
+    if(!first_flag)
+    {
+        return;
+    }
+    first_flag = false;
+
+    FILE* origin = fopen("../QR_code/tower_inform", "r");
+    FILE* result = fopen("../QR_code/tower_inform_result", "w");
+
+    std::string ss = "000001";
+    for(int i=0; ; i++)
+    {
+        if(ss[0] > '9')
+        {
+            break;
+        }
+
+        cv::Mat image = cv::imread("../QR_code/"+ss+".jpg");
+        if(image.empty())
+        {
+            break;
+        }
+
+        cv::cvtColor(image, image, CV_BGR2GRAY);
+
+        zbar::ImageScanner scanner;
+        scanner.set_config(zbar::ZBAR_NONE, zbar::ZBAR_CFG_ENABLE, 1);
+
+        int width = image.cols;
+        int height = image.rows;
+        zbar::Image zbarimage(static_cast<unsigned int>(width), static_cast<unsigned int>(height),
+                              "Y800", image.data, static_cast<unsigned int>(width * height));
+
+        scanner.scan(zbarimage);
+
+        std::vector<std::string> inform;
+
+        for(zbar::Image::SymbolIterator symbol = zbarimage.symbol_begin(); symbol != zbarimage.symbol_end(); ++symbol)
+        {
+            inform.push_back(symbol->get_data());
+        }
+
+        int a=0, b=0;
+        char s[10] = "";
+        fscanf(origin, "%d.%d: %s", &a,&b,s);
+        printf("%d.%d: %s:", a,b,s);
+        fprintf(result, "%d.%d: %s:", a,b,s);
+        for(unsigned int i=0; i<inform.size(); i++)
+        {
+            printf(" %s", inform[i].c_str());
+            fprintf(result, " %s", inform[i].c_str());
+        }
+        printf("\n");
+        fprintf(result, "\n");
+
+        ss[ss.size()-1]++;
+        for(int i=ss.size()-1; i>=0; i--)
+        {
+            if(ss[i]>'9')
+            {
+                ss[i]-=10;
+                ss[i-1]++;
+            }
+        }
+    }
+
+    fclose(origin);
+    fclose(result);
 }
