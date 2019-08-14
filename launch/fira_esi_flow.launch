@@ -14,11 +14,11 @@
           output="screen">
     </node>
 
-    <node pkg="fira_esi"
-          name="zed_qr_node"
-          type="zed_qr_node"
-          output="screen">
-    </node>
+<!--    <node pkg="fira_esi"-->
+<!--          name="zed_qr_node"-->
+<!--          type="zed_qr_node"-->
+<!--          output="screen">-->
+<!--    </node>-->
 
     <node pkg="dynamic_reconfigure"
           name="dynparam"
