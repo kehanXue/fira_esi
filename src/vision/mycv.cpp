@@ -1632,6 +1632,8 @@ void MYCV::QR_code()
             break;
         }
 
+        //image = image(cv::Rect(image.cols/4, image.rows/4, image.cols/2, image.rows/2));
+        cv::resize(image, image, cv::Size(), 2,2);
         cv::cvtColor(image, image, CV_BGR2GRAY);
 
         zbar::ImageScanner scanner;
