@@ -336,7 +336,7 @@ void MYCV::cvmain()
 #ifdef TEST
         printf("save image %s.bmp\n\n", ss.c_str());
 #endif
-        cv::resize(image,image,cv::Size(640,360));
+        // cv::resize(image,image,cv::Size(640,360));
         cv::imwrite("../QR_code/"+ss+".jpg", image);
 
         FILE* tower_inform = fopen("../QR_code/tower_inform", "a+");

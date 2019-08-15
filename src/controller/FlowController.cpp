@@ -116,8 +116,8 @@ int8_t vwpp::FlowController::run()
         }
         else
         {
-            // static TaskID target_task_type_id = DELIVERING;
-            static TaskID target_task_type_id = SCANTOWER;
+            static TaskID target_task_type_id = DELIVERING;
+            // static TaskID target_task_type_id = SCANTOWER;
 
             if (cur_qr_inform.empty() && !last_qr_inform.empty())
             {
