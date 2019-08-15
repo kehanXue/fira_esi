@@ -125,13 +125,13 @@ int8_t vwpp::FlowController::run()
             }
 
 
-            if (cur_qr_inform.at(cur_qr_inform.size() - 1) == '2' && target_task_type_id == SCANTOWER)
+            // if (cur_qr_inform.at(cur_qr_inform.size() - 1) == '2' && target_task_type_id == SCANTOWER)
+            // {
+            //     task_type_id = p_task_hover_on_qr->run(SCANBUILDING, cur_qr_inform);
+            // }
+            if (cur_qr_inform.at(cur_qr_inform.size() - 1) == '3' && target_task_type_id == SCANBUILDING)
             {
-                task_type_id = p_task_hover_on_qr->run(SCANBUILDING, cur_qr_inform);
-            }
-            else if (cur_qr_inform.at(cur_qr_inform.size() - 1) == '3' && target_task_type_id == SCANBUILDING)
-            {
-                task_type_id = p_task_hover_on_qr->run(LANDING, cur_qr_inform);
+                task_type_id = p_task_hover_on_qr->run(SCANBUILDING, "EEWS3");
             }
             else
             {
@@ -180,17 +180,17 @@ int8_t vwpp::FlowController::run()
                     {
                         last_qr_inform = "";
 
-                        // cur_task_id = SCANBUILDING;
-                        // p_task_scan_building->setTargetPoints();
-                        // VisionInterface::getInstance()->openSaveImage();
-                        // ROS_INFO("Task switch to SCANBUILDING!");
+                        cur_task_id = SCANBUILDING;
+                        p_task_scan_building->setTargetPoints();
+                        VisionInterface::getInstance()->openSaveImage();
+                        ROS_INFO("Task switch to SCANBUILDING!");
                         target_task_type_id = LANDING;
 
-                        cur_task_id = HOVERONQR;
-                        last_qr_inform = VisionInterface::getInstance()->getGroundQRinform();
-                        p_task_hover_on_qr->resetRotatingOnXY(PX4Interface::getInstance()->getCurX(),
-                                                              PX4Interface::getInstance()->getCurY());
-                        ROS_INFO("Task switch to HOVERONQR!");
+                        // cur_task_id = HOVERONQR;
+                        // last_qr_inform = VisionInterface::getInstance()->getGroundQRinform();
+                        // p_task_hover_on_qr->resetRotatingOnXY(PX4Interface::getInstance()->getCurX(),
+                        //                                       PX4Interface::getInstance()->getCurY());
+                        // ROS_INFO("Task switch to HOVERONQR!");
                     }
                     else if (target_task_type_id == LANDING)
                     {
