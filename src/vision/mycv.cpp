@@ -1660,8 +1660,8 @@ void MYCV::QR_code()
         fprintf(result, "%d.%d: %s:", a,b,s);
         for(unsigned int i=0; i<inform.size(); i++)
         {
-            printf(" %s", inform[i].c_str());
-            fprintf(result, " %s", inform[i].c_str());
+            printf(" %s\n", inform[i].c_str());
+            fprintf(result, " %s\n", inform[i].c_str());
         }
         printf("\n");
         fprintf(result, "\n");
